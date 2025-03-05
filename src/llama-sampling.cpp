@@ -3,6 +3,7 @@
 #include "llama-impl.h"
 #include "llama-vocab.h"
 #include "llama-grammar.h"
+#include "llama-rng-provider.h"
 
 #include <algorithm>
 #include <cassert>
@@ -16,6 +17,41 @@
 #include <random>
 #include <unordered_map>
 #include <stdexcept>
+
+// Global RNG provider instance
+static RNGProvider* g_rng_provider = nullptr;
+
+// Function to get or create the global RNG provider
+RNGProvider* get_rng_provider(uint32_t seed = 0) {
+    if (g_rng_provider == nullptr) {
+        g_rng_provider = create_rng_provider("uniform", seed);
+        g_rng_provider->set_output_file("rng_values.txt");
+    }
+    return g_rng_provider;
+}
+
+// Function to set a different RNG provider
+void set_rng_provider(const std::string& type, uint32_t seed) {
+    if (g_rng_provider != nullptr) {
+        delete g_rng_provider;
+    }
+    g_rng_provider = create_rng_provider(type, seed);
+    g_rng_provider->set_output_file("rng_values_" + type + ".txt");
+}
+
+// Cleanup the global RNG provider
+void cleanup_rng_provider() {
+    if (g_rng_provider != nullptr) {
+        delete g_rng_provider;
+        g_rng_provider = nullptr;
+    }
+}
+
+// Register cleanup function with atexit
+static int register_cleanup = []() {
+    atexit(cleanup_rng_provider);
+    return 0;
+}();
 
 // the ring buffer works similarly to std::deque, but with a fixed capacity
 template<typename T>
@@ -129,8 +165,9 @@ struct ring_buffer {
 };
 
 static int llama_sample_dist(llama_token_data_array * cur_p, std::mt19937 & rng) {
-    // Get uniform random number between 0 and 1
-    double u = std::uniform_real_distribution<>(0.0, 1.0)(rng);
+    // Get uniform random number between 0 and 1 using our RNG provider
+    double u = get_rng_provider()->generate();
+    
     fprintf(stderr, "\nRNG internal:\n");
     fprintf(stderr, "- Raw uniform random number: %f\n", u);
 
@@ -2531,4 +2568,8 @@ void llama_perf_sampler_reset(struct llama_sampler * chain) {
     auto * ctx = (struct llama_sampler_chain *) chain->ctx;
 
     ctx->t_sample_us = ctx->n_sample = 0;
+}
+
+void llama_set_rng_provider(const char * type, uint32_t seed) {
+    set_rng_provider(type, seed);
 }
