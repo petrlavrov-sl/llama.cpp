@@ -3,6 +3,7 @@
 #include "llama-impl.h"
 #include "llama-vocab.h"
 #include "llama-grammar.h"
+#include "llama-rng-provider.h"
 
 #include <algorithm>
 #include <cassert>
@@ -128,9 +129,9 @@ struct ring_buffer {
     std::vector<T> data;
 };
 
-static int llama_sample_dist(llama_token_data_array * cur_p, std::mt19937 & rng) {
+static int llama_sample_dist(llama_token_data_array * cur_p, struct llama_rng_provider * rng_provider) {
     // Get uniform random number between 0 and 1
-    double u = std::uniform_real_distribution<>(0.0, 1.0)(rng);
+    double u = llama_rng_provider_generate(rng_provider);
     fprintf(stderr, "\nRNG internal:\n");
     fprintf(stderr, "- Raw uniform random number: %f\n", u);
 
@@ -573,9 +574,9 @@ struct llama_sampler * llama_sampler_init_greedy() {
 
 struct llama_sampler_dist {
     const uint32_t seed;
-          uint32_t seed_cur;
+    uint32_t seed_cur;
 
-    std::mt19937 rng;
+    struct llama_rng_provider* rng_provider;
 };
 
 static const char * llama_sampler_dist_name(const struct llama_sampler * /*smpl*/) {
@@ -587,7 +588,7 @@ static void llama_sampler_dist_apply(struct llama_sampler * smpl, llama_token_da
 
     llama_sampler_softmax_impl(cur_p);
 
-    cur_p->selected = llama_sample_dist(cur_p, ctx->rng);
+    cur_p->selected = llama_sample_dist(cur_p, ctx->rng_provider);
 }
 
 static struct llama_sampler * llama_sampler_dist_clone(const struct llama_sampler * smpl) {
@@ -597,8 +598,12 @@ static struct llama_sampler * llama_sampler_dist_clone(const struct llama_sample
     // copy the state
     {
         auto * result_ctx = (llama_sampler_dist *) result->ctx;
-
-        result_ctx->rng = ctx->rng;
+        
+        // Free the default RNG provider created in llama_sampler_init_dist
+        llama_rng_provider_free(result_ctx->rng_provider);
+        
+        // Clone the current RNG provider
+        result_ctx->rng_provider = llama_rng_provider_clone(ctx->rng_provider);
     }
 
     return result;
@@ -607,11 +612,13 @@ static struct llama_sampler * llama_sampler_dist_clone(const struct llama_sample
 static void llama_sampler_dist_reset(struct llama_sampler * smpl) {
     auto * ctx = (llama_sampler_dist *) smpl->ctx;
     ctx->seed_cur = get_rng_seed(ctx->seed);
-    ctx->rng.seed(ctx->seed_cur);
+    llama_rng_provider_reset(ctx->rng_provider, ctx->seed_cur);
 }
 
 static void llama_sampler_dist_free(struct llama_sampler * smpl) {
-    delete (llama_sampler_dist *) smpl->ctx;
+    auto * ctx = (llama_sampler_dist *) smpl->ctx;
+    llama_rng_provider_free(ctx->rng_provider);
+    delete ctx;
 }
 
 static struct llama_sampler_i llama_sampler_dist_i = {
@@ -628,9 +635,9 @@ struct llama_sampler * llama_sampler_init_dist(uint32_t seed) {
     return llama_sampler_init(
         /* .iface = */ &llama_sampler_dist_i,
         /* .ctx   = */ new llama_sampler_dist {
-            /* .seed     = */ seed,
-            /* .seed_cur = */ seed_cur,
-            /* .rng      = */ std::mt19937(seed_cur),
+            /* .seed        = */ seed,
+            /* .seed_cur    = */ seed_cur,
+            /* .rng_provider = */ llama_rng_provider_init_default(seed_cur),
         }
     );
 }

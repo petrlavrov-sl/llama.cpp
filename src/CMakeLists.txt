@@ -22,6 +22,8 @@ add_library(llama
             llama-model-loader.cpp
             llama-model.cpp
             llama-quant.cpp
+            llama-rng-provider.h
+            llama-rng-provider.cpp
             llama-sampling.cpp
             llama-vocab.cpp
             unicode.h
