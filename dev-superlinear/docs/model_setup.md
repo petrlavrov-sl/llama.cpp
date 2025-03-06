@@ -25,7 +25,7 @@ poetry run huggingface-cli download google/gemma-2-2b --local-dir ./models-super
 poetry run python convert_hf_to_gguf.py --outfile ./models-superlinear/gemma-2-2b.gguf ./models-superlinear/gemma/gemma-2-2b/huggingface
 ```
 
-After downloading and converting this model, proceed to the [Build Guide](build_guide.md).
+After downloading and converting this model, proceed to the [Make Guide](make_guide).
 
 ## Full Model Setup (Optional)
 
