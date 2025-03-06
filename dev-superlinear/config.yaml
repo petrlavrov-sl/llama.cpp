@@ -1,11 +1,15 @@
 # RNG Provider Configuration
-rng_provider: uniform  # Options: uniform, normal
+# rng_provider: uniform  # Options: uniform, normal
+rng_provider: normal 
 
 # # Run Directory (where outputs will be saved)
 # run_dir: runs/default
 
 # Model Configuration
-model: gemma-2-2b  # See model_paths in run.py for available shortcuts
+model: gemma-2-2b-it  # See model_paths in run.py for available shortcuts
+
+# Number of tokens to generate (optional)
+num_tokens: 100
 
 # Prompt
 prompt: "Tell me about the history of artificial intelligence"

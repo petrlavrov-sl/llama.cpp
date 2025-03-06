@@ -13,10 +13,15 @@ import matplotlib.pyplot as plt
 import numpy as np
 from pathlib import Path
 from datetime import datetime
+from loguru import logger
 
 # Get script directory for relative paths
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
+
+# Configure loguru logger
+logger.remove()  # Remove default handler
+logger.add(sys.stderr, format="<level>{level: <8}</level> | <green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{message}</level>")
 
 # Model path shortcuts
 MODEL_PATHS = {
@@ -62,7 +67,8 @@ def visualize_distribution(values, output_file, rng_provider):
     visualize_script = os.path.join(PROJECT_ROOT, "tools/visualize_rng.py")
     
     if not os.path.exists(visualize_script):
-        print(f"Warning: Visualization script not found at {visualize_script}")
+        logger.warning(f"Visualization script not found at {visualize_script}")
+        logger.warning(f"No RNG distribution plot will be generated.")
         return False
     
     # Save values to a temporary file if they're not already in a file
@@ -75,20 +81,42 @@ def visualize_distribution(values, output_file, rng_provider):
     else:
         # Assume values is a path to a file
         input_file = values
+        
+        # Check if the file exists and has content
+        if not os.path.exists(input_file):
+            logger.warning(f"RNG values file not found at {input_file}")
+            logger.warning(f"No RNG distribution plot will be generated.")
+            return False
+            
+        if os.path.getsize(input_file) == 0:
+            logger.warning(f"RNG values file is empty: {input_file}")
+            logger.warning(f"No RNG distribution plot will be generated.")
+            return False
     
     # Run the visualization script
     try:
         cmd = ["python", visualize_script, input_file, "-o", output_file]
-        subprocess.run(cmd, check=True)
-        print(f"Visualization saved to {output_file}")
+        logger.info(f"Running visualization command: {' '.join(cmd)}")
+        result = subprocess.run(cmd, check=True, capture_output=True, text=True)
+        logger.success(f"Visualization saved to {output_file}")
         
         # Clean up temporary file if we created one
         if isinstance(values, np.ndarray) and os.path.exists(temp_file):
             os.remove(temp_file)
             
+        # Verify the output file was created
+        if not os.path.exists(output_file):
+            logger.warning(f"Visualization command completed but output file not found: {output_file}")
+            return False
+            
         return True
+    except subprocess.CalledProcessError as e:
+        logger.warning(f"Failed to generate plot: {e}")
+        logger.debug(f"Command output: {e.stdout}")
+        logger.debug(f"Command error: {e.stderr}")
+        return False
     except Exception as e:
-        print(f"Warning: Failed to generate plot: {e}")
+        logger.warning(f"Failed to generate plot: {e}")
         return False
 
 def run_model(config, config_path):
@@ -99,8 +127,8 @@ def run_model(config, config_path):
         
         # Check if model path exists
         if not os.path.exists(model_path):
-            print(f"Error: Model path '{model_path}' does not exist")
-            print(f"Available model shortcuts: {', '.join(MODEL_PATHS.keys())}")
+            logger.error(f"Error: Model path '{model_path}' does not exist")
+            logger.info(f"Available model shortcuts: {', '.join(MODEL_PATHS.keys())}")
             return False
         
         # Extract a clean model name for the directory
@@ -142,8 +170,8 @@ def run_model(config, config_path):
         
         # Check if llama-run exists
         if not os.path.exists(llama_run_path):
-            print(f"Error: llama-run not found at '{llama_run_path}'")
-            print("Make sure you have built the LLaMA.cpp project")
+            logger.error(f"Error: llama-run not found at '{llama_run_path}'")
+            logger.info("Make sure you have built the LLaMA.cpp project")
             return False
         
         # Set environment variable for RNG provider
@@ -161,9 +189,9 @@ def run_model(config, config_path):
         # Add model path and prompt
         cmd.extend([model_path, config['prompt']])
         
-        print(f"Running command: {' '.join(cmd)}")
-        print(f"RNG Provider: {config['rng_provider']}")
-        print(f"Output will be saved to: {run_dir}")
+        logger.info(f"Running command: {' '.join(cmd)}")
+        logger.info(f"RNG Provider: {config['rng_provider']}")
+        logger.info(f"Output will be saved to: {run_dir}")
         
         try:
             with open(output_file, 'w') as out_f, open(log_file, 'w') as log_f:
@@ -175,27 +203,38 @@ def run_model(config, config_path):
                     check=True
                 )
         except subprocess.CalledProcessError as e:
-            print(f"Error running command: {e}")
-            print(f"Check the log file for details: {log_file}")
+            logger.error(f"Error running command: {e}")
+            logger.info(f"Check the log file for details: {log_file}")
             
             # Even if the command failed, try to generate the plot if RNG values were collected
             if os.path.exists(rng_file) and os.path.getsize(rng_file) > 0:
                 if visualize_distribution(rng_file, plot_file, config['rng_provider']):
-                    print(f"RNG distribution plot: {plot_file}")
+                    logger.success(f"RNG distribution plot: {plot_file}")
                 else:
-                    print(f"Warning: Failed to generate RNG distribution plot")
+                    logger.warning(f"Failed to generate RNG distribution plot")
+            else:
+                logger.warning(f"No RNG values were collected. RNG file not found or empty: {rng_file}")
             
             return False
         
-        print(f"Run completed successfully!")
-        print(f"Output: {output_file}")
-        print(f"Log: {log_file}")
+        # Generate plot if RNG values file exists
+        if os.path.exists(rng_file) and os.path.getsize(rng_file) > 0:
+            if visualize_distribution(rng_file, plot_file, config['rng_provider']):
+                logger.success(f"RNG distribution plot: {plot_file}")
+            else:
+                logger.warning(f"Failed to generate RNG distribution plot")
+        else:
+            logger.warning(f"No RNG values were collected. RNG file not found or empty: {rng_file}")
+        
+        logger.success(f"Run completed successfully!")
+        logger.info(f"Output: {output_file}")
+        logger.info(f"Log: {log_file}")
         if os.path.exists(rng_file):
-            print(f"RNG values: {rng_file}")
+            logger.info(f"RNG values: {rng_file}")
         
         return True
     except Exception as e:
-        print(f"Error in run_model: {e}")
+        logger.error(f"Error in run_model: {e}")
         return False
 
 def main():
@@ -207,22 +246,28 @@ def main():
     parser.add_argument("-r", "--rng", help="Override RNG provider from config")
     parser.add_argument("-d", "--dir", help="Override run directory from config")
     parser.add_argument("-n", "--num-tokens", type=int, help="Override number of tokens to generate")
+    parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose logging")
     
     args = parser.parse_args()
+    
+    # Configure logging level
+    if args.verbose:
+        logger.remove()
+        logger.add(sys.stderr, level="DEBUG", format="<level>{level: <8}</level> | <green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{message}</level>")
     
     # Load config
     try:
         with open(args.config, 'r') as f:
             config = yaml.safe_load(f)
     except Exception as e:
-        print(f"Error loading config file: {e}")
+        logger.error(f"Error loading config file: {e}")
         return 1
     
     # Check required config values
     required_keys = ['model', 'prompt', 'rng_provider']
     missing_keys = [key for key in required_keys if key not in config]
     if missing_keys:
-        print(f"Error: Missing required config values: {', '.join(missing_keys)}")
+        logger.error(f"Error: Missing required config values: {', '.join(missing_keys)}")
         return 1
     
     # Override config with command line arguments
@@ -240,8 +285,8 @@ def main():
     # Validate RNG provider
     valid_providers = ['uniform', 'normal']
     if config['rng_provider'] not in valid_providers:
-        print(f"Error: Invalid RNG provider '{config['rng_provider']}'")
-        print(f"Valid providers: {', '.join(valid_providers)}")
+        logger.error(f"Error: Invalid RNG provider '{config['rng_provider']}'")
+        logger.info(f"Valid providers: {', '.join(valid_providers)}")
         return 1
     
     # Run the model
