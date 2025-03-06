@@ -22,9 +22,17 @@
 static RNGProvider* g_rng_provider = nullptr;
 
 // Function to get or create the global RNG provider
-RNGProvider* get_rng_provider(uint32_t seed = 0) {
+static RNGProvider* get_rng_provider(uint32_t seed = 0) {
     if (g_rng_provider == nullptr) {
-        g_rng_provider = create_rng_provider("uniform", seed);
+        // Check for environment variable for RNG provider type
+        const char* env_provider = std::getenv("LLAMA_RNG_PROVIDER");
+        std::string provider_type = "uniform";
+        
+        if (env_provider != nullptr) {
+            provider_type = env_provider;
+        }
+        
+        g_rng_provider = create_rng_provider(provider_type, seed);
         
         // Check for environment variable for output file
         const char* output_file = std::getenv("LLAMA_RNG_OUTPUT");
@@ -38,23 +46,31 @@ RNGProvider* get_rng_provider(uint32_t seed = 0) {
 }
 
 // Function to set a different RNG provider
-void set_rng_provider(const std::string& type, uint32_t seed) {
+static void set_rng_provider(const std::string& type, uint32_t seed) {
     if (g_rng_provider != nullptr) {
         delete g_rng_provider;
     }
-    g_rng_provider = create_rng_provider(type, seed);
+    
+    // Use the specified type, but check environment variable as override
+    std::string provider_type = type;
+    const char* env_provider = std::getenv("LLAMA_RNG_PROVIDER");
+    if (env_provider != nullptr) {
+        provider_type = env_provider;
+    }
+    
+    g_rng_provider = create_rng_provider(provider_type, seed);
     
     // Check for environment variable for output file
     const char* output_file = std::getenv("LLAMA_RNG_OUTPUT");
     if (output_file != nullptr) {
         g_rng_provider->set_output_file(output_file);
     } else {
-        g_rng_provider->set_output_file("rng_values_" + type + ".txt");
+        g_rng_provider->set_output_file("rng_values_" + provider_type + ".txt");
     }
 }
 
 // Cleanup the global RNG provider
-void cleanup_rng_provider() {
+static void cleanup_rng_provider() {
     if (g_rng_provider != nullptr) {
         delete g_rng_provider;
         g_rng_provider = nullptr;
@@ -178,7 +194,7 @@ struct ring_buffer {
     std::vector<T> data;
 };
 
-static int llama_sample_dist(llama_token_data_array * cur_p, std::mt19937 & rng) {
+static int llama_sample_dist(llama_token_data_array * cur_p, std::mt19937 & /*rng*/) {
     // Get uniform random number between 0 and 1 using our RNG provider
     double u = get_rng_provider()->generate();
     
