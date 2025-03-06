@@ -151,8 +151,16 @@ def run_model(config, config_path):
         env["LLAMA_RNG_PROVIDER"] = config['rng_provider']
         env["LLAMA_RNG_OUTPUT"] = rng_file  # Save RNG values directly to run dir
         
-        # Run the command
-        cmd = [llama_run_path, model_path, config['prompt']]
+        # Build the command
+        cmd = [llama_run_path]
+        
+        # Add number of tokens parameter if specified
+        if 'num_tokens' in config:
+            cmd.extend(['-n', str(config['num_tokens'])])
+            
+        # Add model path and prompt
+        cmd.extend([model_path, config['prompt']])
+        
         print(f"Running command: {' '.join(cmd)}")
         print(f"RNG Provider: {config['rng_provider']}")
         print(f"Output will be saved to: {run_dir}")
@@ -169,17 +177,15 @@ def run_model(config, config_path):
         except subprocess.CalledProcessError as e:
             print(f"Error running command: {e}")
             print(f"Check the log file for details: {log_file}")
+            
+            # Even if the command failed, try to generate the plot if RNG values were collected
+            if os.path.exists(rng_file) and os.path.getsize(rng_file) > 0:
+                if visualize_distribution(rng_file, plot_file, config['rng_provider']):
+                    print(f"RNG distribution plot: {plot_file}")
+                else:
+                    print(f"Warning: Failed to generate RNG distribution plot")
+            
             return False
-        
-        # Generate plot if RNG values file exists
-        if os.path.exists(rng_file):
-            # Generate plot using the visualize_rng.py script
-            if visualize_distribution(rng_file, plot_file, config['rng_provider']):
-                print(f"RNG distribution plot: {plot_file}")
-            else:
-                print(f"Warning: Failed to generate RNG distribution plot")
-        else:
-            print(f"Warning: RNG values file {rng_file} not found")
         
         print(f"Run completed successfully!")
         print(f"Output: {output_file}")
@@ -200,6 +206,7 @@ def main():
     parser.add_argument("-p", "--prompt", help="Override prompt from config")
     parser.add_argument("-r", "--rng", help="Override RNG provider from config")
     parser.add_argument("-d", "--dir", help="Override run directory from config")
+    parser.add_argument("-n", "--num-tokens", type=int, help="Override number of tokens to generate")
     
     args = parser.parse_args()
     
@@ -227,6 +234,8 @@ def main():
         config['rng_provider'] = args.rng
     if args.dir:
         config['run_dir'] = args.dir
+    if args.num_tokens:
+        config['num_tokens'] = args.num_tokens
     
     # Validate RNG provider
     valid_providers = ['uniform', 'normal']
