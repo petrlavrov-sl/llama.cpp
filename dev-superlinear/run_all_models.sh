@@ -47,11 +47,11 @@ for MODEL_PATH in $MODELS; do
     
     # Run with uniform distribution
     echo "  Running with uniform distribution..."
-    poetry run python dev-superlinear/run.py --model "$MODEL_PATH" --prompt "$PROMPT" --rng uniform --num-tokens "$NUM_TOKENS"
+    poetry run python dev-superlinear/run.py --model "$MODEL_PATH" --prompt "$PROMPT" --rng uniform --num-tokens "$NUM_TOKENS" --verbose
     
     # Run with normal distribution
     echo "  Running with normal distribution..."
-    poetry run python dev-superlinear/run.py --model "$MODEL_PATH" --prompt "$PROMPT" --rng normal --num-tokens "$NUM_TOKENS"
+    poetry run python dev-superlinear/run.py --model "$MODEL_PATH" --prompt "$PROMPT" --rng normal --num-tokens "$NUM_TOKENS" --verbose
     
     echo "  Completed runs for $MODEL_NAME"
     echo "----------------------------------------"
