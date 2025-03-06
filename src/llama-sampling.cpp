@@ -25,7 +25,14 @@ static RNGProvider* g_rng_provider = nullptr;
 RNGProvider* get_rng_provider(uint32_t seed = 0) {
     if (g_rng_provider == nullptr) {
         g_rng_provider = create_rng_provider("uniform", seed);
-        g_rng_provider->set_output_file("rng_values.txt");
+        
+        // Check for environment variable for output file
+        const char* output_file = std::getenv("LLAMA_RNG_OUTPUT");
+        if (output_file != nullptr) {
+            g_rng_provider->set_output_file(output_file);
+        } else {
+            g_rng_provider->set_output_file("rng_values.txt");
+        }
     }
     return g_rng_provider;
 }
@@ -36,7 +43,14 @@ void set_rng_provider(const std::string& type, uint32_t seed) {
         delete g_rng_provider;
     }
     g_rng_provider = create_rng_provider(type, seed);
-    g_rng_provider->set_output_file("rng_values_" + type + ".txt");
+    
+    // Check for environment variable for output file
+    const char* output_file = std::getenv("LLAMA_RNG_OUTPUT");
+    if (output_file != nullptr) {
+        g_rng_provider->set_output_file(output_file);
+    } else {
+        g_rng_provider->set_output_file("rng_values_" + type + ".txt");
+    }
 }
 
 // Cleanup the global RNG provider
