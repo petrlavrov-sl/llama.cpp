@@ -180,6 +180,10 @@ def run_model(config, config_path):
         # Set different environment variables based on the RNG provider
         if config['rng_provider'] == 'external-api':
             # When using external API, we need to set the API URL environment variable
+            if 'api_url' not in config or not config['api_url']:
+                logger.error("Error: api_url is required for external-api RNG provider")
+                return False
+                
             env["LLAMA_RNG_PROVIDER"] = "external-api"
             env["LLAMA_RNG_API_URL"] = config['api_url']
             logger.info(f"Using external API RNG provider with URL: {config['api_url']}")

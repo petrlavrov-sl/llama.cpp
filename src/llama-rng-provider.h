@@ -4,6 +4,8 @@
 #include <random>
 #include <string>
 #include <fstream>
+#include <curl/curl.h>
+#include <nlohmann/json.hpp>
 
 // Simple RNG Provider base class
 class RNGProvider {
@@ -87,10 +89,90 @@ private:
     std::mt19937 rng;
 };
 
+// External API-based RNG provider
+class ExternalAPIRNGProvider : public RNGProvider {
+public:
+    ExternalAPIRNGProvider(const std::string& api_url) 
+        : RNGProvider("external-api"), api_url(api_url) {
+        // Initialize curl
+        curl_global_init(CURL_GLOBAL_DEFAULT);
+        curl = curl_easy_init();
+        if (!curl) {
+            fprintf(stderr, "Failed to initialize curl\n");
+        }
+    }
+    
+    ~ExternalAPIRNGProvider() override {
+        if (curl) {
+            curl_easy_cleanup(curl);
+        }
+        curl_global_cleanup();
+    }
+    
+    double generate() override {
+        if (!curl) {
+            fprintf(stderr, "Curl not initialized, returning default value\n");
+            return 0.5; // Default value if curl failed
+        }
+        
+        // Make request to the API
+        std::string response_data;
+        curl_easy_setopt(curl, CURLOPT_URL, api_url.c_str());
+        curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_data);
+        curl_easy_setopt(curl, CURLOPT_TIMEOUT, 5L); // 5 second timeout
+        
+        CURLcode res = curl_easy_perform(curl);
+        
+        if (res != CURLE_OK) {
+            fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+            return 0.5; // Default value on error
+        }
+        
+        // Parse JSON response
+        try {
+            nlohmann::json j = nlohmann::json::parse(response_data);
+            if (j.contains("random") && j["random"].is_number()) {
+                double value = j["random"];
+                // Ensure value is in the range [0, 1]
+                value = std::max(0.0, std::min(1.0, value));
+                log_value(value);
+                return value;
+            } else {
+                fprintf(stderr, "API response missing 'random' field: %s\n", response_data.c_str());
+            }
+        } catch (std::exception& e) {
+            fprintf(stderr, "JSON parse error: %s\n", e.what());
+        }
+        
+        return 0.5; // Default value on error
+    }
+    
+private:
+    std::string api_url;
+    CURL* curl;
+    
+    // Static callback function for curl
+    static size_t write_callback(char* ptr, size_t size, size_t nmemb, void* userdata) {
+        std::string* response = reinterpret_cast<std::string*>(userdata);
+        response->append(ptr, size * nmemb);
+        return size * nmemb;
+    }
+};
+
 // Factory function to create RNG providers
 inline RNGProvider* create_rng_provider(const std::string& type, uint32_t seed) {
     if (type == "normal") {
         return new NormalRNGProvider(seed);
+    } else if (type == "external-api") {
+        // Check for API URL environment variable
+        const char* api_url = std::getenv("LLAMA_RNG_API_URL");
+        if (api_url == nullptr) {
+            fprintf(stderr, "Error: LLAMA_RNG_API_URL environment variable not set for external-api provider\n");
+            return new UniformRNGProvider(seed); // Fallback to uniform
+        }
+        return new ExternalAPIRNGProvider(api_url);
     }
     // Default to uniform
     return new UniformRNGProvider(seed);
