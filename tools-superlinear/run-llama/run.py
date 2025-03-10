@@ -176,7 +176,17 @@ def run_model(config, config_path):
         
         # Set environment variable for RNG provider
         env = os.environ.copy()
-        env["LLAMA_RNG_PROVIDER"] = config['rng_provider']
+        
+        # Set different environment variables based on the RNG provider
+        if config['rng_provider'] == 'external-api':
+            # When using external API, we need to set the API URL environment variable
+            env["LLAMA_RNG_PROVIDER"] = "external-api"
+            env["LLAMA_RNG_API_URL"] = config['api_url']
+            logger.info(f"Using external API RNG provider with URL: {config['api_url']}")
+        else:
+            # For built-in providers (uniform, normal), use the regular environment variable
+            env["LLAMA_RNG_PROVIDER"] = config['rng_provider']
+            
         env["LLAMA_RNG_OUTPUT"] = rng_file  # Save RNG values directly to run dir
         
         # Build the command
@@ -246,6 +256,7 @@ def main():
     parser.add_argument("-r", "--rng", help="Override RNG provider from config")
     parser.add_argument("-d", "--dir", help="Override run directory from config")
     parser.add_argument("-n", "--num-tokens", type=int, help="Override number of tokens to generate")
+    parser.add_argument("-a", "--api-url", help="API URL for external-api RNG provider")
     parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose logging")
     
     args = parser.parse_args()
@@ -281,12 +292,19 @@ def main():
         config['run_dir'] = args.dir
     if args.num_tokens:
         config['num_tokens'] = args.num_tokens
+    if args.api_url:
+        config['api_url'] = args.api_url
     
     # Validate RNG provider
-    valid_providers = ['uniform', 'normal']
+    valid_providers = ['uniform', 'normal', 'external-api']
     if config['rng_provider'] not in valid_providers:
         logger.error(f"Error: Invalid RNG provider '{config['rng_provider']}'")
         logger.info(f"Valid providers: {', '.join(valid_providers)}")
+        return 1
+        
+    # Check if external API URL is provided when using external-api provider
+    if config['rng_provider'] == 'external-api' and ('api_url' not in config or not config['api_url']):
+        logger.error(f"Error: api_url must be specified when using external-api RNG provider")
         return 1
     
     # Run the model
