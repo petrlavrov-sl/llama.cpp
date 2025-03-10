@@ -1,8 +1,11 @@
 # RNG Provider Configuration
-# rng_provider: uniform  # Options: uniform, normal
+# Options: uniform, normal, external-api
 rng_provider: normal 
 
-# # Run Directory (where outputs will be saved)
+# API URL (required when rng_provider is external-api)
+# api_url: http://localhost:8000/random
+
+# Run Directory (where outputs will be saved)
 # run_dir: runs/default
 
 # Model Configuration
