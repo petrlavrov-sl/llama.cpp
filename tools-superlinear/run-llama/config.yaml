@@ -1,8 +1,13 @@
 # RNG Provider Configuration
-# Options: uniform, normal, external-api
+# Options: 
+#  - uniform: Standard uniform distribution (0-1)
+#  - normal: Normal distribution with mean 0.5, std dev 0.15, clamped to (0-1) 
+#  - external-api: Uses an external HTTP API to provide random numbers
 rng_provider: normal 
 
-# API URL (required when rng_provider is external-api)
+# API URL (REQUIRED when rng_provider is external-api)
+# The API endpoint must return JSON with a 'random' field containing a number between 0-1
+# Example: {"random": 0.42}
 # api_url: http://localhost:8000/random
 
 # Run Directory (where outputs will be saved)

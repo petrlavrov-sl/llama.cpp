@@ -60,6 +60,7 @@ extern "C" {
     struct llama_model;
     struct llama_context;
     struct llama_sampler;
+    struct llama_rng_provider;
     struct llama_kv_cache;
 
     typedef int32_t llama_pos;
