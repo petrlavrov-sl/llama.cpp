@@ -9,7 +9,7 @@ echo "Using $NUM_TOKENS tokens for each run"
 
 # Get the directory where this script is located
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-PROJECT_ROOT="$( cd "$SCRIPT_DIR/.." && pwd )"
+PROJECT_ROOT="$( cd "$SCRIPT_DIR/../.." && pwd )"
 
 # Directory containing models (relative to project root)
 MODELS_DIR="$PROJECT_ROOT/models-superlinear"

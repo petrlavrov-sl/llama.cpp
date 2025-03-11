@@ -4,8 +4,17 @@ llama_add_compile_flags()
 # libraries
 #
 
-# llama
+# Find libcurl
+find_package(CURL REQUIRED)
+# Include nlohmann/json as a header-only library
+include(FetchContent)
+FetchContent_Declare(
+    json
+    URL https://github.com/nlohmann/json/releases/download/v3.11.2/json.tar.xz
+)
+FetchContent_MakeAvailable(json)
 
+# llama
 add_library(llama
             ../include/llama.h
             llama.cpp
@@ -32,7 +41,7 @@ add_library(llama
 target_include_directories(llama PUBLIC . ../include ../common)
 target_compile_features   (llama PUBLIC cxx_std_17) # don't bump
 
-target_link_libraries(llama PUBLIC ggml)
+target_link_libraries(llama PUBLIC ggml CURL::libcurl nlohmann_json::nlohmann_json)
 
 if (BUILD_SHARED_LIBS)
     set_target_properties(llama PROPERTIES POSITION_INDEPENDENT_CODE ON)
