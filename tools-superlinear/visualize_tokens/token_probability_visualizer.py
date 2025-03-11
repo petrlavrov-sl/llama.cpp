@@ -34,77 +34,44 @@ class TokenProbabilityParser:
     
     def __init__(self, log_file: str):
         self.log_file = log_file
-        self.rng_blocks = []
         self.tokens = []
         self.probabilities = []
-        self.cumulative_probs = []
         self.token_ids = []
-        self.token_text = []
         self.selected_indices = []
         
     def parse_log(self) -> List[Dict[str, Any]]:
         """Parse the log file and extract token probability information"""
-        with open(self.log_file, 'r', encoding='utf-8', errors='replace') as f:
-            content = f.read()
+        tokens = []
         
-        # Find all RNG blocks
-        rng_blocks = re.findall(r'RNG internal:.*?RNG generated sample:.*?token id: (\d+), probability: ([\d\.]+)', 
-                               content, re.DOTALL)
-        
-        probability_blocks = []
-        
-        rng_block_matches = re.finditer(r'RNG internal:(.*?)RNG generated sample: (\d+) \(token id: (\d+), probability: ([\d\.]+)\)', 
-                                        content, re.DOTALL)
-        
-        for match in rng_block_matches:
-            full_text = match.group(0)
-            inner_text = match.group(1)
-            selected_idx = int(match.group(2))
-            token_id = int(match.group(3))
-            probability = float(match.group(4))
+        try:
+            with open(self.log_file, 'r', encoding='utf-8') as f:
+                for line in f:
+                    if line.strip():
+                        try:
+                            token = json.loads(line)
+                            # Extract relevant information
+                            if 'selected_probability' in token:
+                                token['probability'] = token['selected_probability']
+                            if 'selected_token_id' in token:
+                                token['token_id'] = token['selected_token_id']
+                            tokens.append(token)
+                            
+                            # Store for later processing
+                            if 'token_id' in token:
+                                self.token_ids.append(token['token_id'])
+                            if 'probability' in token:
+                                self.probabilities.append(token['probability'])
+                            if 'selected_index' in token:
+                                self.selected_indices.append(token['selected_index'])
+                        except json.JSONDecodeError as e:
+                            print(f"Error parsing JSON line: {e}", file=sys.stderr)
+                            print(f"Problematic line: {line}", file=sys.stderr)
+                            continue
+        except Exception as e:
+            print(f"Error reading file: {e}", file=sys.stderr)
+            return []
             
-            # Extract token probabilities
-            token_probs = re.findall(r'\s+\[(\d+)\] token (\d+) = ([\d\.]+) \(cumulative: ([\d\.]+)\)', inner_text)
-            
-            # Build token probability data
-            token_data = []
-            for tp in token_probs:
-                idx = int(tp[0])
-                token_id_inner = int(tp[1])
-                prob = float(tp[2])
-                cumulative = float(tp[3])
-                
-                token_data.append({
-                    "index": idx,
-                    "token_id": token_id_inner,
-                    "probability": prob,
-                    "cumulative": cumulative,
-                    "selected": idx == selected_idx
-                })
-            
-            # Extract raw random number
-            match_raw = re.search(r'- Raw uniform random number: ([\d\.]+)', inner_text)
-            raw_random = float(match_raw.group(1)) if match_raw else None
-            
-            # Extract scaled random number
-            match_scaled = re.search(r'- Scaled random number: ([\d\.]+)', inner_text)
-            scaled_random = float(match_scaled.group(1)) if match_scaled else None
-            
-            probability_blocks.append({
-                "token_id": token_id,
-                "probability": probability,
-                "selected_index": selected_idx,
-                "raw_random": raw_random,
-                "scaled_random": scaled_random,
-                "tokens": token_data
-            })
-            
-            # Store for later processing
-            self.token_ids.append(token_id)
-            self.probabilities.append(probability)
-            self.selected_indices.append(selected_idx)
-        
-        return probability_blocks
+        return tokens
     
     def extract_token_text(self, model_vocab_file: Optional[str] = None) -> None:
         """
@@ -125,10 +92,10 @@ class TokenProbabilityParser:
         # Map token IDs to text
         for token_id in self.token_ids:
             if token_id in token_map:
-                self.token_text.append(token_map[token_id])
+                self.tokens.append(token_map[token_id])
             else:
                 # Use placeholder if token ID not found in vocab file
-                self.token_text.append(f"<{token_id}>")
+                self.tokens.append(f"<{token_id}>")
 
 def load_output_text(output_file: str) -> str:
     """Load the generated text from the output file"""
@@ -194,7 +161,7 @@ def create_colored_html(output_text: str, probability_blocks: List[Dict[str, Any
                 padding: 4px 8px;
                 border-radius: 3px;
                 font-size: 12px;
-                white-space: nowrap;
+                white-space: pre;
                 z-index: 100;
             }}
             
@@ -300,7 +267,7 @@ def generate_colored_tokens_html(output_text: str, probability_blocks: List[Dict
     """Generate HTML for colored tokens"""
     
     # Get all probabilities for normalization (relative mode)
-    all_probs = [block["probability"] for block in probability_blocks]
+    all_probs = [block["selected_probability"] for block in probability_blocks if "selected_probability" in block]
     min_prob = min(all_probs) if all_probs else 0
     max_prob = max(all_probs) if all_probs else 1
     prob_range = max_prob - min_prob if max_prob > min_prob else 1.0
@@ -309,9 +276,12 @@ def generate_colored_tokens_html(output_text: str, probability_blocks: List[Dict
     html_output = ""
     chars_processed = 0
     
-    for i, block in enumerate(probability_blocks):
-        token_id = block["token_id"]
-        probability = block["probability"]
+    for block in probability_blocks:
+        if "selected_token_id" not in block or "selected_probability" not in block:
+            continue
+            
+        token_id = block["selected_token_id"]
+        probability = block["selected_probability"]
         
         # Get token text from the output - this is an approximation
         # In practice, you'd need a proper tokenizer to get the exact token text
@@ -350,13 +320,20 @@ def generate_colored_tokens_html(output_text: str, probability_blocks: List[Dict
         else:
             display_text = html.escape(display_text)
         
+        # Create tooltip with token info and candidates
+        tooltip_text = f"Token ID: {token_id}\\nProbability: {probability:.4f}"
+        if "tokens" in block:
+            tooltip_text += "\\n\\nTop candidates:"
+            sorted_candidates = sorted(block["tokens"], key=lambda x: x["probability"], reverse=True)
+            for i, candidate in enumerate(sorted_candidates[:5]):  # Show top 5 candidates
+                tooltip_text += f"\\n{i+1}. ID {candidate['token_id']}: {candidate['probability']:.4f}"
+        
         # Create token HTML with tooltip
         token_html = f"""
         <span class="token" style="background-color: {color};">
             {display_text}
             <span class="tooltip">
-                Token ID: {token_id}<br>
-                Probability: {probability:.4f}
+                {tooltip_text}
             </span>
         </span>
         """

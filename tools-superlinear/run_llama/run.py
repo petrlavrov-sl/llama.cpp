@@ -283,10 +283,23 @@ def visualize_probabilities(token_data_file: str, output_file: str) -> bool:
             logger.warning(f"Token probability visualization script not found at {script_path}")
             return False
             
-        cmd = ["python", str(script_path), token_data_file, "-o", output_file + ".json", "-p", output_file]
+        cmd = ["python", str(script_path), token_data_file, "-o", output_file + ".json", "-p", output_file, "--analyze"]
         logger.info(f"Running token probability visualization: {' '.join(cmd)}")
-        result = subprocess.run(cmd, check=True, capture_output=True, text=True)
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        
+        if result.returncode != 0:
+            logger.error(f"Token probability visualization failed with error:")
+            logger.error(f"stdout: {result.stdout}")
+            logger.error(f"stderr: {result.stderr}")
+            return False
+            
+        # Log the analysis output
+        if result.stdout:
+            for line in result.stdout.splitlines():
+                logger.info(f"Analysis: {line}")
+            
         logger.success(f"Token probability visualization saved to {output_file}")
+        logger.success(f"Token probability data saved to {output_file}.json")
         return True
     except Exception as e:
         logger.error(f"Failed to generate token probability visualization: {e}")
@@ -302,7 +315,19 @@ def visualize_tokens(token_data_file: str, output_file: str) -> bool:
             
         cmd = ["python", str(script_path), token_data_file, "--html", output_file + ".html", "--plot", output_file]
         logger.info(f"Running token visualization: {' '.join(cmd)}")
-        result = subprocess.run(cmd, check=True, capture_output=True, text=True)
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        
+        if result.returncode != 0:
+            logger.error(f"Token visualization failed with error:")
+            logger.error(f"stdout: {result.stdout}")
+            logger.error(f"stderr: {result.stderr}")
+            return False
+            
+        # Log any output
+        if result.stdout:
+            for line in result.stdout.splitlines():
+                logger.info(f"Visualization: {line}")
+            
         logger.success(f"Token visualization saved to {output_file}")
         logger.success(f"Token HTML visualization saved to {output_file}.html")
         return True
