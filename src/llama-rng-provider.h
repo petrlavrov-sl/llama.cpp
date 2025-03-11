@@ -124,12 +124,9 @@ public:
         curl_easy_setopt(curl, CURLOPT_TIMEOUT, 5L); // 5 second timeout
         
         CURLcode res = curl_easy_perform(curl);
-        
         if (res != CURLE_OK) {
-            fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
-            return 0.5; // Default value on error
+            throw std::runtime_error(std::string("curl_easy_perform() failed: ") + curl_easy_strerror(res));
         }
-        
         // Parse JSON response
         try {
             nlohmann::json j = nlohmann::json::parse(response_data);
@@ -139,14 +136,11 @@ public:
                 value = std::max(0.0, std::min(1.0, value));
                 log_value(value);
                 return value;
-            } else {
-                fprintf(stderr, "API response missing 'random' field: %s\n", response_data.c_str());
             }
+            throw std::runtime_error("API response missing 'random' field: " + response_data);
         } catch (std::exception& e) {
-            fprintf(stderr, "JSON parse error: %s\n", e.what());
+            throw std::runtime_error(std::string("RNG API error: ") + e.what());
         }
-        
-        return 0.5; // Default value on error
     }
     
 private:

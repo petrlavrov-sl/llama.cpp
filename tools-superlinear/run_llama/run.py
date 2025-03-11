@@ -64,7 +64,7 @@ def read_rng_values(filename):
 def visualize_distribution(values, output_file, rng_provider):
     """Visualize the distribution of RNG values using visualize_rng.py"""
     # Use the visualize_rng.py script from tools directory
-    visualize_script = os.path.join(PROJECT_ROOT, "tools/visualize_rng.py")
+    visualize_script = SCRIPT_DIR / "visualize_rng.py"
     
     if not os.path.exists(visualize_script):
         logger.warning(f"Visualization script not found at {visualize_script}")
@@ -95,7 +95,7 @@ def visualize_distribution(values, output_file, rng_provider):
     
     # Run the visualization script
     try:
-        cmd = ["python", visualize_script, input_file, "-o", output_file]
+        cmd = ["python", str(visualize_script), input_file, "-o", output_file]
         logger.info(f"Running visualization command: {' '.join(cmd)}")
         result = subprocess.run(cmd, check=True, capture_output=True, text=True)
         logger.success(f"Visualization saved to {output_file}")
@@ -198,7 +198,7 @@ def run_model(config, config_path):
         
         # Add number of tokens parameter if specified
         if 'num_tokens' in config:
-            cmd.extend(['-n', str(config['num_tokens'])])
+            cmd.extend(['-c', str(config['num_tokens'])])
             
         # Add model path and prompt
         cmd.extend([model_path, config['prompt']])
@@ -214,13 +214,28 @@ def run_model(config, config_path):
                     stdout=out_f,
                     stderr=log_f,
                     env=env,
-                    check=True
+                    check=False  # Don't raise exception on non-zero exit code
                 )
+                
+                # Check if it was a context size exceeded error
+                with open(log_file, 'r') as f:
+                    log_content = f.read()
+                    if "context size exceeded" in log_content:
+                        logger.info("Model reached context size limit - treating as successful completion")
+                        process.returncode = 0  # Override return code for this case
+                    elif process.returncode != 0:
+                        logger.error(f"Error running command: exit code {process.returncode}")
+                        logger.info(f"Check the log file for details: {log_file}")
+                        return False  # Stop immediately on real errors
+                        
         except subprocess.CalledProcessError as e:
             logger.error(f"Error running command: {e}")
             logger.info(f"Check the log file for details: {log_file}")
-            
-            # Even if the command failed, try to generate the plot if RNG values were collected
+            return False  # Stop immediately
+        
+        # Only proceed with visualization if the run was successful
+        if process.returncode == 0:
+            # Generate plot if RNG values file exists
             if os.path.exists(rng_file) and os.path.getsize(rng_file) > 0:
                 if visualize_distribution(rng_file, plot_file, config['rng_provider']):
                     logger.success(f"RNG distribution plot: {plot_file}")
@@ -228,17 +243,6 @@ def run_model(config, config_path):
                     logger.warning(f"Failed to generate RNG distribution plot")
             else:
                 logger.warning(f"No RNG values were collected. RNG file not found or empty: {rng_file}")
-            
-            return False
-        
-        # Generate plot if RNG values file exists
-        if os.path.exists(rng_file) and os.path.getsize(rng_file) > 0:
-            if visualize_distribution(rng_file, plot_file, config['rng_provider']):
-                logger.success(f"RNG distribution plot: {plot_file}")
-            else:
-                logger.warning(f"Failed to generate RNG distribution plot")
-        else:
-            logger.warning(f"No RNG values were collected. RNG file not found or empty: {rng_file}")
         
         logger.success(f"Run completed successfully!")
         logger.info(f"Output: {output_file}")
