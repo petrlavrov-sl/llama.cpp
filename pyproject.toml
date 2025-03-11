@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "llama-cpp-scripts"
-version = "0.0.5"
+version = "0.0.6"
 description = "Scripts that ship with llama.cpp"
 authors = ["GGML <ggml@ggml.ai>"]
 readme = "README.md"
