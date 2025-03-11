@@ -159,7 +159,7 @@ def run_model(config, config_path):
         output_file = os.path.join(run_dir, "output.txt")
         log_file = os.path.join(run_dir, "log.txt")
         rng_file = os.path.join(run_dir, "rng_values.txt")
-        plot_file = os.path.join(run_dir, "rng_distribution.png")
+        token_data_file = os.path.join(run_dir, "token_data.jsonl")
         
         # Save config to run directory
         with open(os.path.join(run_dir, "config.yaml"), 'w') as f:
@@ -192,6 +192,11 @@ def run_model(config, config_path):
             env["LLAMA_RNG_PROVIDER"] = config['rng_provider']
             
         env["LLAMA_RNG_OUTPUT"] = rng_file  # Save RNG values directly to run dir
+        
+        # Set token data file path if visualization is enabled
+        if config.get('visualize_tokens') or config.get('visualize_probabilities'):
+            env["LLAMA_TOKEN_DATA_FILE"] = token_data_file
+            logger.info(f"Token data will be saved to: {token_data_file}")
         
         # Build the command
         cmd = [llama_run_path]
@@ -235,10 +240,17 @@ def run_model(config, config_path):
         
         # Only proceed with visualization if the run was successful
         if process.returncode == 0:
-            # Generate plot if RNG values file exists
+            # Generate visualizations if enabled
+            if config.get('visualize_probabilities') and os.path.exists(token_data_file):
+                visualize_probabilities(token_data_file, os.path.join(run_dir, "probabilities.png"))
+                
+            if config.get('visualize_tokens') and os.path.exists(token_data_file):
+                visualize_tokens(token_data_file, os.path.join(run_dir, "tokens.png"))
+            
+            # Generate RNG plot if values file exists
             if os.path.exists(rng_file) and os.path.getsize(rng_file) > 0:
-                if visualize_distribution(rng_file, plot_file, config['rng_provider']):
-                    logger.success(f"RNG distribution plot: {plot_file}")
+                if visualize_distribution(rng_file, os.path.join(run_dir, "rng_distribution.png"), config['rng_provider']):
+                    logger.success(f"RNG distribution plot: {os.path.join(run_dir, 'rng_distribution.png')}")
                 else:
                     logger.warning(f"Failed to generate RNG distribution plot")
             else:
@@ -249,10 +261,80 @@ def run_model(config, config_path):
         logger.info(f"Log: {log_file}")
         if os.path.exists(rng_file):
             logger.info(f"RNG values: {rng_file}")
+        if os.path.exists(token_data_file):
+            logger.info(f"Token data: {token_data_file}")
         
         return True
     except Exception as e:
         logger.error(f"Error in run_model: {e}")
+        return False
+
+def visualize_probabilities(token_data_file: str, output_file: str) -> bool:
+    """Visualize token probabilities from the token data file"""
+    try:
+        import matplotlib.pyplot as plt
+        import json
+        import numpy as np
+        
+        # Read token data
+        probabilities = []
+        with open(token_data_file, 'r') as f:
+            for line in f:
+                data = json.loads(line)
+                probabilities.append([t['probability'] for t in data['tokens']])
+        
+        if not probabilities:
+            logger.warning("No probability data found to visualize")
+            return False
+        
+        # Create heatmap
+        plt.figure(figsize=(15, 10))
+        plt.imshow(probabilities, aspect='auto', cmap='viridis')
+        plt.colorbar(label='Probability')
+        plt.xlabel('Token Index')
+        plt.ylabel('Generation Step')
+        plt.title('Token Probabilities During Generation')
+        plt.savefig(output_file)
+        plt.close()
+        
+        logger.success(f"Probability visualization saved to: {output_file}")
+        return True
+    except Exception as e:
+        logger.error(f"Error generating probability visualization: {e}")
+        return False
+
+def visualize_tokens(token_data_file: str, output_file: str) -> bool:
+    """Visualize token sequences from the token data file"""
+    try:
+        import matplotlib.pyplot as plt
+        import json
+        import numpy as np
+        
+        # Read token data
+        tokens = []
+        with open(token_data_file, 'r') as f:
+            for line in f:
+                data = json.loads(line)
+                tokens.append([t['token_id'] for t in data['tokens']])
+        
+        if not tokens:
+            logger.warning("No token data found to visualize")
+            return False
+        
+        # Create token sequence visualization
+        plt.figure(figsize=(15, 10))
+        plt.imshow(tokens, aspect='auto', cmap='tab20')
+        plt.colorbar(label='Token ID')
+        plt.xlabel('Token Position')
+        plt.ylabel('Generation Step')
+        plt.title('Token IDs During Generation')
+        plt.savefig(output_file)
+        plt.close()
+        
+        logger.success(f"Token visualization saved to: {output_file}")
+        return True
+    except Exception as e:
+        logger.error(f"Error generating token visualization: {e}")
         return False
 
 def main():
@@ -266,6 +348,8 @@ def main():
     parser.add_argument("-n", "--num-tokens", type=int, help="Override number of tokens to generate")
     parser.add_argument("-a", "--api-url", help="API URL for external-api RNG provider")
     parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose logging")
+    parser.add_argument("--visualize-probabilities", action="store_true", help="Visualize token probabilities during generation")
+    parser.add_argument("--visualize-tokens", action="store_true", help="Visualize token sequences during generation")
     
     args = parser.parse_args()
     
