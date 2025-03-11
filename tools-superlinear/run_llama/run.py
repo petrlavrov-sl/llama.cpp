@@ -16,8 +16,8 @@ from datetime import datetime
 from loguru import logger
 
 # Get script directory for relative paths
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
+SCRIPT_DIR = Path(__file__).absolute().parent
+PROJECT_ROOT = SCRIPT_DIR.parent.parent
 
 # Configure loguru logger
 logger.remove()  # Remove default handler
