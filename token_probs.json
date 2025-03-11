@@ -1,0 +1,584 @@
+[
+  {
+    "index": 20,
+    "token_id": 12362,
+    "probability": 0.00651,
+    "cumulative": 1.0
+  },
+  {
+    "index": 1,
+    "token_id": 235248,
+    "probability": 0.295117,
+    "cumulative": 1.0
+  },
+  {
+    "index": 0,
+    "token_id": 235274,
+    "probability": 1.0,
+    "cumulative": 1.0
+  },
+  {
+    "index": 1,
+    "token_id": 235321,
+    "probability": 0.04369,
+    "cumulative": 1.0
+  },
+  {
+    "index": 2,
+    "token_id": 235304,
+    "probability": 0.026943,
+    "cumulative": 1.0
+  },
+  {
+    "index": 2,
+    "token_id": 235308,
+    "probability": 0.089691,
+    "cumulative": 1.0
+  },
+  {
+    "index": 1,
+    "token_id": 235256,
+    "probability": 0.027245,
+    "cumulative": 1.0
+  },
+  {
+    "index": 9,
+    "token_id": 671,
+    "probability": 0.012151,
+    "cumulative": 1.0
+  },
+  {
+    "index": 25,
+    "token_id": 5842,
+    "probability": 0.004854,
+    "cumulative": 1.0
+  },
+  {
+    "index": 4,
+    "token_id": 16481,
+    "probability": 0.014562,
+    "cumulative": 1.0
+  },
+  {
+    "index": 1,
+    "token_id": 105460,
+    "probability": 0.036299,
+    "cumulative": 1.0
+  },
+  {
+    "index": 0,
+    "token_id": 17273,
+    "probability": 1.0,
+    "cumulative": 1.0
+  },
+  {
+    "index": 0,
+    "token_id": 235281,
+    "probability": 1.0,
+    "cumulative": 1.0
+  },
+  {
+    "index": 2,
+    "token_id": 9223,
+    "probability": 0.037737,
+    "cumulative": 1.0
+  },
+  {
+    "index": 5,
+    "token_id": 42020,
+    "probability": 0.019484,
+    "cumulative": 1.0
+  },
+  {
+    "index": 6,
+    "token_id": 696,
+    "probability": 0.017278,
+    "cumulative": 1.0
+  },
+  {
+    "index": 6,
+    "token_id": 135853,
+    "probability": 0.013522,
+    "cumulative": 1.0
+  },
+  {
+    "index": 0,
+    "token_id": 55900,
+    "probability": 1.0,
+    "cumulative": 1.0
+  },
+  {
+    "index": 4,
+    "token_id": 575,
+    "probability": 0.019894,
+    "cumulative": 1.0
+  },
+  {
+    "index": 5,
+    "token_id": 578,
+    "probability": 0.023639,
+    "cumulative": 1.0
+  },
+  {
+    "index": 12,
+    "token_id": 7149,
+    "probability": 0.011458,
+    "cumulative": 1.0
+  },
+  {
+    "index": 3,
+    "token_id": 578,
+    "probability": 0.026286,
+    "cumulative": 1.0
+  },
+  {
+    "index": 5,
+    "token_id": 595,
+    "probability": 0.014781,
+    "cumulative": 1.0
+  },
+  {
+    "index": 3,
+    "token_id": 591,
+    "probability": 0.034936,
+    "cumulative": 1.0
+  },
+  {
+    "index": 15,
+    "token_id": 968,
+    "probability": 0.00609,
+    "cumulative": 1.0
+  },
+  {
+    "index": 6,
+    "token_id": 13059,
+    "probability": 0.01801,
+    "cumulative": 1.0
+  },
+  {
+    "index": 24,
+    "token_id": 6869,
+    "probability": 0.006793,
+    "cumulative": 1.0
+  },
+  {
+    "index": 6,
+    "token_id": 6990,
+    "probability": 0.016133,
+    "cumulative": 1.0
+  },
+  {
+    "index": 0,
+    "token_id": 685,
+    "probability": 1.0,
+    "cumulative": 1.0
+  },
+  {
+    "index": 2,
+    "token_id": 476,
+    "probability": 0.125677,
+    "cumulative": 1.0
+  },
+  {
+    "index": 7,
+    "token_id": 2725,
+    "probability": 0.023423,
+    "cumulative": 1.0
+  },
+  {
+    "index": 1,
+    "token_id": 674,
+    "probability": 0.061914,
+    "cumulative": 1.0
+  },
+  {
+    "index": 3,
+    "token_id": 8042,
+    "probability": 0.122625,
+    "cumulative": 1.0
+  },
+  {
+    "index": 7,
+    "token_id": 575,
+    "probability": 0.015417,
+    "cumulative": 1.0
+  },
+  {
+    "index": 19,
+    "token_id": 18460,
+    "probability": 0.008059,
+    "cumulative": 1.0
+  },
+  {
+    "index": 0,
+    "token_id": 675,
+    "probability": 1.0,
+    "cumulative": 1.0
+  },
+  {
+    "index": 11,
+    "token_id": 25175,
+    "probability": 0.013,
+    "cumulative": 1.0
+  },
+  {
+    "index": 4,
+    "token_id": 16612,
+    "probability": 0.02641,
+    "cumulative": 1.0
+  },
+  {
+    "index": 4,
+    "token_id": 235265,
+    "probability": 0.058654,
+    "cumulative": 1.0
+  },
+  {
+    "index": 2,
+    "token_id": 6875,
+    "probability": 0.025434,
+    "cumulative": 1.0
+  },
+  {
+    "index": 2,
+    "token_id": 578,
+    "probability": 0.059038,
+    "cumulative": 1.0
+  },
+  {
+    "index": 12,
+    "token_id": 16481,
+    "probability": 0.00734,
+    "cumulative": 1.0
+  },
+  {
+    "index": 9,
+    "token_id": 10165,
+    "probability": 0.007557,
+    "cumulative": 1.0
+  },
+  {
+    "index": 2,
+    "token_id": 603,
+    "probability": 0.021314,
+    "cumulative": 1.0
+  },
+  {
+    "index": 3,
+    "token_id": 573,
+    "probability": 0.015347,
+    "cumulative": 1.0
+  },
+  {
+    "index": 3,
+    "token_id": 20010,
+    "probability": 0.04449,
+    "cumulative": 1.0
+  },
+  {
+    "index": 0,
+    "token_id": 577,
+    "probability": 1.0,
+    "cumulative": 1.0
+  },
+  {
+    "index": 2,
+    "token_id": 2500,
+    "probability": 0.050125,
+    "cumulative": 1.0
+  },
+  {
+    "index": 4,
+    "token_id": 25175,
+    "probability": 0.02994,
+    "cumulative": 1.0
+  },
+  {
+    "index": 0,
+    "token_id": 674,
+    "probability": 1.0,
+    "cumulative": 1.0
+  },
+  {
+    "index": 1,
+    "token_id": 798,
+    "probability": 0.047492,
+    "cumulative": 1.0
+  },
+  {
+    "index": 7,
+    "token_id": 3508,
+    "probability": 0.013672,
+    "cumulative": 1.0
+  },
+  {
+    "index": 1,
+    "token_id": 5766,
+    "probability": 0.031732,
+    "cumulative": 1.0
+  },
+  {
+    "index": 0,
+    "token_id": 13333,
+    "probability": 1.0,
+    "cumulative": 1.0
+  },
+  {
+    "index": 10,
+    "token_id": 696,
+    "probability": 0.016575,
+    "cumulative": 1.0
+  },
+  {
+    "index": 3,
+    "token_id": 34790,
+    "probability": 0.061788,
+    "cumulative": 1.0
+  },
+  {
+    "index": 4,
+    "token_id": 1538,
+    "probability": 0.035059,
+    "cumulative": 1.0
+  },
+  {
+    "index": 1,
+    "token_id": 235269,
+    "probability": 0.420136,
+    "cumulative": 1.0
+  },
+  {
+    "index": 0,
+    "token_id": 1582,
+    "probability": 1.0,
+    "cumulative": 1.0
+  },
+  {
+    "index": 0,
+    "token_id": 685,
+    "probability": 1.0,
+    "cumulative": 1.0
+  },
+  {
+    "index": 9,
+    "token_id": 5255,
+    "probability": 0.011036,
+    "cumulative": 1.0
+  },
+  {
+    "index": 1,
+    "token_id": 578,
+    "probability": 0.039092,
+    "cumulative": 1.0
+  },
+  {
+    "index": 4,
+    "token_id": 8377,
+    "probability": 0.013009,
+    "cumulative": 1.0
+  },
+  {
+    "index": 1,
+    "token_id": 26149,
+    "probability": 0.422272,
+    "cumulative": 1.0
+  },
+  {
+    "index": 0,
+    "token_id": 60495,
+    "probability": 1.0,
+    "cumulative": 1.0
+  },
+  {
+    "index": 0,
+    "token_id": 235269,
+    "probability": 1.0,
+    "cumulative": 1.0
+  },
+  {
+    "index": 1,
+    "token_id": 6044,
+    "probability": 0.149887,
+    "cumulative": 1.0
+  },
+  {
+    "index": 1,
+    "token_id": 578,
+    "probability": 0.033882,
+    "cumulative": 1.0
+  },
+  {
+    "index": 0,
+    "token_id": 578,
+    "probability": 1.0,
+    "cumulative": 1.0
+  },
+  {
+    "index": 18,
+    "token_id": 3210,
+    "probability": 0.005813,
+    "cumulative": 1.0
+  },
+  {
+    "index": 1,
+    "token_id": 235265,
+    "probability": 0.076596,
+    "cumulative": 1.0
+  },
+  {
+    "index": 3,
+    "token_id": 4559,
+    "probability": 0.020364,
+    "cumulative": 1.0
+  },
+  {
+    "index": 1,
+    "token_id": 25411,
+    "probability": 0.09184,
+    "cumulative": 1.0
+  },
+  {
+    "index": 0,
+    "token_id": 235265,
+    "probability": 1.0,
+    "cumulative": 1.0
+  },
+  {
+    "index": 6,
+    "token_id": 4560,
+    "probability": 0.022317,
+    "cumulative": 1.0
+  },
+  {
+    "index": 6,
+    "token_id": 17983,
+    "probability": 0.017229,
+    "cumulative": 1.0
+  },
+  {
+    "index": 5,
+    "token_id": 5168,
+    "probability": 0.015439,
+    "cumulative": 1.0
+  },
+  {
+    "index": 0,
+    "token_id": 576,
+    "probability": 1.0,
+    "cumulative": 1.0
+  },
+  {
+    "index": 1,
+    "token_id": 18225,
+    "probability": 0.091378,
+    "cumulative": 1.0
+  },
+  {
+    "index": 1,
+    "token_id": 729,
+    "probability": 0.048832,
+    "cumulative": 1.0
+  },
+  {
+    "index": 11,
+    "token_id": 77885,
+    "probability": 0.008413,
+    "cumulative": 1.0
+  },
+  {
+    "index": 3,
+    "token_id": 476,
+    "probability": 0.024573,
+    "cumulative": 1.0
+  },
+  {
+    "index": 2,
+    "token_id": 575,
+    "probability": 0.0163,
+    "cumulative": 1.0
+  },
+  {
+    "index": 2,
+    "token_id": 573,
+    "probability": 0.025395,
+    "cumulative": 1.0
+  },
+  {
+    "index": 1,
+    "token_id": 4061,
+    "probability": 0.072068,
+    "cumulative": 1.0
+  },
+  {
+    "index": 2,
+    "token_id": 575,
+    "probability": 0.043732,
+    "cumulative": 1.0
+  },
+  {
+    "index": 11,
+    "token_id": 3428,
+    "probability": 0.013968,
+    "cumulative": 1.0
+  },
+  {
+    "index": 1,
+    "token_id": 6077,
+    "probability": 0.051516,
+    "cumulative": 1.0
+  },
+  {
+    "index": 2,
+    "token_id": 3433,
+    "probability": 0.049357,
+    "cumulative": 1.0
+  },
+  {
+    "index": 1,
+    "token_id": 1658,
+    "probability": 0.073556,
+    "cumulative": 1.0
+  },
+  {
+    "index": 1,
+    "token_id": 576,
+    "probability": 0.20191,
+    "cumulative": 1.0
+  },
+  {
+    "index": 2,
+    "token_id": 573,
+    "probability": 0.037629,
+    "cumulative": 1.0
+  },
+  {
+    "index": 4,
+    "token_id": 5188,
+    "probability": 0.03369,
+    "cumulative": 1.0
+  },
+  {
+    "index": 1,
+    "token_id": 729,
+    "probability": 0.209916,
+    "cumulative": 1.0
+  },
+  {
+    "index": 2,
+    "token_id": 13791,
+    "probability": 0.029944,
+    "cumulative": 1.0
+  },
+  {
+    "index": 8,
+    "token_id": 573,
+    "probability": 0.011521,
+    "cumulative": 1.0
+  },
+  {
+    "index": 12,
+    "token_id": 6859,
+    "probability": 0.015218,
+    "cumulative": 1.0
+  }
+]
