@@ -8,21 +8,26 @@ Two modes available:
 - relative: shows 1/(p/max(candidates)) where p is the token's probability
 """
 
-import json
 import argparse
-from pathlib import Path
-from typing import List, Dict, Any
+import os
+
 from loguru import logger
 
+# Import the token loading function
 from utils import load_jsonl
+
 
 def process_token_data(jsonl_file: str, mode: str = 'absolute', debug: bool = False) -> str:
     """Process token data and return formatted string."""
     output = []
-
+    
+    # Load the token data
     json_objects = load_jsonl(jsonl_file, debug)
     
-    # Process each JSON object
+    if debug:
+        logger.debug(f"Loaded {len(json_objects)} token objects")
+    
+    # Process each token object
     for data in json_objects:
         try:
             # Extract token info
@@ -31,10 +36,10 @@ def process_token_data(jsonl_file: str, mode: str = 'absolute', debug: bool = Fa
             
             if token_id is None or prob is None:
                 if debug:
-                    logger.debug(f"Missing token_id or probability in: {json_str[:100]}...")
+                    logger.debug(f"Missing token_id or probability in object")
                 continue
             
-            # Calculate score
+            # Calculate score based on mode
             if mode == 'relative':
                 # Get max probability from candidates
                 candidates = data.get('tokens', [])
@@ -46,13 +51,12 @@ def process_token_data(jsonl_file: str, mode: str = 'absolute', debug: bool = Fa
             else:  # absolute mode
                 score = 1.0 / prob if prob > 0 else float('inf')
             
-            # Format output
+            # Format output with token ID
             output.append(f"{token_id}({score:.1f})")
             
-        except json.JSONDecodeError as e:
+        except Exception as e:
             if debug:
-                logger.error(f"Failed to parse JSON: {e}")
-                logger.debug(f"Object start: {json_str[:100]}...")
+                logger.error(f"Error processing token: {e}")
             continue
     
     if not output:
@@ -62,7 +66,6 @@ def process_token_data(jsonl_file: str, mode: str = 'absolute', debug: bool = Fa
     result = "".join(output)
     logger.info(f"Processed {len(output)} tokens successfully")
     return result
-
 
 def main():
     parser = argparse.ArgumentParser(description="Simple token probability visualizer")
@@ -82,6 +85,11 @@ def main():
               format="<level>{level: <8}</level> | <green>{time:HH:mm:ss}</green> | <level>{message}</level>")
     
     try:
+        # Check if input file exists
+        if not os.path.exists(args.input_file):
+            logger.error(f"Input file not found: {args.input_file}")
+            return 1
+            
         # Process tokens
         result = process_token_data(args.input_file, args.mode, args.debug)
         
