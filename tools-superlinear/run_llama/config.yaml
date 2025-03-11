@@ -3,8 +3,8 @@
 #  - uniform: Standard uniform distribution (0-1)
 #  - normal: Normal distribution with mean 0.5, std dev 0.15, clamped to (0-1) 
 #  - external-api: Uses an external HTTP API to provide random numbers
-rng_provider: normal 
-# rng_provider: external-api
+# rng_provider: normal 
+rng_provider: external-api
 
 # API URL (REQUIRED when rng_provider is external-api)
 # The API endpoint must return JSON with a 'random' field containing a number between 0-1

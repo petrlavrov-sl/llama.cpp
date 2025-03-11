@@ -111,8 +111,7 @@ public:
     
     double generate() override {
         if (!curl) {
-            fprintf(stderr, "Curl not initialized, returning default value\n");
-            return 0.5; // Default value if curl failed
+            throw std::runtime_error("Curl not initialized - cannot generate random numbers");
         }
         
         // Make request to the API

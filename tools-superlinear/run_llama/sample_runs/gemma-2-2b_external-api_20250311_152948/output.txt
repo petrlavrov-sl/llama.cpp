@@ -1,0 +1,3 @@
+In 1956, the first artificial intelligence computer program, the “Logic Theorist” was developed. This program was designed to test the logical abilities of a computer. It was designed to determine if a given mathematical statement was true or false. It is still considered as the first AI program.
+
+In 1957, another artificial intelligence program was developed, named “Logic Theorist.” This program was designed to solve mathematical problems. It was based on the logic[0m
