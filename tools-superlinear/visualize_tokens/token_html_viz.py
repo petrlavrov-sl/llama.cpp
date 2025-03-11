@@ -13,6 +13,8 @@ Two modes available:
 import argparse
 import os
 import sys
+import json
+import html
 
 import matplotlib.colors as mcolors
 from loguru import logger
@@ -36,10 +38,25 @@ def get_color_for_score(score, max_score=10.0):
     # Return hex color
     return f"#00{green_value:02x}00"
 
-def create_html_visualization(tokens, output_file, mode='absolute'):
+def create_html_visualization(tokens, output_file, mode='absolute', token_map_file=None):
     """Create an HTML visualization of token probabilities."""
     # Process tokens
     token_data = []
+    
+    # Load token map if available
+    token_text_map = {}
+    if token_map_file and os.path.exists(token_map_file):
+        try:
+            with open(token_map_file, 'r') as f:
+                for line in f:
+                    try:
+                        token_info = json.loads(line.strip())
+                        token_text_map[token_info['token_id']] = token_info['text']
+                    except json.JSONDecodeError:
+                        continue
+            logger.info(f"Loaded {len(token_text_map)} tokens from token map file")
+        except Exception as e:
+            logger.error(f"Error loading token map: {e}")
     
     for token in tokens:
         token_id = token.get('selected_token_id')
@@ -63,11 +80,15 @@ def create_html_visualization(tokens, output_file, mode='absolute'):
         # Get color for score
         color = get_color_for_score(score)
         
+        # Get token text if available
+        token_text = token_text_map.get(token_id, f"T{token_id}")
+        
         token_data.append({
             'token_id': token_id,
             'probability': prob,
             'score': score,
-            'color': color
+            'color': color,
+            'text': token_text
         })
     
     # Create HTML
@@ -133,32 +154,12 @@ def create_html_visualization(tokens, output_file, mode='absolute'):
                 margin-right: 5px;
                 vertical-align: middle;
             }
-            .mode-selector {
-                margin-top: 20px;
-            }
-            .mode-selector label {
-                margin-right: 15px;
-            }
         </style>
     </head>
     <body>
-        <h1>Token Probability Visualization</h1>
-        <p>This visualization shows tokens colored by their probability scores.</p>
-        
-        <div class="mode-selector">
-            <strong>Mode:</strong>
-            <form method="GET">
-                <label>
-                    <input type="radio" name="mode" value="absolute" onchange="this.form.submit()" """ + ("checked" if mode == 'absolute' else "") + """>
-                    Absolute (1/p)
-                </label>
-                <label>
-                    <input type="radio" name="mode" value="relative" onchange="this.form.submit()" """ + ("checked" if mode == 'relative' else "") + """>
-                    Relative (1/(p/max_p))
-                </label>
-                <input type="hidden" name="file" value=""" + os.path.basename(output_file) + """>
-            </form>
-        </div>
+        <h1>Token Probability Visualization - """ + mode.capitalize() + """ Mode</h1>
+        <p>This visualization shows tokens colored by their probability scores using """ + mode + """ mode.</p>
+        <p><strong>Mode:</strong> """ + ("Absolute (1/p)" if mode == 'absolute' else "Relative (1/(p/max_p))") + """</p>
         
         <div class="token-container">
     """
@@ -170,9 +171,9 @@ def create_html_visualization(tokens, output_file, mode='absolute'):
         <p>Green intensity represents token scores (1/probability):</p>
         <div style="display: flex; align-items: center; margin-top: 10px; margin-bottom: 15px;">
             <span style="display: inline-block; width: 20px; height: 20px; background-color: #003200;"></span>
-            <span style="margin: 0 5px;">→ High score (low probability)</span>
-            <span style="display: inline-block; width: 20px; height: 20px; background-color: #00ff00;"></span>
             <span style="margin: 0 5px;">→ Low score (high probability)</span>
+            <span style="display: inline-block; width: 20px; height: 20px; background-color: #00ff00;"></span>
+            <span style="margin: 0 5px;">→ High score (low probability)</span>
         </div>
         
         <div style="display: flex; align-items: center; margin-top: 5px;">
@@ -180,8 +181,6 @@ def create_html_visualization(tokens, output_file, mode='absolute'):
             <span style="margin-left: 10px;">Score gradient (low to high)</span>
         </div>
     </div>
-
-    <div/>
 """
     
     # Add tokens
@@ -190,6 +189,7 @@ def create_html_visualization(tokens, output_file, mode='absolute'):
         prob = token['probability']
         score = token['score']
         color = token['color']
+        token_text = token.get('text', f"T{token_id}")
         
         # Determine text color based on background color brightness
         # Use white text for dark backgrounds, black text for light backgrounds
@@ -202,6 +202,7 @@ def create_html_visualization(tokens, output_file, mode='absolute'):
             <span class="token" style="background-color: {color}; color: {text_color};">T{token_id}</span>
             <span class="tooltiptext">
                 Token ID: {token_id}<br>
+                Text: {html.escape(token_text)}<br>
                 Probability: {prob:.6f}<br>
                 Score: {score:.2f}
             </span>
@@ -225,8 +226,8 @@ def main():
     """Main function."""
     parser = argparse.ArgumentParser(description='Create HTML visualization of token probabilities')
     parser.add_argument('input_file', help='Input JSONL file with token data')
-    parser.add_argument('--output', '-o', help='Output HTML file', default='token_viz.html')
-    parser.add_argument('--mode', '-m', help='Visualization mode (absolute or relative)', default='absolute', choices=['absolute', 'relative'])
+    parser.add_argument('--output', '-o', help='Output HTML file base name', default='token_viz')
+    parser.add_argument('--token_map', '-t', help='Input JSONL file with token map data')
     args = parser.parse_args()
     
     # Load token data
@@ -239,10 +240,17 @@ def main():
         logger.error(f"Error loading token data: {e}")
         return 1
     
-    # Create visualization
+    # Create visualizations for both modes
     try:
-        create_html_visualization(tokens, args.output, args.mode)
-        logger.success(f"HTML visualization saved to {args.output}")
+        # Absolute mode
+        abs_output = f"{args.output}_absolute.html"
+        create_html_visualization(tokens, abs_output, 'absolute', args.token_map)
+        logger.success(f"Absolute mode visualization saved to {abs_output}")
+        
+        # Relative mode
+        rel_output = f"{args.output}_relative.html"
+        create_html_visualization(tokens, rel_output, 'relative', args.token_map)
+        logger.success(f"Relative mode visualization saved to {rel_output}")
     except Exception as e:
         logger.error(f"Error creating visualization: {e}")
         return 1

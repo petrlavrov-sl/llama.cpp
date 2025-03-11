@@ -23,6 +23,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <unordered_set>
 
 #include "chat.h"
 #include "common.h"
@@ -990,6 +991,17 @@ static int generate(LlamaData & llama_data, const std::string & prompt, std::str
         return 1;
     }
 
+    // Check if we should save token map
+    static std::unordered_set<llama_token> saved_tokens;
+    FILE* token_map_file = nullptr;
+    const char* token_map_file_path = std::getenv("LLAMA_TOKEN_MAP_FILE");
+    if (token_map_file_path != nullptr) {
+        token_map_file = fopen(token_map_file_path, "a");
+        if (token_map_file == nullptr) {
+            printe("failed to open token map file: %s\n", token_map_file_path);
+        }
+    }
+
     // prepare a batch for the prompt
     llama_batch batch = llama_batch_get_one(tokens.data(), tokens.size());
     llama_token new_token_id;
@@ -997,6 +1009,9 @@ static int generate(LlamaData & llama_data, const std::string & prompt, std::str
         check_context_size(llama_data.context, batch);
         if (llama_decode(llama_data.context.get(), batch)) {
             printe("failed to decode\n");
+            if (token_map_file != nullptr) {
+                fclose(token_map_file);
+            }
             return 1;
         }
 
@@ -1008,13 +1023,34 @@ static int generate(LlamaData & llama_data, const std::string & prompt, std::str
 
         std::string piece;
         if (convert_token_to_string(vocab, new_token_id, piece)) {
+            if (token_map_file != nullptr) {
+                fclose(token_map_file);
+            }
             return 1;
+        }
+
+        // Save token to map file if needed
+        if (token_map_file != nullptr && saved_tokens.find(new_token_id) == saved_tokens.end()) {
+            // Escape special characters in the token text
+            std::string escaped_text = "";
+            for (char c : piece) {
+                if (c == '\\' || c == '"') {
+                    escaped_text += '\\';
+                }
+                escaped_text += c;
+            }
+            fprintf(token_map_file, "{\"token_id\": %d, \"text\": \"%s\"}\n", new_token_id, escaped_text.c_str());
+            saved_tokens.insert(new_token_id);
         }
 
         print_word_and_concatenate_to_response(piece, response);
 
         // prepare the next batch with the sampled token
         batch = llama_batch_get_one(&new_token_id, 1);
+    }
+
+    if (token_map_file != nullptr) {
+        fclose(token_map_file);
     }
 
     printf(LOG_COL_DEFAULT);
