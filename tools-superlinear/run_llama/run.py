@@ -242,10 +242,16 @@ def run_model(config, config_path):
         if process.returncode == 0:
             # Generate visualizations if enabled
             if config.get('visualize_probabilities') and os.path.exists(token_data_file):
-                visualize_probabilities(token_data_file, os.path.join(run_dir, "probabilities.png"))
+                prob_output = os.path.join(run_dir, "probabilities.png")
+                if visualize_probabilities(token_data_file, prob_output):
+                    logger.success(f"Token probability visualization saved to: {prob_output}")
+                    logger.success(f"Token probability data saved to: {prob_output}.json")
                 
             if config.get('visualize_tokens') and os.path.exists(token_data_file):
-                visualize_tokens(token_data_file, os.path.join(run_dir, "tokens.png"))
+                token_output = os.path.join(run_dir, "tokens.png")
+                if visualize_tokens(token_data_file, token_output):
+                    logger.success(f"Token visualization saved to: {token_output}")
+                    logger.success(f"Token HTML visualization saved to: {token_output}.html")
             
             # Generate RNG plot if values file exists
             if os.path.exists(rng_file) and os.path.getsize(rng_file) > 0:
@@ -270,71 +276,38 @@ def run_model(config, config_path):
         return False
 
 def visualize_probabilities(token_data_file: str, output_file: str) -> bool:
-    """Visualize token probabilities from the token data file"""
+    """Visualize token probabilities using process_json_tokens.py"""
     try:
-        import matplotlib.pyplot as plt
-        import json
-        import numpy as np
-        
-        # Read token data
-        probabilities = []
-        with open(token_data_file, 'r') as f:
-            for line in f:
-                data = json.loads(line)
-                probabilities.append([t['probability'] for t in data['tokens']])
-        
-        if not probabilities:
-            logger.warning("No probability data found to visualize")
+        script_path = SCRIPT_DIR.parent / "visualize_tokens" / "process_json_tokens.py"
+        if not script_path.exists():
+            logger.warning(f"Token probability visualization script not found at {script_path}")
             return False
-        
-        # Create heatmap
-        plt.figure(figsize=(15, 10))
-        plt.imshow(probabilities, aspect='auto', cmap='viridis')
-        plt.colorbar(label='Probability')
-        plt.xlabel('Token Index')
-        plt.ylabel('Generation Step')
-        plt.title('Token Probabilities During Generation')
-        plt.savefig(output_file)
-        plt.close()
-        
-        logger.success(f"Probability visualization saved to: {output_file}")
+            
+        cmd = ["python", str(script_path), token_data_file, "-o", output_file + ".json", "-p", output_file]
+        logger.info(f"Running token probability visualization: {' '.join(cmd)}")
+        result = subprocess.run(cmd, check=True, capture_output=True, text=True)
+        logger.success(f"Token probability visualization saved to {output_file}")
         return True
     except Exception as e:
-        logger.error(f"Error generating probability visualization: {e}")
+        logger.error(f"Failed to generate token probability visualization: {e}")
         return False
 
 def visualize_tokens(token_data_file: str, output_file: str) -> bool:
-    """Visualize token sequences from the token data file"""
+    """Visualize tokens using token_probability_visualizer.py"""
     try:
-        import matplotlib.pyplot as plt
-        import json
-        import numpy as np
-        
-        # Read token data
-        tokens = []
-        with open(token_data_file, 'r') as f:
-            for line in f:
-                data = json.loads(line)
-                tokens.append([t['token_id'] for t in data['tokens']])
-        
-        if not tokens:
-            logger.warning("No token data found to visualize")
+        script_path = SCRIPT_DIR.parent / "visualize_tokens" / "token_probability_visualizer.py"
+        if not script_path.exists():
+            logger.warning(f"Token visualization script not found at {script_path}")
             return False
-        
-        # Create token sequence visualization
-        plt.figure(figsize=(15, 10))
-        plt.imshow(tokens, aspect='auto', cmap='tab20')
-        plt.colorbar(label='Token ID')
-        plt.xlabel('Token Position')
-        plt.ylabel('Generation Step')
-        plt.title('Token IDs During Generation')
-        plt.savefig(output_file)
-        plt.close()
-        
-        logger.success(f"Token visualization saved to: {output_file}")
+            
+        cmd = ["python", str(script_path), token_data_file, "--html", output_file + ".html", "--plot", output_file]
+        logger.info(f"Running token visualization: {' '.join(cmd)}")
+        result = subprocess.run(cmd, check=True, capture_output=True, text=True)
+        logger.success(f"Token visualization saved to {output_file}")
+        logger.success(f"Token HTML visualization saved to {output_file}.html")
         return True
     except Exception as e:
-        logger.error(f"Error generating token visualization: {e}")
+        logger.error(f"Failed to generate token visualization: {e}")
         return False
 
 def main():
@@ -348,8 +321,10 @@ def main():
     parser.add_argument("-n", "--num-tokens", type=int, help="Override number of tokens to generate")
     parser.add_argument("-a", "--api-url", help="API URL for external-api RNG provider")
     parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose logging")
-    parser.add_argument("--visualize-probabilities", action="store_true", help="Visualize token probabilities during generation")
-    parser.add_argument("--visualize-tokens", action="store_true", help="Visualize token sequences during generation")
+    parser.add_argument("--visualize-probabilities", action="store_true", 
+                       help="Visualize token probabilities during generation")
+    parser.add_argument("--visualize-tokens", action="store_true", 
+                       help="Visualize token sequences during generation")
     
     args = parser.parse_args()
     
@@ -398,6 +373,10 @@ def main():
     if config['rng_provider'] == 'external-api' and ('api_url' not in config or not config['api_url']):
         logger.error(f"Error: api_url must be specified when using external-api RNG provider")
         return 1
+    
+    # Add visualization flags to config
+    config['visualize_probabilities'] = args.visualize_probabilities
+    config['visualize_tokens'] = args.visualize_tokens
     
     # Run the model
     success = run_model(config, args.config)
