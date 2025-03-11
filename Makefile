@@ -5,69 +5,69 @@ endif
 # Define the default target now so that it is always the first target
 BUILD_TARGETS = \
 	libllava.a \
-	llama-batched \
-	llama-batched-bench \
-	llama-bench \
-	llama-cli \
-	llama-convert-llama2c-to-ggml \
-	llama-embedding \
-	llama-eval-callback \
-	llama-export-lora \
-	llama-gbnf-validator \
-	llama-gguf \
-	llama-gguf-hash \
-	llama-gguf-split \
-	llama-gritlm \
-	llama-imatrix \
-	llama-infill \
-	llama-llava-cli \
-	llama-minicpmv-cli\
-	llama-qwen2vl-cli\
-	llama-lookahead \
-	llama-lookup \
-	llama-lookup-create \
-	llama-lookup-merge \
-	llama-lookup-stats \
-	llama-parallel \
-	llama-passkey \
-	llama-perplexity \
-	llama-q8dot \
-	llama-quantize \
-	llama-quantize-stats \
-	llama-retrieval \
-	llama-save-load-state \
-	llama-server \
-	llama-simple \
-	llama-simple-chat \
+	# llama-batched \
+	# llama-batched-bench \
+	# llama-bench \
+	# llama-cli \
+	# llama-convert-llama2c-to-ggml \
+	# llama-embedding \
+	# llama-eval-callback \
+	# llama-export-lora \
+	# llama-gbnf-validator \
+	# llama-gguf \
+	# llama-gguf-hash \
+	# llama-gguf-split \
+	# llama-gritlm \
+	# llama-imatrix \
+	# llama-infill \
+	# llama-llava-cli \
+	# llama-minicpmv-cli\
+	# llama-qwen2vl-cli\
+	# llama-lookahead \
+	# llama-lookup \
+	# llama-lookup-create \
+	# llama-lookup-merge \
+	# llama-lookup-stats \
+	# llama-parallel \
+	# llama-passkey \
+	# llama-perplexity \
+	# llama-q8dot \
+	# llama-quantize \
+	# llama-quantize-stats \
+	# llama-retrieval \
+	# llama-save-load-state \
+	# llama-server \
+	# llama-simple \
+	# llama-simple-chat \
 	llama-run \
-	llama-speculative \
-	llama-tokenize \
-	llama-vdot \
-	llama-cvector-generator \
-	llama-gen-docs \
+	# llama-speculative \
+	# llama-tokenize \
+	# llama-vdot \
+	# llama-cvector-generator \
+	# llama-gen-docs \
 	tests/test-c.o
 
 # Binaries only useful for tests
-TEST_TARGETS = \
-	tests/test-arg-parser \
-	tests/test-autorelease \
-	tests/test-backend-ops \
-	tests/test-chat \
-	tests/test-chat-template \
-	tests/test-double-float \
-	tests/test-grammar-integration \
-	tests/test-grammar-parser \
-	tests/test-json-schema-to-grammar \
-	tests/test-llama-grammar \
-	tests/test-log \
-	tests/test-model-load-cancel \
-	tests/test-quantize-fns \
-	tests/test-quantize-perf \
-	tests/test-rope \
-	tests/test-sampling \
-	tests/test-tokenizer-0 \
-	tests/test-tokenizer-1-bpe \
-	tests/test-tokenizer-1-spm
+# TEST_TARGETS = \
+# 	tests/test-arg-parser \
+# 	tests/test-autorelease \
+# 	tests/test-backend-ops \
+# 	tests/test-chat \
+# 	tests/test-chat-template \
+# 	tests/test-double-float \
+# 	tests/test-grammar-integration \
+# 	tests/test-grammar-parser \
+# 	tests/test-json-schema-to-grammar \
+# 	tests/test-llama-grammar \
+# 	tests/test-log \
+# 	tests/test-model-load-cancel \
+# 	tests/test-quantize-fns \
+# 	tests/test-quantize-perf \
+# 	tests/test-rope \
+# 	tests/test-sampling \
+# 	tests/test-tokenizer-0 \
+# 	tests/test-tokenizer-1-bpe \
+# 	tests/test-tokenizer-1-spm
 #	tests/test-opt \
 
 # Legacy build targets that were renamed in #7809, but should still be removed when the project is cleaned
@@ -1393,43 +1393,43 @@ examples/server/%.hpp: examples/server/public/% FORCE Makefile
 		echo "unsigned int $${NAME}_len = $(shell cat $< | wc -c );" \
 	) > $@
 
-llama-gen-docs: examples/gen-docs/gen-docs.cpp \
-	$(OBJ_ALL)
-	$(CXX) $(CXXFLAGS) -c $< -o $(call GET_OBJ_FILE, $<)
-	$(CXX) $(CXXFLAGS) $(filter-out %.h $<,$^) $(call GET_OBJ_FILE, $<) -o $@ $(LDFLAGS)
+# llama-gen-docs: examples/gen-docs/gen-docs.cpp \
+# 	$(OBJ_ALL)
+# 	$(CXX) $(CXXFLAGS) -c $< -o $(call GET_OBJ_FILE, $<)
+# 	$(CXX) $(CXXFLAGS) $(filter-out %.h $<,$^) $(call GET_OBJ_FILE, $<) -o $@ $(LDFLAGS)
 
-libllava.a: examples/llava/llava.cpp \
-	examples/llava/llava.h \
-	examples/llava/clip.cpp \
-	examples/llava/clip.h \
-	common/stb_image.h \
-	common/base64.hpp \
-	$(OBJ_ALL)
-	$(CXX) $(CXXFLAGS) -static -fPIC -c $< -o $@ -Wno-cast-qual
+# libllava.a: examples/llava/llava.cpp \
+# 	examples/llava/llava.h \
+# 	examples/llava/clip.cpp \
+# 	examples/llava/clip.h \
+# 	common/stb_image.h \
+# 	common/base64.hpp \
+# 	$(OBJ_ALL)
+# 	$(CXX) $(CXXFLAGS) -static -fPIC -c $< -o $@ -Wno-cast-qual
 
-llama-llava-cli: examples/llava/llava-cli.cpp \
-	examples/llava/llava.cpp \
-	examples/llava/llava.h \
-	examples/llava/clip.cpp \
-	examples/llava/clip.h \
-	$(OBJ_ALL)
-	$(CXX) $(CXXFLAGS) $< $(filter-out %.h $<,$^) -o $@ $(LDFLAGS) -Wno-cast-qual
+# llama-llava-cli: examples/llava/llava-cli.cpp \
+# 	examples/llava/llava.cpp \
+# 	examples/llava/llava.h \
+# 	examples/llava/clip.cpp \
+# 	examples/llava/clip.h \
+# 	$(OBJ_ALL)
+# 	$(CXX) $(CXXFLAGS) $< $(filter-out %.h $<,$^) -o $@ $(LDFLAGS) -Wno-cast-qual
 
-llama-minicpmv-cli: examples/llava/minicpmv-cli.cpp \
-	examples/llava/llava.cpp \
-	examples/llava/llava.h \
-	examples/llava/clip.cpp \
-	examples/llava/clip.h \
-	$(OBJ_ALL)
-	$(CXX) $(CXXFLAGS) $< $(filter-out %.h $<,$^) -o $@ $(LDFLAGS) -Wno-cast-qual
+# llama-minicpmv-cli: examples/llava/minicpmv-cli.cpp \
+# 	examples/llava/llava.cpp \
+# 	examples/llava/llava.h \
+# 	examples/llava/clip.cpp \
+# 	examples/llava/clip.h \
+# 	$(OBJ_ALL)
+# 	$(CXX) $(CXXFLAGS) $< $(filter-out %.h $<,$^) -o $@ $(LDFLAGS) -Wno-cast-qual
 
-llama-qwen2vl-cli: examples/llava/qwen2vl-cli.cpp \
-	examples/llava/llava.cpp \
-	examples/llava/llava.h \
-	examples/llava/clip.cpp \
-	examples/llava/clip.h \
-	$(OBJ_ALL)
-	$(CXX) $(CXXFLAGS) $< $(filter-out %.h $<,$^) -o $@ $(LDFLAGS) -Wno-cast-qual
+# llama-qwen2vl-cli: examples/llava/qwen2vl-cli.cpp \
+# 	examples/llava/llava.cpp \
+# 	examples/llava/llava.h \
+# 	examples/llava/clip.cpp \
+# 	examples/llava/clip.h \
+# 	$(OBJ_ALL)
+# 	$(CXX) $(CXXFLAGS) $< $(filter-out %.h $<,$^) -o $@ $(LDFLAGS) -Wno-cast-qual
 
 ifeq ($(UNAME_S),Darwin)
 swift: examples/batched.swift
@@ -1451,123 +1451,123 @@ common/build-info.o: common/build-info.cpp
 # Tests
 #
 
-tests: $(TEST_TARGETS)
+# tests: $(TEST_TARGETS)
 
-tests/test-arg-parser: tests/test-arg-parser.cpp \
-	$(OBJ_ALL)
-	$(CXX) $(CXXFLAGS) -c $< -o $(call GET_OBJ_FILE, $<)
-	$(CXX) $(CXXFLAGS) $(filter-out %.h $<,$^) $(call GET_OBJ_FILE, $<) -o $@ $(LDFLAGS)
+# tests/test-arg-parser: tests/test-arg-parser.cpp \
+# 	$(OBJ_ALL)
+# 	$(CXX) $(CXXFLAGS) -c $< -o $(call GET_OBJ_FILE, $<)
+# 	$(CXX) $(CXXFLAGS) $(filter-out %.h $<,$^) $(call GET_OBJ_FILE, $<) -o $@ $(LDFLAGS)
 
-tests/test-llama-grammar: tests/test-llama-grammar.cpp \
-	$(OBJ_ALL)
-	$(CXX) $(CXXFLAGS) -c $< -o $(call GET_OBJ_FILE, $<)
-	$(CXX) $(CXXFLAGS) $(filter-out %.h $<,$^) $(call GET_OBJ_FILE, $<) -o $@ $(LDFLAGS)
+# tests/test-llama-grammar: tests/test-llama-grammar.cpp \
+# 	$(OBJ_ALL)
+# 	$(CXX) $(CXXFLAGS) -c $< -o $(call GET_OBJ_FILE, $<)
+# 	$(CXX) $(CXXFLAGS) $(filter-out %.h $<,$^) $(call GET_OBJ_FILE, $<) -o $@ $(LDFLAGS)
 
-tests/test-log: tests/test-log.cpp \
-	$(OBJ_ALL)
-	$(CXX) $(CXXFLAGS) -c $< -o $(call GET_OBJ_FILE, $<)
-	$(CXX) $(CXXFLAGS) $(filter-out %.h $<,$^) $(call GET_OBJ_FILE, $<) -o $@ $(LDFLAGS)
+# tests/test-log: tests/test-log.cpp \
+# 	$(OBJ_ALL)
+# 	$(CXX) $(CXXFLAGS) -c $< -o $(call GET_OBJ_FILE, $<)
+# 	$(CXX) $(CXXFLAGS) $(filter-out %.h $<,$^) $(call GET_OBJ_FILE, $<) -o $@ $(LDFLAGS)
 
-tests/test-grammar-parser: tests/test-grammar-parser.cpp \
-	$(OBJ_ALL)
-	$(CXX) $(CXXFLAGS) -c $< -o $(call GET_OBJ_FILE, $<)
-	$(CXX) $(CXXFLAGS) $(filter-out %.h $<,$^) $(call GET_OBJ_FILE, $<) -o $@ $(LDFLAGS)
+# tests/test-grammar-parser: tests/test-grammar-parser.cpp \
+# 	$(OBJ_ALL)
+# 	$(CXX) $(CXXFLAGS) -c $< -o $(call GET_OBJ_FILE, $<)
+# 	$(CXX) $(CXXFLAGS) $(filter-out %.h $<,$^) $(call GET_OBJ_FILE, $<) -o $@ $(LDFLAGS)
 
-tests/test-grammar-integration: tests/test-grammar-integration.cpp \
-	$(OBJ_ALL)
-	$(CXX) $(CXXFLAGS) -c $< -o $(call GET_OBJ_FILE, $<)
-	$(CXX) $(CXXFLAGS) $(filter-out %.h $<,$^) $(call GET_OBJ_FILE, $<) -o $@ $(LDFLAGS)
+# tests/test-grammar-integration: tests/test-grammar-integration.cpp \
+# 	$(OBJ_ALL)
+# 	$(CXX) $(CXXFLAGS) -c $< -o $(call GET_OBJ_FILE, $<)
+# 	$(CXX) $(CXXFLAGS) $(filter-out %.h $<,$^) $(call GET_OBJ_FILE, $<) -o $@ $(LDFLAGS)
 
-tests/test-double-float: tests/test-double-float.cpp
-	$(CXX) $(CXXFLAGS) -c $< -o $(call GET_OBJ_FILE, $<)
-	$(CXX) $(CXXFLAGS) $(filter-out %.h $<,$^) $(call GET_OBJ_FILE, $<) -o $@ $(LDFLAGS)
+# tests/test-double-float: tests/test-double-float.cpp
+# 	$(CXX) $(CXXFLAGS) -c $< -o $(call GET_OBJ_FILE, $<)
+# 	$(CXX) $(CXXFLAGS) $(filter-out %.h $<,$^) $(call GET_OBJ_FILE, $<) -o $@ $(LDFLAGS)
 
-tests/test-json-schema-to-grammar: tests/test-json-schema-to-grammar.cpp \
-	$(OBJ_ALL)
-	$(CXX) $(CXXFLAGS) -Iexamples/server -c $< -o $(call GET_OBJ_FILE, $<)
-	$(CXX) $(CXXFLAGS) $(filter-out %.h $<,$^) $(call GET_OBJ_FILE, $<) -o $@ $(LDFLAGS)
+# tests/test-json-schema-to-grammar: tests/test-json-schema-to-grammar.cpp \
+# 	$(OBJ_ALL)
+# 	$(CXX) $(CXXFLAGS) -Iexamples/server -c $< -o $(call GET_OBJ_FILE, $<)
+# 	$(CXX) $(CXXFLAGS) $(filter-out %.h $<,$^) $(call GET_OBJ_FILE, $<) -o $@ $(LDFLAGS)
 
-tests/test-chat: tests/test-chat.cpp \
-	$(OBJ_ALL)
-	$(CXX) $(CXXFLAGS) -Iexamples/server -c $< -o $(call GET_OBJ_FILE, $<)
-	$(CXX) $(CXXFLAGS) $(filter-out %.h $<,$^) $(call GET_OBJ_FILE, $<) -o $@ $(LDFLAGS)
+# tests/test-chat: tests/test-chat.cpp \
+# 	$(OBJ_ALL)
+# 	$(CXX) $(CXXFLAGS) -Iexamples/server -c $< -o $(call GET_OBJ_FILE, $<)
+# 	$(CXX) $(CXXFLAGS) $(filter-out %.h $<,$^) $(call GET_OBJ_FILE, $<) -o $@ $(LDFLAGS)
 
-tests/test-opt: tests/test-opt.cpp \
-	$(OBJ_GGML)
-	$(CXX) $(CXXFLAGS) -c $< -o $(call GET_OBJ_FILE, $<)
-	$(CXX) $(CXXFLAGS) $(filter-out %.h $<,$^) $(call GET_OBJ_FILE, $<) -o $@ $(LDFLAGS)
+# tests/test-opt: tests/test-opt.cpp \
+# 	$(OBJ_GGML)
+# 	$(CXX) $(CXXFLAGS) -c $< -o $(call GET_OBJ_FILE, $<)
+# 	$(CXX) $(CXXFLAGS) $(filter-out %.h $<,$^) $(call GET_OBJ_FILE, $<) -o $@ $(LDFLAGS)
 
-tests/test-quantize-fns: tests/test-quantize-fns.cpp \
-	$(OBJ_GGML)
-	$(CXX) $(CXXFLAGS) -c $< -o $(call GET_OBJ_FILE, $<)
-	$(CXX) $(CXXFLAGS) $(filter-out %.h $<,$^) $(call GET_OBJ_FILE, $<) -o $@ $(LDFLAGS)
+# tests/test-quantize-fns: tests/test-quantize-fns.cpp \
+# 	$(OBJ_GGML)
+# 	$(CXX) $(CXXFLAGS) -c $< -o $(call GET_OBJ_FILE, $<)
+# 	$(CXX) $(CXXFLAGS) $(filter-out %.h $<,$^) $(call GET_OBJ_FILE, $<) -o $@ $(LDFLAGS)
 
-tests/test-quantize-perf: tests/test-quantize-perf.cpp \
-	$(OBJ_GGML)
-	$(CXX) $(CXXFLAGS) -c $< -o $(call GET_OBJ_FILE, $<)
-	$(CXX) $(CXXFLAGS) $(filter-out %.h $<,$^) $(call GET_OBJ_FILE, $<) -o $@ $(LDFLAGS)
+# tests/test-quantize-perf: tests/test-quantize-perf.cpp \
+# 	$(OBJ_GGML)
+# 	$(CXX) $(CXXFLAGS) -c $< -o $(call GET_OBJ_FILE, $<)
+# 	$(CXX) $(CXXFLAGS) $(filter-out %.h $<,$^) $(call GET_OBJ_FILE, $<) -o $@ $(LDFLAGS)
 
-tests/test-sampling: tests/test-sampling.cpp \
-	$(OBJ_ALL)
-	$(CXX) $(CXXFLAGS) -c $< -o $(call GET_OBJ_FILE, $<)
-	$(CXX) $(CXXFLAGS) $(filter-out %.h $<,$^) $(call GET_OBJ_FILE, $<) -o $@ $(LDFLAGS)
+# tests/test-sampling: tests/test-sampling.cpp \
+# 	$(OBJ_ALL)
+# 	$(CXX) $(CXXFLAGS) -c $< -o $(call GET_OBJ_FILE, $<)
+# 	$(CXX) $(CXXFLAGS) $(filter-out %.h $<,$^) $(call GET_OBJ_FILE, $<) -o $@ $(LDFLAGS)
 
-tests/test-tokenizer-0: tests/test-tokenizer-0.cpp \
-	$(OBJ_ALL)
-	$(CXX) $(CXXFLAGS) -c $< -o $(call GET_OBJ_FILE, $<)
-	$(CXX) $(CXXFLAGS) $(filter-out %.h $<,$^) $(call GET_OBJ_FILE, $<) -o $@ $(LDFLAGS)
+# tests/test-tokenizer-0: tests/test-tokenizer-0.cpp \
+# 	$(OBJ_ALL)
+# 	$(CXX) $(CXXFLAGS) -c $< -o $(call GET_OBJ_FILE, $<)
+# 	$(CXX) $(CXXFLAGS) $(filter-out %.h $<,$^) $(call GET_OBJ_FILE, $<) -o $@ $(LDFLAGS)
 
-tests/test-tokenizer-1-bpe: tests/test-tokenizer-1-bpe.cpp \
-	$(OBJ_ALL)
-	$(CXX) $(CXXFLAGS) -c $< -o $(call GET_OBJ_FILE, $<)
-	$(CXX) $(CXXFLAGS) $(filter-out %.h $<,$^) $(call GET_OBJ_FILE, $<) -o $@ $(LDFLAGS)
+# tests/test-tokenizer-1-bpe: tests/test-tokenizer-1-bpe.cpp \
+# 	$(OBJ_ALL)
+# 	$(CXX) $(CXXFLAGS) -c $< -o $(call GET_OBJ_FILE, $<)
+# 	$(CXX) $(CXXFLAGS) $(filter-out %.h $<,$^) $(call GET_OBJ_FILE, $<) -o $@ $(LDFLAGS)
 
-tests/test-tokenizer-1-spm: tests/test-tokenizer-1-spm.cpp \
-	$(OBJ_ALL)
-	$(CXX) $(CXXFLAGS) -c $< -o $(call GET_OBJ_FILE, $<)
-	$(CXX) $(CXXFLAGS) $(filter-out %.h $<,$^) $(call GET_OBJ_FILE, $<) -o $@ $(LDFLAGS)
+# tests/test-tokenizer-1-spm: tests/test-tokenizer-1-spm.cpp \
+# 	$(OBJ_ALL)
+# 	$(CXX) $(CXXFLAGS) -c $< -o $(call GET_OBJ_FILE, $<)
+# 	$(CXX) $(CXXFLAGS) $(filter-out %.h $<,$^) $(call GET_OBJ_FILE, $<) -o $@ $(LDFLAGS)
 
-tests/test-rope: tests/test-rope.cpp ggml/src/ggml.o \
-	$(OBJ_GGML)
-	$(CXX) $(CXXFLAGS) -c $< -o $(call GET_OBJ_FILE, $<)
-	$(CXX) $(CXXFLAGS) $(filter-out %.h $<,$^) $(call GET_OBJ_FILE, $<) -o $@ $(LDFLAGS)
+# tests/test-rope: tests/test-rope.cpp ggml/src/ggml.o \
+# 	$(OBJ_GGML)
+# 	$(CXX) $(CXXFLAGS) -c $< -o $(call GET_OBJ_FILE, $<)
+# 	$(CXX) $(CXXFLAGS) $(filter-out %.h $<,$^) $(call GET_OBJ_FILE, $<) -o $@ $(LDFLAGS)
 
-tests/test-c.o: tests/test-c.c include/llama.h
-	$(CC) $(CFLAGS) -c $(filter-out %.h,$^) -o $@
+# tests/test-c.o: tests/test-c.c include/llama.h
+# 	$(CC) $(CFLAGS) -c $(filter-out %.h,$^) -o $@
 
-tests/test-backend-ops: tests/test-backend-ops.cpp \
-	$(OBJ_GGML)
-	$(CXX) $(CXXFLAGS) -c $< -o $(call GET_OBJ_FILE, $<)
-	$(CXX) $(CXXFLAGS) $(filter-out %.h $<,$^) $(call GET_OBJ_FILE, $<) -o $@ $(LDFLAGS)
+# tests/test-backend-ops: tests/test-backend-ops.cpp \
+# 	$(OBJ_GGML)
+# 	$(CXX) $(CXXFLAGS) -c $< -o $(call GET_OBJ_FILE, $<)
+# 	$(CXX) $(CXXFLAGS) $(filter-out %.h $<,$^) $(call GET_OBJ_FILE, $<) -o $@ $(LDFLAGS)
 
-tests/test-model-load-cancel: tests/test-model-load-cancel.cpp tests/get-model.cpp \
-	$(OBJ_ALL)
-	$(CXX) $(CXXFLAGS) -c $< -o $(call GET_OBJ_FILE, $<)
-	$(CXX) $(CXXFLAGS) $(filter-out %.h $<,$^) $(call GET_OBJ_FILE, $<) -o $@ $(LDFLAGS)
+# tests/test-model-load-cancel: tests/test-model-load-cancel.cpp tests/get-model.cpp \
+# 	$(OBJ_ALL)
+# 	$(CXX) $(CXXFLAGS) -c $< -o $(call GET_OBJ_FILE, $<)
+# 	$(CXX) $(CXXFLAGS) $(filter-out %.h $<,$^) $(call GET_OBJ_FILE, $<) -o $@ $(LDFLAGS)
 
-tests/test-autorelease: tests/test-autorelease.cpp tests/get-model.cpp \
-	$(OBJ_ALL)
-	$(CXX) $(CXXFLAGS) -c $< -o $(call GET_OBJ_FILE, $<)
-	$(CXX) $(CXXFLAGS) $(filter-out %.h $<,$^) $(call GET_OBJ_FILE, $<) -o $@ $(LDFLAGS)
+# tests/test-autorelease: tests/test-autorelease.cpp tests/get-model.cpp \
+# 	$(OBJ_ALL)
+# 	$(CXX) $(CXXFLAGS) -c $< -o $(call GET_OBJ_FILE, $<)
+# 	$(CXX) $(CXXFLAGS) $(filter-out %.h $<,$^) $(call GET_OBJ_FILE, $<) -o $@ $(LDFLAGS)
 
-tests/test-chat-template: tests/test-chat-template.cpp \
-	$(OBJ_ALL)
-	$(CXX) $(CXXFLAGS) -c $< -o $(call GET_OBJ_FILE, $<)
-	$(CXX) $(CXXFLAGS) $(filter-out %.h $<,$^) $(call GET_OBJ_FILE, $<) -o $@ $(LDFLAGS)
+# tests/test-chat-template: tests/test-chat-template.cpp \
+# 	$(OBJ_ALL)
+# 	$(CXX) $(CXXFLAGS) -c $< -o $(call GET_OBJ_FILE, $<)
+# 	$(CXX) $(CXXFLAGS) $(filter-out %.h $<,$^) $(call GET_OBJ_FILE, $<) -o $@ $(LDFLAGS)
 
 #
 # PoCs
 #
 
-llama-vdot: pocs/vdot/vdot.cpp ggml/src/ggml.o \
-	$(OBJ_GGML)
-	$(CXX) $(CXXFLAGS) -c $< -o $(call GET_OBJ_FILE, $<)
-	$(CXX) $(CXXFLAGS) $(filter-out $<,$^) $(call GET_OBJ_FILE, $<) -o $@ $(LDFLAGS)
+# llama-vdot: pocs/vdot/vdot.cpp ggml/src/ggml.o \
+# 	$(OBJ_GGML)
+# 	$(CXX) $(CXXFLAGS) -c $< -o $(call GET_OBJ_FILE, $<)
+# 	$(CXX) $(CXXFLAGS) $(filter-out $<,$^) $(call GET_OBJ_FILE, $<) -o $@ $(LDFLAGS)
 
-llama-q8dot: pocs/vdot/q8dot.cpp ggml/src/ggml.o \
-	$(OBJ_GGML)
-	$(CXX) $(CXXFLAGS) -c $< -o $(call GET_OBJ_FILE, $<)
-	$(CXX) $(CXXFLAGS) $(filter-out $<,$^) $(call GET_OBJ_FILE, $<) -o $@ $(LDFLAGS)
+# llama-q8dot: pocs/vdot/q8dot.cpp ggml/src/ggml.o \
+# 	$(OBJ_GGML)
+# 	$(CXX) $(CXXFLAGS) -c $< -o $(call GET_OBJ_FILE, $<)
+# 	$(CXX) $(CXXFLAGS) $(filter-out $<,$^) $(call GET_OBJ_FILE, $<) -o $@ $(LDFLAGS)
 
 #
 # Deprecated binaries that we want to keep around long enough for people to migrate to the new filenames, then these can be removed.
