@@ -16,6 +16,7 @@
 #include <numeric>
 #include <random>
 #include <unordered_map>
+#include <unordered_set>
 #include <stdexcept>
 
 // Helper function to escape whitespace and special characters for JSON

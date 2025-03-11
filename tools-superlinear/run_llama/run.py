@@ -196,7 +196,10 @@ def run_model(config, config_path):
         # Set token data file path if visualization is enabled
         if config.get('visualize_tokens') or config.get('visualize_probabilities'):
             env["LLAMA_TOKEN_DATA_FILE"] = token_data_file
+            token_map_file = os.path.join(run_dir, "token_map.jsonl")
+            env["LLAMA_TOKEN_MAP_FILE"] = token_map_file
             logger.info(f"Token data will be saved to: {token_data_file}")
+            logger.info(f"Token map will be saved to: {token_map_file}")
         
         # Build the command
         cmd = [llama_run_path]
@@ -306,14 +309,24 @@ def visualize_probabilities(token_data_file: str, output_file: str) -> bool:
         return False
 
 def visualize_tokens(token_data_file: str, output_file: str) -> bool:
-    """Visualize tokens using token_probability_visualizer.py"""
+    """Visualize tokens using token_html_viz.py"""
     try:
-        script_path = SCRIPT_DIR.parent / "visualize_tokens" / "token_probability_visualizer.py"
+        # Get the token map file path
+        run_dir = os.path.dirname(token_data_file)
+        token_map_file = os.path.join(run_dir, "token_map.jsonl")
+        
+        script_path = SCRIPT_DIR.parent / "visualize_tokens" / "token_html_viz.py"
         if not script_path.exists():
             logger.warning(f"Token visualization script not found at {script_path}")
             return False
             
-        cmd = ["python", str(script_path), token_data_file, "--html", output_file + ".html", "--plot", output_file]
+        cmd = ["python", str(script_path), token_data_file, "--output", output_file]
+        
+        # Add token map file if it exists
+        if os.path.exists(token_map_file):
+            cmd.extend(["--token_map", token_map_file])
+            logger.info(f"Using token map file: {token_map_file}")
+        
         logger.info(f"Running token visualization: {' '.join(cmd)}")
         result = subprocess.run(cmd, capture_output=True, text=True)
         
@@ -328,8 +341,7 @@ def visualize_tokens(token_data_file: str, output_file: str) -> bool:
             for line in result.stdout.splitlines():
                 logger.info(f"Visualization: {line}")
             
-        logger.success(f"Token visualization saved to {output_file}")
-        logger.success(f"Token HTML visualization saved to {output_file}.html")
+        logger.success(f"Token visualization saved to {output_file}_absolute.html and {output_file}_relative.html")
         return True
     except Exception as e:
         logger.error(f"Failed to generate token visualization: {e}")
