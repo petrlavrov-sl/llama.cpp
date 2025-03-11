@@ -57,6 +57,13 @@ def create_html_visualization(tokens, output_file, mode='absolute', token_map_fi
             logger.info(f"Loaded {len(token_text_map)} tokens from token map file")
         except Exception as e:
             logger.error(f"Error loading token map: {e}")
+            raise RuntimeError(f"Failed to load token map file: {e}")
+    else:
+        logger.warning(f"Token map file not found or not specified: {token_map_file}")
+        logger.warning("Will use token IDs as fallback")
+
+    # Track missing tokens
+    missing_tokens = set()
     
     for token in tokens:
         token_id = token.get('selected_token_id')
@@ -80,8 +87,12 @@ def create_html_visualization(tokens, output_file, mode='absolute', token_map_fi
         # Get color for score
         color = get_color_for_score(score)
         
-        # Get token text if available
-        token_text = token_text_map.get(token_id, f"T{token_id}")
+        # Get token text - use fallback if not in map
+        if token_id in token_text_map:
+            token_text = token_text_map[token_id]
+        else:
+            token_text = f"<T{token_id}>"
+            missing_tokens.add(token_id)
         
         token_data.append({
             'token_id': token_id,
@@ -114,6 +125,23 @@ def create_html_visualization(tokens, output_file, mode='absolute', token_map_fi
                 border-radius: 3px;
                 font-family: monospace;
                 font-weight: bold;
+                white-space: pre;
+                min-width: 20px;
+                text-align: center;
+            }
+            
+            /* Style for whitespace tokens to make them visible */
+            .whitespace-token {
+                border: 1px dashed #999;
+            }
+            
+            /* Style for newline tokens */
+            .newline-token {
+                display: block;
+                margin: 5px 0;
+                width: 100%;
+                height: 1px;
+                background-color: #ccc;
             }
             .tooltip {
                 position: relative;
@@ -197,12 +225,32 @@ def create_html_visualization(tokens, output_file, mode='absolute', token_map_fi
         brightness = (r * 299 + g * 587 + b * 114) / 1000
         text_color = "#FFFFFF" if brightness < 0.5 else "#000000"
         
+        # Process token text for display
+        display_text = token_text
+        is_whitespace = False
+        is_newline = False
+        
+        # Handle special whitespace characters
+        if token_text == ' ' or token_text == '\t':
+            display_text = '␣' if token_text == ' ' else '→'
+            is_whitespace = True
+        elif token_text == '\n':
+            display_text = '⏎'
+            is_newline = True
+        
+        # Add CSS classes based on token type
+        token_classes = "token"
+        if is_whitespace:
+            token_classes += " whitespace-token"
+        if is_newline:
+            token_classes += " newline-token"
+        
         html_content += f"""
         <div class="tooltip">
-            <span class="token" style="background-color: {color}; color: {text_color};">T{token_id}</span>
+            <span class="{token_classes}" style="background-color: {color}; color: {text_color};">{html.escape(display_text)}</span>
             <span class="tooltiptext">
                 Token ID: {token_id}<br>
-                Text: {html.escape(token_text)}<br>
+                Text: {html.escape(repr(token_text)[1:-1])}<br>
                 Probability: {prob:.6f}<br>
                 Score: {score:.2f}
             </span>
@@ -214,6 +262,10 @@ def create_html_visualization(tokens, output_file, mode='absolute', token_map_fi
 </body>
 </html>
 """
+    
+    # Report missing tokens
+    if missing_tokens:
+        logger.warning(f"Missing {len(missing_tokens)} tokens in the token map: {sorted(list(missing_tokens))}")
     
     # Write HTML to file
     with open(output_file, 'w') as f:
