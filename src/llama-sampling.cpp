@@ -3,6 +3,7 @@
 #include "llama-impl.h"
 #include "llama-vocab.h"
 #include "llama-grammar.h"
+#include "llama-rng-provider.h"
 
 #include <algorithm>
 #include <cassert>
@@ -16,6 +17,71 @@
 #include <random>
 #include <unordered_map>
 #include <stdexcept>
+
+// Global RNG provider instance
+static RNGProvider* g_rng_provider = nullptr;
+
+// Function to get or create the global RNG provider
+static RNGProvider* get_rng_provider(uint32_t seed = 0) {
+    if (g_rng_provider == nullptr) {
+        // Check for environment variable for RNG provider type
+        const char* env_provider = std::getenv("LLAMA_RNG_PROVIDER");
+        std::string provider_type = "uniform";
+        
+        if (env_provider != nullptr) {
+            provider_type = env_provider;
+        }
+        
+        g_rng_provider = create_rng_provider(provider_type, seed);
+        
+        // Check for environment variable for output file
+        const char* output_file = std::getenv("LLAMA_RNG_OUTPUT");
+        if (output_file != nullptr) {
+            g_rng_provider->set_output_file(output_file);
+        } else {
+            g_rng_provider->set_output_file("rng_values.txt");
+        }
+    }
+    return g_rng_provider;
+}
+
+// Function to set a different RNG provider
+static void set_rng_provider(const std::string& type, uint32_t seed) {
+    if (g_rng_provider != nullptr) {
+        delete g_rng_provider;
+    }
+    
+    // Use the specified type, but check environment variable as override
+    std::string provider_type = type;
+    const char* env_provider = std::getenv("LLAMA_RNG_PROVIDER");
+    if (env_provider != nullptr) {
+        provider_type = env_provider;
+    }
+    
+    g_rng_provider = create_rng_provider(provider_type, seed);
+    
+    // Check for environment variable for output file
+    const char* output_file = std::getenv("LLAMA_RNG_OUTPUT");
+    if (output_file != nullptr) {
+        g_rng_provider->set_output_file(output_file);
+    } else {
+        g_rng_provider->set_output_file("rng_values_" + provider_type + ".txt");
+    }
+}
+
+// Cleanup the global RNG provider
+static void cleanup_rng_provider() {
+    if (g_rng_provider != nullptr) {
+        delete g_rng_provider;
+        g_rng_provider = nullptr;
+    }
+}
+
+// Register cleanup function with atexit
+static int register_cleanup = []() {
+    atexit(cleanup_rng_provider);
+    return 0;
+}();
 
 // the ring buffer works similarly to std::deque, but with a fixed capacity
 template<typename T>
@@ -128,36 +194,47 @@ struct ring_buffer {
     std::vector<T> data;
 };
 
-static int llama_sample_dist(llama_token_data_array * cur_p, std::mt19937 & rng) {
-    // iterator for the probabilities
-#ifdef __GNUC__
-    #pragma GCC diagnostic push
-    #pragma GCC diagnostic ignored "-Wunused-local-typedefs"
-#endif
+static int llama_sample_dist(llama_token_data_array * cur_p, std::mt19937 & /*rng*/) {
+    // Get uniform random number between 0 and 1 using our RNG provider
+    double u = get_rng_provider()->generate();
+    
+    fprintf(stderr, "\nRNG internal:\n");
+    fprintf(stderr, "- Raw uniform random number: %f\n", u);
 
-    struct probs_iterator {
-        typedef std::input_iterator_tag iterator_category;
-        typedef float value_type;
-        typedef float * pointer;
-        typedef float & reference;
-        typedef ptrdiff_t difference_type;
+    // Calculate cumulative probabilities
+    std::vector<float> cumulative_probs;
+    cumulative_probs.reserve(cur_p->size);
+    float sum = 0.0f;
 
-        const llama_token_data * data;
+    fprintf(stderr, "- Token probabilities:\n");
+    for (size_t i = 0; i < cur_p->size; ++i) {
+        sum += cur_p->data[i].p;
+        cumulative_probs.push_back(sum);
+        fprintf(stderr, "  [%zu] token %d = %f (cumulative: %f)\n", 
+                i, cur_p->data[i].id, cur_p->data[i].p, sum);
+    }
 
-        bool operator==(const probs_iterator & other) const { return data == other.data; }
-        bool operator!=(const probs_iterator & other) const { return data != other.data; }
-        const float & operator*() const { return data->p; }
-        probs_iterator & operator++() { ++data; return *this; }
-        probs_iterator operator++(int) { probs_iterator tmp = *this; ++data; return tmp; }
-    };
+    // Normalize cumulative probabilities
+    if (sum != 1.0f) {
+        for (float& p : cumulative_probs) {
+            p /= sum;
+        }
+        fprintf(stderr, "- Normalized cumulative probabilities\n");
+    }
 
-#ifdef __GNUC__
-    #pragma GCC diagnostic pop
-#endif
+    // Scale random number to probability sum
+    double scaled = u * 1.0; // since we normalized, multiply by 1.0
+    fprintf(stderr, "- Scaled random number: %f\n", scaled);
 
-    std::discrete_distribution<int> dist(probs_iterator{cur_p->data}, probs_iterator{cur_p->data + cur_p->size});
-
-    return dist(rng);
+    // Find the selected index using binary search
+    auto it = std::lower_bound(cumulative_probs.begin(), cumulative_probs.end(), scaled);
+    size_t selected_idx = it - cumulative_probs.begin();
+    
+    fprintf(stderr, "- Selected index: %zu\n", selected_idx);
+    fprintf(stderr, "RNG generated sample: %zu (token id: %d, probability: %f)\n", 
+            selected_idx, cur_p->data[selected_idx].id, cur_p->data[selected_idx].p);
+    
+    return selected_idx;
 }
 
 /*
@@ -2521,4 +2598,8 @@ void llama_perf_sampler_reset(struct llama_sampler * chain) {
     auto * ctx = (struct llama_sampler_chain *) chain->ctx;
 
     ctx->t_sample_us = ctx->n_sample = 0;
+}
+
+void llama_set_rng_provider(const char * type, uint32_t seed) {
+    set_rng_provider(type, seed);
 }
