@@ -198,17 +198,18 @@ def create_html_visualization(tokens, output_file, mode='absolute', token_map_fi
         <h3>Legend</h3>
         <p>Green intensity represents token scores (1/probability):</p>
         <div style="display: flex; align-items: center; margin-top: 10px; margin-bottom: 15px;">
-            <span style="display: inline-block; width: 20px; height: 20px; background-color: #003200;"></span>
-            <span style="margin: 0 5px;">→ Low score (high probability)</span>
             <span style="display: inline-block; width: 20px; height: 20px; background-color: #00ff00;"></span>
+            <span style="margin: 0 5px;">→ Low score (high probability)</span>
+            <span style="display: inline-block; width: 20px; height: 20px; background-color: #003200;"></span>
             <span style="margin: 0 5px;">→ High score (low probability)</span>
         </div>
         
         <div style="display: flex; align-items: center; margin-top: 5px;">
-            <span style="display: inline-block; width: 300px; height: 20px; background: linear-gradient(to right, #003200, #00ff00);"></span>
+            <span style="display: inline-block; width: 300px; height: 20px; background: linear-gradient(to right, #00ff00, #003200);"></span>
             <span style="margin-left: 10px;">Score gradient (low to high)</span>
         </div>
     </div>
+    <div/>
 """
     
     # Add tokens
