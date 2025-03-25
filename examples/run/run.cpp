@@ -23,6 +23,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <unordered_set>
 
 #include "chat.h"
 #include "common.h"
@@ -936,6 +937,34 @@ static void print_word_and_concatenate_to_response(const std::string & piece, st
     response += piece;
 }
 
+// Save all tokens from vocabulary to token map file
+static int save_vocab_to_token_map(const llama_vocab * vocab, const char * token_map_file_path) {
+    FILE* token_map_file = fopen(token_map_file_path, "w");
+    if (token_map_file == nullptr) {
+        printe("failed to open token map file: %s\n", token_map_file_path);
+        return 1;
+    }
+
+    const int n_vocab = llama_vocab_size(vocab);
+    for (int i = 0; i < n_vocab; i++) {
+        std::string piece;
+        if (convert_token_to_string(vocab, i, piece) == 0) {
+            // Escape special characters in the token text
+            std::string escaped_text = "";
+            for (char c : piece) {
+                if (c == '\\' || c == '"') {
+                    escaped_text += '\\';
+                }
+                escaped_text += c;
+            }
+            fprintf(token_map_file, "{\"token_id\": %d, \"text\": \"%s\"}\n", i, escaped_text.c_str());
+        }
+    }
+
+    fclose(token_map_file);
+    return 0;
+}
+
 // helper function to evaluate a prompt and generate a response
 static int generate(LlamaData & llama_data, const std::string & prompt, std::string & response) {
     const llama_vocab * vocab = llama_model_get_vocab(llama_data.model.get());
@@ -943,6 +972,17 @@ static int generate(LlamaData & llama_data, const std::string & prompt, std::str
     std::vector<llama_token> tokens;
     if (tokenize_prompt(vocab, prompt, tokens, llama_data) < 0) {
         return 1;
+    }
+
+    // Check if we should save token map
+    static bool token_map_saved = false;
+    const char* token_map_file_path = std::getenv("LLAMA_TOKEN_MAP_FILE");
+    
+    // Save all tokens from vocabulary to token map file if not already done
+    if (token_map_file_path != nullptr && !token_map_saved) {
+        if (save_vocab_to_token_map(vocab, token_map_file_path) == 0) {
+            token_map_saved = true;
+        }
     }
 
     // prepare a batch for the prompt
