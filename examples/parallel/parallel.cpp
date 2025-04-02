@@ -42,17 +42,8 @@ User: Who is Richard Feynman?
 Assistant: Richard Feynman was an American physicist who is best known for his work in quantum mechanics and particle physics. He was awarded the Nobel Prize in Physics in 1965 for his contributions to the development of quantum electrodynamics. He was a popular lecturer and author, and he wrote several books, including "Surely You're Joking, Mr. Feynman!" and "What Do You Care What Other People Think?".
 User:)";
 
-static std::vector<std::string> k_prompts = {
-    "What is the meaning of life?",
-    "Tell me an interesting fact about llamas.",
-    "What is the best way to cook a steak?",
-    "Are you familiar with the Special Theory of Relativity and can you explain it to me?",
-    "Recommend some interesting books to read.",
-    "What is the best way to learn a new language?",
-    "How to get a job at Google?",
-    "If you could have any superpower, what would it be?",
-    "I want to learn how to play the piano.",
-};
+// No more default prompts - prompts will be loaded from file
+std::vector<std::string> k_prompts;
 
 struct client {
     ~client() {
@@ -115,13 +106,16 @@ static std::vector<std::string> split_string(const std::string& input, char deli
 // Print custom usage information
 static void print_custom_usage(const char* program_name) {
     fprintf(stderr, "\nAdditional parameters for parallel processing:\n");
-    fprintf(stderr, "  -o, --output-file FNAME   save results to specified file\n");
+    fprintf(stderr, "  -f, --file FNAME         input file with prompts (REQUIRED, one prompt per line)\n");
+    fprintf(stderr, "  -o, --output-file FNAME  save results to specified file\n");
     fprintf(stderr, "\nUsage example:\n");
     fprintf(stderr, "  %s -m models/7B/ggml-model-q4_0.bin -f prompts.txt -o results.txt --n-parallel 4\n\n", program_name);
 }
 
 // Process custom command line arguments
 bool process_custom_arguments(int argc, char ** argv, std::string & output_file) {
+    bool file_arg_present = false;
+
     // Check if help is requested
     for (int i = 1; i < argc; i++) {
         std::string arg = argv[i];
@@ -131,6 +125,18 @@ bool process_custom_arguments(int argc, char ** argv, std::string & output_file)
             // Don't modify these, let common_params_parse handle them
             continue;
         }
+
+        // Check if file argument is present
+        if (arg == "-f" || arg == "--file") {
+            file_arg_present = true;
+        }
+    }
+
+    if (!file_arg_present) {
+        fprintf(stderr, "\033[31mError: No prompt file specified. A file with prompts is required.\033[0m\n");
+        fprintf(stderr, "Please provide a file with prompts using the -f/--file option.\n\n");
+        print_custom_usage(argv[0]);
+        return false;
     }
 
     for (int i = 1; i < argc - 1; i++) {
@@ -194,24 +200,31 @@ int main(int argc, char ** argv) {
 
     const llama_vocab * vocab = llama_model_get_vocab(model);
 
-    // load the prompts from an external file if there are any
+    // load the prompts from file - required
     if (params.prompt.empty()) {
-        LOG_INF("\033[32mNo new questions so proceed with build-in defaults.\033[0m\n");
-    } else {
-        // Output each line of the input params.prompts vector and copy to k_prompts
-        k_prompts.clear(); // Clear default prompts
-        int index = 0;
-        LOG_INF("\033[32mNow printing the external prompt file %s\033[0m\n\n", params.prompt_file.c_str());
+        LOG_ERR("\033[31mError: No prompt file provided. A file with prompts is required.\033[0m\n");
+        LOG_ERR("Please provide a file with prompts using the -f/--file option.\n");
+        return 1;
+    }
 
-        std::vector<std::string> prompts = split_string(params.prompt, '\n');
-        for (const auto& prompt : prompts) {
-            if (!prompt.empty()) {
-                k_prompts.resize(index + 1);
-                k_prompts[index] = prompt;
-                index++;
-                LOG_INF("%3d prompt: %s\n", index, prompt.c_str());
-            }
+    // Load prompts from the file
+    LOG_INF("\033[32mLoading prompts from file: %s\033[0m\n\n", params.prompt_file.c_str());
+
+    std::vector<std::string> prompts = split_string(params.prompt, '\n');
+    int index = 0;
+    for (const auto& prompt : prompts) {
+        if (!prompt.empty()) {
+            k_prompts.resize(index + 1);
+            k_prompts[index] = prompt;
+            index++;
+            LOG_INF("%3d prompt: %s\n", index, prompt.c_str());
         }
+    }
+
+    // Check if we have any valid prompts
+    if (k_prompts.empty()) {
+        LOG_ERR("\033[31mError: No valid prompts found in the file.\033[0m\n");
+        return 1;
     }
 
     // Adjust number of sequences to match number of prompts
@@ -222,7 +235,7 @@ int main(int argc, char ** argv) {
         n_seq = n_seq_param;
     }
 
-    LOG_INF("\n\nProcessing %d prompts with %d parallel clients\n\n", n_seq, params.n_parallel);
+    LOG_INF("\n\nProcessing %d prompts sequentially (not randomly) with %d parallel clients\n\n", n_seq, params.n_parallel);
 
     LOG_INF("\n\n");
 
