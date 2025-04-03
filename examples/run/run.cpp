@@ -990,7 +990,7 @@ static int save_vocab_to_token_map(const llama_vocab * vocab, const char * token
         return 1;
     }
 
-    const int n_vocab = llama_vocab_size(vocab);
+    const int n_vocab = llama_vocab_n_tokens(vocab);
     for (int i = 0; i < n_vocab; i++) {
         std::string piece;
         if (convert_token_to_string(vocab, i, piece) == 0) {
