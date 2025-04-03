@@ -107,13 +107,12 @@ static std::vector<std::string> split_string(const std::string& input, char deli
 static void print_custom_usage(const char* program_name) {
     fprintf(stderr, "\nAdditional parameters for parallel processing:\n");
     fprintf(stderr, "  -f, --file FNAME         input file with prompts (REQUIRED, one prompt per line)\n");
-    fprintf(stderr, "  -o, --output-file FNAME  save results to specified file\n");
     fprintf(stderr, "\nUsage example:\n");
     fprintf(stderr, "  %s -m models/7B/ggml-model-q4_0.bin -f prompts.txt -o results.txt --n-parallel 4\n\n", program_name);
 }
 
 // Process custom command line arguments
-bool process_custom_arguments(int argc, char ** argv, std::string & output_file) {
+bool process_custom_arguments(int argc, char ** argv) {
     bool file_arg_present = false;
 
     // Check if help is requested
@@ -139,16 +138,6 @@ bool process_custom_arguments(int argc, char ** argv, std::string & output_file)
         return false;
     }
 
-    for (int i = 1; i < argc - 1; i++) {
-        std::string arg = argv[i];
-
-        if (arg == "--output-file" || arg == "-o") {
-            output_file = argv[++i];
-            // Skip this argument so it won't be processed by common_params_parse
-            argv[i-1] = argv[i] = (char *)"";
-        }
-    }
-
     return true;
 }
 
@@ -157,14 +146,11 @@ int main(int argc, char ** argv) {
 
     common_params params;
 
-    // custom parameters not handled by common_params
-    std::string output_file_path;
-
     // Container to store all prompt-response pairs
     std::vector<prompt_response> results;
 
     // Process our custom arguments first
-    if (!process_custom_arguments(argc, argv, output_file_path)) {
+    if (!process_custom_arguments(argc, argv)) {
         return 1;
     }
 
@@ -227,12 +213,14 @@ int main(int argc, char ** argv) {
         return 1;
     }
 
-    // Adjust number of sequences to match number of prompts
+    // Always set the number of sequences to match number of prompts
     // We want to process each prompt exactly once
     int32_t n_seq = k_prompts.size();
-    if (n_seq_param < n_seq) {
-        // If user specified fewer sequences than prompts, respect their choice
-        n_seq = n_seq_param;
+
+    // Inform the user if they specified a different number of sequences
+    if (params.n_sequences != 1 && params.n_sequences != (int32_t)k_prompts.size()) {
+        LOG_INF("\n\nNote: Ignoring specified --sequences %d, using number of prompts (%d) instead\n\n",
+                params.n_sequences, (int32_t)k_prompts.size());
     }
 
     LOG_INF("\n\nProcessing %d prompts sequentially (not randomly) with %d parallel clients\n\n", n_seq, params.n_parallel);
@@ -515,11 +503,10 @@ int main(int argc, char ** argv) {
     llama_backend_free();
 
     // Save results to file if output file path was provided
-    if (!output_file_path.empty()) {
-        std::ofstream outfile(output_file_path);
+    if (!params.out_file.empty()) {
+        std::ofstream outfile(params.out_file);
         if (outfile.is_open()) {
-            LOG_INF("Saving results to file: %s\n", output_file_path.c_str());
-
+            LOG_INF("Saving results to file: %s\n", params.out_file.c_str());
             outfile << "# Results from llama.cpp parallel processing\n";
             outfile << "# Total prompts: " << results.size() << "\n";
             outfile << "# Date: " << std::time(nullptr) << "\n\n";
@@ -542,7 +529,7 @@ int main(int argc, char ** argv) {
             outfile.close();
             LOG_INF("Results saved successfully\n");
         } else {
-            LOG_ERR("Failed to open output file: %s\n", output_file_path.c_str());
+            LOG_ERR("Failed to open output file: %s\n", params.out_file.c_str());
         }
     }
 
