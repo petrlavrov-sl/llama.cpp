@@ -23,7 +23,7 @@
 static std::string llama_escape_whitespace(const std::string& text) {
     std::string result;
     result.reserve(text.size() * 2); // Reserve space to avoid reallocations
-    
+
     for (char c : text) {
         switch (c) {
             case '\\': result += "\\\\"; break;
@@ -43,7 +43,7 @@ static std::string llama_escape_whitespace(const std::string& text) {
                 }
         }
     }
-    
+
     return result;
 }
 
@@ -56,13 +56,13 @@ static RNGProvider* get_rng_provider(uint32_t seed = 0) {
         // Check for environment variable for RNG provider type
         const char* env_provider = std::getenv("LLAMA_RNG_PROVIDER");
         std::string provider_type = "uniform";
-        
+
         if (env_provider != nullptr) {
             provider_type = env_provider;
         }
-        
+
         g_rng_provider = create_rng_provider(provider_type, seed);
-        
+
         // Check for environment variable for output file
         const char* output_file = std::getenv("LLAMA_RNG_OUTPUT");
         if (output_file != nullptr) {
@@ -79,16 +79,16 @@ static void set_rng_provider(const std::string& type, uint32_t seed) {
     if (g_rng_provider != nullptr) {
         delete g_rng_provider;
     }
-    
+
     // Use the specified type, but check environment variable as override
     std::string provider_type = type;
     const char* env_provider = std::getenv("LLAMA_RNG_PROVIDER");
     if (env_provider != nullptr) {
         provider_type = env_provider;
     }
-    
+
     g_rng_provider = create_rng_provider(provider_type, seed);
-    
+
     // Check for environment variable for output file
     const char* output_file = std::getenv("LLAMA_RNG_OUTPUT");
     if (output_file != nullptr) {
@@ -226,11 +226,11 @@ struct ring_buffer {
 static int llama_sample_dist(llama_token_data_array * cur_p, std::mt19937 & /*rng*/) {
     // Get uniform random number between 0 and 1 using our RNG provider
     double u = get_rng_provider()->generate();
-    
+
     // Check if debug output is enabled
     const char* debug_env = std::getenv("LLAMA_RNG_DEBUG");
     bool debug_enabled = (debug_env != nullptr && std::string(debug_env) == "1");
-    
+
     if (debug_enabled) {
         fprintf(stderr, "\nRNG internal:\n");
         fprintf(stderr, "- Raw uniform random number: %f\n", u);
@@ -246,7 +246,7 @@ static int llama_sample_dist(llama_token_data_array * cur_p, std::mt19937 & /*rn
         sum += cur_p->data[i].p;
         cumulative_probs.push_back(sum);
         if (debug_enabled) {
-            fprintf(stderr, "  [%zu] token %d = %f (cumulative: %f)\n", 
+            fprintf(stderr, "  [%zu] token %d = %f (cumulative: %f)\n",
                     i, cur_p->data[i].id, cur_p->data[i].p, sum);
         }
     }
@@ -270,13 +270,13 @@ static int llama_sample_dist(llama_token_data_array * cur_p, std::mt19937 & /*rn
     // Find the selected index using binary search
     auto it = std::lower_bound(cumulative_probs.begin(), cumulative_probs.end(), scaled);
     size_t selected_idx = it - cumulative_probs.begin();
-    
+
     if (debug_enabled) {
         fprintf(stderr, "- Selected index: %zu\n", selected_idx);
-        fprintf(stderr, "RNG generated sample: %zu (token id: %d, probability: %f)\n", 
+        fprintf(stderr, "RNG generated sample: %zu (token id: %d, probability: %f)\n",
                 selected_idx, cur_p->data[selected_idx].id, cur_p->data[selected_idx].p);
     }
-    
+
     // Log sampling data in JSON format to a file if environment variable is set
     const char* token_data_file = std::getenv("LLAMA_TOKEN_DATA_FILE");
     if (token_data_file != nullptr) {
@@ -289,19 +289,19 @@ static int llama_sample_dist(llama_token_data_array * cur_p, std::mt19937 & /*rn
             fprintf(f, "  \"selected_index\": %zu,\n", selected_idx);
             fprintf(f, "  \"selected_token_id\": %d,\n", cur_p->data[selected_idx].id);
             fprintf(f, "  \"selected_probability\": %f,\n", cur_p->data[selected_idx].p);
-            
+
             // Add a placeholder for token text that can be filled in by post-processing
             fprintf(f, "  \"selected_token_text\": \"<token_%d>\",\n", cur_p->data[selected_idx].id);
-            
+
             // Token data array
             fprintf(f, "  \"tokens\": [\n");
             for (size_t i = 0; i < cur_p->size; ++i) {
-                fprintf(f, "    {\"index\": %zu, \"token_id\": %d, \"probability\": %f, \"cumulative\": %f", 
+                fprintf(f, "    {\"index\": %zu, \"token_id\": %d, \"probability\": %f, \"cumulative\": %f",
                         i, cur_p->data[i].id, cur_p->data[i].p, cumulative_probs[i]);
-                
+
                 // Add placeholder for token text
                 fprintf(f, ", \"text\": \"<token_%d>\"", cur_p->data[i].id);
-                
+
                 fprintf(f, "}%s\n", (i < cur_p->size - 1) ? "," : "");
             }
             fprintf(f, "  ]\n");
@@ -309,7 +309,7 @@ static int llama_sample_dist(llama_token_data_array * cur_p, std::mt19937 & /*rn
             fclose(f);
         }
     }
-    
+
     return selected_idx;
 }
 
