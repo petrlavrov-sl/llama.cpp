@@ -16,7 +16,36 @@
 #include <numeric>
 #include <random>
 #include <unordered_map>
+#include <unordered_set>
 #include <stdexcept>
+
+// Helper function to escape whitespace and special characters for JSON
+static std::string llama_escape_whitespace(const std::string& text) {
+    std::string result;
+    result.reserve(text.size() * 2); // Reserve space to avoid reallocations
+
+    for (char c : text) {
+        switch (c) {
+            case '\\': result += "\\\\"; break;
+            case '\"': result += "\\\""; break;
+            case '\n': result += "\\n"; break;
+            case '\r': result += "\\r"; break;
+            case '\t': result += "\\t"; break;
+            case '\b': result += "\\b"; break;
+            case '\f': result += "\\f"; break;
+            default:
+                if (static_cast<unsigned char>(c) < 32) {
+                    char buf[8];
+                    snprintf(buf, sizeof(buf), "\\u%04x", c);
+                    result += buf;
+                } else {
+                    result += c;
+                }
+        }
+    }
+
+    return result;
+}
 
 // Global RNG provider instance
 static RNGProvider* g_rng_provider = nullptr;
@@ -27,13 +56,13 @@ static RNGProvider* get_rng_provider(uint32_t seed = 0) {
         // Check for environment variable for RNG provider type
         const char* env_provider = std::getenv("LLAMA_RNG_PROVIDER");
         std::string provider_type = "uniform";
-        
+
         if (env_provider != nullptr) {
             provider_type = env_provider;
         }
-        
+
         g_rng_provider = create_rng_provider(provider_type, seed);
-        
+
         // Check for environment variable for output file
         const char* output_file = std::getenv("LLAMA_RNG_OUTPUT");
         if (output_file != nullptr) {
@@ -50,16 +79,16 @@ static void set_rng_provider(const std::string& type, uint32_t seed) {
     if (g_rng_provider != nullptr) {
         delete g_rng_provider;
     }
-    
+
     // Use the specified type, but check environment variable as override
     std::string provider_type = type;
     const char* env_provider = std::getenv("LLAMA_RNG_PROVIDER");
     if (env_provider != nullptr) {
         provider_type = env_provider;
     }
-    
+
     g_rng_provider = create_rng_provider(provider_type, seed);
-    
+
     // Check for environment variable for output file
     const char* output_file = std::getenv("LLAMA_RNG_OUTPUT");
     if (output_file != nullptr) {
@@ -197,21 +226,29 @@ struct ring_buffer {
 static int llama_sample_dist(llama_token_data_array * cur_p, std::mt19937 & /*rng*/) {
     // Get uniform random number between 0 and 1 using our RNG provider
     double u = get_rng_provider()->generate();
-    
-    fprintf(stderr, "\nRNG internal:\n");
-    fprintf(stderr, "- Raw uniform random number: %f\n", u);
+
+    // Check if debug output is enabled
+    const char* debug_env = std::getenv("LLAMA_RNG_DEBUG");
+    bool debug_enabled = (debug_env != nullptr && std::string(debug_env) == "1");
+
+    if (debug_enabled) {
+        fprintf(stderr, "\nRNG internal:\n");
+        fprintf(stderr, "- Raw uniform random number: %f\n", u);
+        fprintf(stderr, "- Token probabilities:\n");
+    }
 
     // Calculate cumulative probabilities
     std::vector<float> cumulative_probs;
     cumulative_probs.reserve(cur_p->size);
     float sum = 0.0f;
 
-    fprintf(stderr, "- Token probabilities:\n");
     for (size_t i = 0; i < cur_p->size; ++i) {
         sum += cur_p->data[i].p;
         cumulative_probs.push_back(sum);
-        fprintf(stderr, "  [%zu] token %d = %f (cumulative: %f)\n", 
-                i, cur_p->data[i].id, cur_p->data[i].p, sum);
+        if (debug_enabled) {
+            fprintf(stderr, "  [%zu] token %d = %f (cumulative: %f)\n",
+                    i, cur_p->data[i].id, cur_p->data[i].p, sum);
+        }
     }
 
     // Normalize cumulative probabilities
@@ -219,21 +256,60 @@ static int llama_sample_dist(llama_token_data_array * cur_p, std::mt19937 & /*rn
         for (float& p : cumulative_probs) {
             p /= sum;
         }
-        fprintf(stderr, "- Normalized cumulative probabilities\n");
+        if (debug_enabled) {
+            fprintf(stderr, "- Normalized cumulative probabilities\n");
+        }
     }
 
     // Scale random number to probability sum
     double scaled = u * 1.0; // since we normalized, multiply by 1.0
-    fprintf(stderr, "- Scaled random number: %f\n", scaled);
+    if (debug_enabled) {
+        fprintf(stderr, "- Scaled random number: %f\n", scaled);
+    }
 
     // Find the selected index using binary search
     auto it = std::lower_bound(cumulative_probs.begin(), cumulative_probs.end(), scaled);
     size_t selected_idx = it - cumulative_probs.begin();
-    
-    fprintf(stderr, "- Selected index: %zu\n", selected_idx);
-    fprintf(stderr, "RNG generated sample: %zu (token id: %d, probability: %f)\n", 
-            selected_idx, cur_p->data[selected_idx].id, cur_p->data[selected_idx].p);
-    
+
+    if (debug_enabled) {
+        fprintf(stderr, "- Selected index: %zu\n", selected_idx);
+        fprintf(stderr, "RNG generated sample: %zu (token id: %d, probability: %f)\n",
+                selected_idx, cur_p->data[selected_idx].id, cur_p->data[selected_idx].p);
+    }
+
+    // Log sampling data in JSON format to a file if environment variable is set
+    const char* token_data_file = std::getenv("LLAMA_TOKEN_DATA_FILE");
+    if (token_data_file != nullptr) {
+        FILE* f = fopen(token_data_file, "a");
+        if (f != nullptr) {
+            // Start JSON object
+            fprintf(f, "{\n");
+            fprintf(f, "  \"raw_random\": %f,\n", u);
+            fprintf(f, "  \"scaled_random\": %f,\n", scaled);
+            fprintf(f, "  \"selected_index\": %zu,\n", selected_idx);
+            fprintf(f, "  \"selected_token_id\": %d,\n", cur_p->data[selected_idx].id);
+            fprintf(f, "  \"selected_probability\": %f,\n", cur_p->data[selected_idx].p);
+
+            // Add a placeholder for token text that can be filled in by post-processing
+            fprintf(f, "  \"selected_token_text\": \"<token_%d>\",\n", cur_p->data[selected_idx].id);
+
+            // Token data array
+            fprintf(f, "  \"tokens\": [\n");
+            for (size_t i = 0; i < cur_p->size; ++i) {
+                fprintf(f, "    {\"index\": %zu, \"token_id\": %d, \"probability\": %f, \"cumulative\": %f",
+                        i, cur_p->data[i].id, cur_p->data[i].p, cumulative_probs[i]);
+
+                // Add placeholder for token text
+                fprintf(f, ", \"text\": \"<token_%d>\"", cur_p->data[i].id);
+
+                fprintf(f, "}%s\n", (i < cur_p->size - 1) ? "," : "");
+            }
+            fprintf(f, "  ]\n");
+            fprintf(f, "}\n");
+            fclose(f);
+        }
+    }
+
     return selected_idx;
 }
 
@@ -1526,7 +1602,9 @@ static struct llama_sampler * llama_sampler_init_grammar_impl(
                      const char ** trigger_words,
                             size_t num_trigger_words,
                const llama_token * trigger_tokens,
-                            size_t num_trigger_tokens);
+                            size_t num_trigger_tokens,
+                     const char ** trigger_patterns,
+                            size_t num_trigger_patterns);
 
 static void llama_sampler_grammar_reset(struct llama_sampler * smpl) {
     auto * ctx = (llama_sampler_grammar *) smpl->ctx;
@@ -1534,12 +1612,14 @@ static void llama_sampler_grammar_reset(struct llama_sampler * smpl) {
         return;
     }
 
-    std::vector<const char *>  trigger_words;
-    for (auto & word : ctx->grammar->trigger_words) {
-        trigger_words.push_back(word.c_str());
+    std::vector<const char *>  trigger_patterns_c;
+    trigger_patterns_c.reserve(ctx->grammar->trigger_patterns.size());
+    for (auto & trigger_pattern : ctx->grammar->trigger_patterns) {
+        trigger_patterns_c.push_back(trigger_pattern.pattern.c_str());
     }
+
     auto * grammar_new = llama_grammar_init_impl(ctx->grammar->vocab, ctx->grammar_str.c_str(), ctx->grammar_root.c_str(),
-                                                 ctx->grammar->lazy, trigger_words.data(), trigger_words.size(),
+                                                 ctx->grammar->lazy, trigger_patterns_c.data(), trigger_patterns_c.size(),
                                                  ctx->grammar->trigger_tokens.data(), ctx->grammar->trigger_tokens.size());
 
     llama_grammar_free_impl(ctx->grammar);
@@ -1549,7 +1629,7 @@ static void llama_sampler_grammar_reset(struct llama_sampler * smpl) {
 static struct llama_sampler * llama_sampler_grammar_clone(const struct llama_sampler * smpl) {
     const auto * ctx = (const llama_sampler_grammar *) smpl->ctx;
 
-    auto * result = llama_sampler_init_grammar_impl(ctx->vocab, nullptr, nullptr, false, nullptr, 0, nullptr, 0);
+    auto * result = llama_sampler_init_grammar_impl(ctx->vocab, nullptr, nullptr, false, nullptr, 0, nullptr, 0, nullptr, 0);
 
     // copy the state
     {
@@ -1593,15 +1673,33 @@ static struct llama_sampler * llama_sampler_init_grammar_impl(
                      const char ** trigger_words,
                             size_t num_trigger_words,
                const llama_token * trigger_tokens,
-                            size_t num_trigger_tokens) {
+                            size_t num_trigger_tokens,
+                     const char ** trigger_patterns,
+                            size_t num_trigger_patterns) {
     auto * ctx = new llama_sampler_grammar;
 
     if (grammar_str != nullptr && grammar_str[0] != '\0') {
+        // TODO: remove trigger_words support.
+        if (trigger_words != nullptr && num_trigger_words > 0) {
+            GGML_ASSERT(trigger_patterns == nullptr && num_trigger_patterns == 0);
+            std::string trigger_pattern("[\\s\\S]*?(");
+            for (size_t i = 0; i < num_trigger_words; ++i) {
+                static const std::regex special_chars("[.^$|()*+?\\[\\]{}\\\\]");
+                if (i > 0) {
+                    trigger_pattern += "|";
+                }
+                trigger_pattern += std::regex_replace(trigger_words[i], special_chars, "\\$0");
+            }
+            trigger_pattern += ")[\\s\\S]*";
+            auto trigger_pattern_c = trigger_pattern.c_str();
+            trigger_patterns = &trigger_pattern_c;
+            num_trigger_patterns = 1;
+        }
         *ctx = {
             /* .vocab        = */ vocab,
             /* .grammar_str  = */ grammar_str,
             /* .grammar_root = */ grammar_root,
-            /* .grammar      = */ llama_grammar_init_impl(vocab, grammar_str, grammar_root, lazy, trigger_words, num_trigger_words, trigger_tokens, num_trigger_tokens),
+            /* .grammar      = */ llama_grammar_init_impl(vocab, grammar_str, grammar_root, lazy, trigger_patterns, num_trigger_patterns, trigger_tokens, num_trigger_tokens),
         };
     } else {
         *ctx = {
@@ -1622,7 +1720,7 @@ struct llama_sampler * llama_sampler_init_grammar(
         const struct llama_vocab * vocab,
                       const char * grammar_str,
                       const char * grammar_root) {
-    return llama_sampler_init_grammar_impl(vocab, grammar_str, grammar_root, /* lazy= */ false, nullptr, 0, nullptr, 0);
+    return llama_sampler_init_grammar_impl(vocab, grammar_str, grammar_root, /* lazy= */ false, nullptr, 0, nullptr, 0, nullptr, 0);
 }
 
 struct llama_sampler * llama_sampler_init_grammar_lazy(
@@ -1633,7 +1731,18 @@ struct llama_sampler * llama_sampler_init_grammar_lazy(
                             size_t num_trigger_words,
                const llama_token * trigger_tokens,
                             size_t num_trigger_tokens) {
-    return llama_sampler_init_grammar_impl(vocab, grammar_str, grammar_root, /* lazy= */ true, trigger_words, num_trigger_words, trigger_tokens, num_trigger_tokens);
+    return llama_sampler_init_grammar_impl(vocab, grammar_str, grammar_root, /* lazy= */ true, trigger_words, num_trigger_words, trigger_tokens, num_trigger_tokens, nullptr, 0);
+}
+
+struct llama_sampler * llama_sampler_init_grammar_lazy_patterns(
+        const struct llama_vocab * vocab,
+                      const char * grammar_str,
+                      const char * grammar_root,
+                     const char ** trigger_patterns,
+                            size_t num_trigger_patterns,
+               const llama_token * trigger_tokens,
+                            size_t num_trigger_tokens) {
+    return llama_sampler_init_grammar_impl(vocab, grammar_str, grammar_root, /* lazy= */ true, nullptr, 0, trigger_tokens, num_trigger_tokens, trigger_patterns, num_trigger_patterns);
 }
 
 // penalties

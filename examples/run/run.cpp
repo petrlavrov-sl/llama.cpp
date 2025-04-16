@@ -23,6 +23,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <unordered_set>
 
 #include "chat.h"
 #include "common.h"
@@ -79,6 +80,7 @@ class Opt {
         ctx_params           = llama_context_default_params();
         model_params         = llama_model_default_params();
         context_size_default = ctx_params.n_batch;
+        n_threads_default    = ctx_params.n_threads;
         ngl_default          = model_params.n_gpu_layers;
         common_params_sampling sampling;
         temperature_default = sampling.temp;
@@ -104,6 +106,7 @@ class Opt {
 
         ctx_params.n_batch        = context_size >= 0 ? context_size : context_size_default;
         ctx_params.n_ctx          = ctx_params.n_batch;
+        ctx_params.n_threads = ctx_params.n_threads_batch = n_threads >= 0 ? n_threads : n_threads_default;
         model_params.n_gpu_layers = ngl >= 0 ? ngl : ngl_default;
         temperature               = temperature >= 0 ? temperature : temperature_default;
 
@@ -116,12 +119,12 @@ class Opt {
     std::string chat_template_file;
     std::string          user;
     bool                 use_jinja   = false;
-    int                  context_size = -1, ngl = -1;
+    int                  context_size = -1, ngl = -1, n_threads = -1;
     float                temperature = -1;
     bool                 verbose     = false;
 
   private:
-    int   context_size_default = -1, ngl_default = -1;
+    int   context_size_default = -1, ngl_default = -1, n_threads_default = -1;
     float temperature_default = -1;
     bool  help                = false;
 
@@ -159,53 +162,94 @@ class Opt {
         return 0;
     }
 
+    int parse_options_with_value(int argc, const char ** argv, int & i, bool & options_parsing) {
+        if (options_parsing && (strcmp(argv[i], "-c") == 0 || strcmp(argv[i], "--context-size") == 0)) {
+            if (handle_option_with_value(argc, argv, i, context_size) == 1) {
+                return 1;
+            }
+        } else if (options_parsing &&
+                   (strcmp(argv[i], "-n") == 0 || strcmp(argv[i], "-ngl") == 0 || strcmp(argv[i], "--ngl") == 0)) {
+            if (handle_option_with_value(argc, argv, i, ngl) == 1) {
+                return 1;
+            }
+        } else if (options_parsing && (strcmp(argv[i], "-t") == 0 || strcmp(argv[i], "--threads") == 0)) {
+            if (handle_option_with_value(argc, argv, i, n_threads) == 1) {
+                return 1;
+            }
+        } else if (options_parsing && strcmp(argv[i], "--temp") == 0) {
+            if (handle_option_with_value(argc, argv, i, temperature) == 1) {
+                return 1;
+            }
+        } else if (options_parsing && strcmp(argv[i], "--chat-template-file") == 0) {
+            if (handle_option_with_value(argc, argv, i, chat_template_file) == 1) {
+                return 1;
+            }
+            use_jinja = true;
+        } else {
+            return 2;
+        }
+
+        return 0;
+    }
+
+    int parse_options(const char ** argv, int & i, bool & options_parsing) {
+        if (options_parsing && (parse_flag(argv, i, "-v", "--verbose") || parse_flag(argv, i, "-v", "--log-verbose"))) {
+            verbose = true;
+        } else if (options_parsing && strcmp(argv[i], "--jinja") == 0) {
+            use_jinja = true;
+        } else if (options_parsing && parse_flag(argv, i, "-h", "--help")) {
+            help = true;
+            return 0;
+        } else if (options_parsing && strcmp(argv[i], "--") == 0) {
+            options_parsing = false;
+        } else {
+            return 2;
+        }
+
+        return 0;
+    }
+
+    int parse_positional_args(const char ** argv, int & i, int & positional_args_i) {
+        if (positional_args_i == 0) {
+            if (!argv[i][0] || argv[i][0] == '-') {
+                return 1;
+            }
+
+            ++positional_args_i;
+            model_ = argv[i];
+        } else if (positional_args_i == 1) {
+            ++positional_args_i;
+            user = argv[i];
+        } else {
+            user += " " + std::string(argv[i]);
+        }
+
+        return 0;
+    }
+
     int parse(int argc, const char ** argv) {
         bool options_parsing   = true;
         for (int i = 1, positional_args_i = 0; i < argc; ++i) {
-            if (options_parsing && (strcmp(argv[i], "-c") == 0 || strcmp(argv[i], "--context-size") == 0)) {
-                if (handle_option_with_value(argc, argv, i, context_size) == 1) {
-                    return 1;
-                }
-            } else if (options_parsing &&
-                       (strcmp(argv[i], "-n") == 0 || strcmp(argv[i], "-ngl") == 0 || strcmp(argv[i], "--ngl") == 0)) {
-                if (handle_option_with_value(argc, argv, i, ngl) == 1) {
-                    return 1;
-                }
-            } else if (options_parsing && strcmp(argv[i], "--temp") == 0) {
-                if (handle_option_with_value(argc, argv, i, temperature) == 1) {
-                    return 1;
-                }
-            } else if (options_parsing &&
-                       (parse_flag(argv, i, "-v", "--verbose") || parse_flag(argv, i, "-v", "--log-verbose"))) {
-                verbose = true;
-            } else if (options_parsing && strcmp(argv[i], "--jinja") == 0) {
-                use_jinja = true;
-            } else if (options_parsing && strcmp(argv[i], "--chat-template-file") == 0){
-                if (handle_option_with_value(argc, argv, i, chat_template_file) == 1) {
-                    return 1;
-                }
-                use_jinja = true;
-            } else if (options_parsing && parse_flag(argv, i, "-h", "--help")) {
-                help = true;
-                return 0;
-            } else if (options_parsing && strcmp(argv[i], "--") == 0) {
-                options_parsing = false;
-            } else if (positional_args_i == 0) {
-                if (!argv[i][0] || argv[i][0] == '-') {
-                    return 1;
-                }
+            int ret = parse_options_with_value(argc, argv, i, options_parsing);
+            if (ret == 0) {
+                continue;
+            } else if (ret == 1) {
+                return ret;
+            }
 
-                ++positional_args_i;
-                model_ = argv[i];
-            } else if (positional_args_i == 1) {
-                ++positional_args_i;
-                user = argv[i];
-            } else {
-                user += " " + std::string(argv[i]);
+            ret = parse_options(argv, i, options_parsing);
+            if (ret == 0) {
+                continue;
+            } else if (ret == 1) {
+                return ret;
+            }
+
+            if (parse_positional_args(argv, i, positional_args_i)) {
+                return 1;
             }
         }
 
-        if (model_.empty()){
+        if (model_.empty()) {
             return 1;
         }
 
@@ -232,6 +276,8 @@ class Opt {
             "      Number of GPU layers (default: %d)\n"
             "  --temp <value>\n"
             "      Temperature (default: %.1f)\n"
+            "  -t, --threads <value>\n"
+            "      Number of threads to use during generation (default: %d)\n"
             "  -v, --verbose, --log-verbose\n"
             "      Set verbosity level to infinity (i.e. log all messages, useful for debugging)\n"
             "  -h, --help\n"
@@ -260,7 +306,7 @@ class Opt {
             "  llama-run file://some-file3.gguf\n"
             "  llama-run --ngl 999 some-file4.gguf\n"
             "  llama-run --ngl 999 some-file5.gguf Hello World\n",
-            context_size_default, ngl_default, temperature_default);
+            context_size_default, ngl_default, temperature_default, n_threads_default);
     }
 };
 
@@ -891,7 +937,7 @@ static int apply_chat_template(const struct common_chat_templates * tmpls, Llama
 // Function to tokenize the prompt
 static int tokenize_prompt(const llama_vocab * vocab, const std::string & prompt,
                            std::vector<llama_token> & prompt_tokens, const LlamaData & llama_data) {
-    const bool is_first = llama_get_kv_cache_used_cells(llama_data.context.get()) == 0;
+    const bool is_first = llama_kv_self_used_cells(llama_data.context.get()) == 0;
 
     const int n_prompt_tokens = -llama_tokenize(vocab, prompt.c_str(), prompt.size(), NULL, 0, is_first, true);
     prompt_tokens.resize(n_prompt_tokens);
@@ -907,7 +953,7 @@ static int tokenize_prompt(const llama_vocab * vocab, const std::string & prompt
 // Check if we have enough space in the context to evaluate this batch
 static int check_context_size(const llama_context_ptr & ctx, const llama_batch & batch) {
     const int n_ctx      = llama_n_ctx(ctx.get());
-    const int n_ctx_used = llama_get_kv_cache_used_cells(ctx.get());
+    const int n_ctx_used = llama_kv_self_used_cells(ctx.get());
     if (n_ctx_used + batch.n_tokens > n_ctx) {
         printf(LOG_COL_DEFAULT "\n");
         printe("context size exceeded\n");
@@ -936,6 +982,34 @@ static void print_word_and_concatenate_to_response(const std::string & piece, st
     response += piece;
 }
 
+// Save all tokens from vocabulary to token map file
+static int save_vocab_to_token_map(const llama_vocab * vocab, const char * token_map_file_path) {
+    FILE* token_map_file = fopen(token_map_file_path, "w");
+    if (token_map_file == nullptr) {
+        printe("failed to open token map file: %s\n", token_map_file_path);
+        return 1;
+    }
+
+    const int n_vocab = llama_vocab_n_tokens(vocab);
+    for (int i = 0; i < n_vocab; i++) {
+        std::string piece;
+        if (convert_token_to_string(vocab, i, piece) == 0) {
+            // Escape special characters in the token text
+            std::string escaped_text = "";
+            for (char c : piece) {
+                if (c == '\\' || c == '"') {
+                    escaped_text += '\\';
+                }
+                escaped_text += c;
+            }
+            fprintf(token_map_file, "{\"token_id\": %d, \"text\": \"%s\"}\n", i, escaped_text.c_str());
+        }
+    }
+
+    fclose(token_map_file);
+    return 0;
+}
+
 // helper function to evaluate a prompt and generate a response
 static int generate(LlamaData & llama_data, const std::string & prompt, std::string & response) {
     const llama_vocab * vocab = llama_model_get_vocab(llama_data.model.get());
@@ -943,6 +1017,17 @@ static int generate(LlamaData & llama_data, const std::string & prompt, std::str
     std::vector<llama_token> tokens;
     if (tokenize_prompt(vocab, prompt, tokens, llama_data) < 0) {
         return 1;
+    }
+
+    // Check if we should save token map
+    static bool token_map_saved = false;
+    const char* token_map_file_path = std::getenv("LLAMA_TOKEN_MAP_FILE");
+    
+    // Save all tokens from vocabulary to token map file if not already done
+    if (token_map_file_path != nullptr && !token_map_saved) {
+        if (save_vocab_to_token_map(vocab, token_map_file_path) == 0) {
+            token_map_saved = true;
+        }
     }
 
     // prepare a batch for the prompt
