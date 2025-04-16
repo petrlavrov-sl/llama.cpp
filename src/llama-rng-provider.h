@@ -10,7 +10,11 @@
 // Simple RNG Provider base class
 class RNGProvider {
 public:
-    RNGProvider(const std::string& name) : name(name) {}
+    RNGProvider(const std::string& name) : name(name) {
+        // Check if debug output is enabled
+        const char* debug_env = std::getenv("LLAMA_RNG_DEBUG");
+        debug_enabled = (debug_env != nullptr && std::string(debug_env) == "1");
+    }
     virtual ~RNGProvider() {
         if (output_file.is_open()) {
             output_file.close();
@@ -26,7 +30,7 @@ public:
             output_file.close();
         }
         
-        if (!filename.empty()) {
+        if (!filename.empty() && debug_enabled) {
             output_file.open(filename);
             if (output_file.is_open()) {
                 output_file << "# RNG values from " << name << " provider\n";
@@ -43,7 +47,7 @@ public:
 protected:
     // Log the generated value to file if enabled
     void log_value(double value) {
-        if (output_file.is_open()) {
+        if (output_file.is_open() && debug_enabled) {
             output_file << value << "\n";
             output_file.flush();
         }
@@ -52,6 +56,7 @@ protected:
 private:
     std::string name;
     std::ofstream output_file;
+    bool debug_enabled = false;
 };
 
 // Uniform distribution RNG provider

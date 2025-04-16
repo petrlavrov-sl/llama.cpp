@@ -227,21 +227,28 @@ static int llama_sample_dist(llama_token_data_array * cur_p, std::mt19937 & /*rn
     // Get uniform random number between 0 and 1 using our RNG provider
     double u = get_rng_provider()->generate();
     
-    fprintf(stderr, "\nRNG internal:\n");
-    fprintf(stderr, "- Raw uniform random number: %f\n", u);
+    // Check if debug output is enabled
+    const char* debug_env = std::getenv("LLAMA_RNG_DEBUG");
+    bool debug_enabled = (debug_env != nullptr && std::string(debug_env) == "1");
+    
+    if (debug_enabled) {
+        fprintf(stderr, "\nRNG internal:\n");
+        fprintf(stderr, "- Raw uniform random number: %f\n", u);
+        fprintf(stderr, "- Token probabilities:\n");
+    }
 
     // Calculate cumulative probabilities
     std::vector<float> cumulative_probs;
     cumulative_probs.reserve(cur_p->size);
     float sum = 0.0f;
 
-    // Log token probabilities in human-readable format to stderr
-    fprintf(stderr, "- Token probabilities:\n");
     for (size_t i = 0; i < cur_p->size; ++i) {
         sum += cur_p->data[i].p;
         cumulative_probs.push_back(sum);
-        fprintf(stderr, "  [%zu] token %d = %f (cumulative: %f)\n", 
-                i, cur_p->data[i].id, cur_p->data[i].p, sum);
+        if (debug_enabled) {
+            fprintf(stderr, "  [%zu] token %d = %f (cumulative: %f)\n", 
+                    i, cur_p->data[i].id, cur_p->data[i].p, sum);
+        }
     }
 
     // Normalize cumulative probabilities
@@ -249,20 +256,26 @@ static int llama_sample_dist(llama_token_data_array * cur_p, std::mt19937 & /*rn
         for (float& p : cumulative_probs) {
             p /= sum;
         }
-        fprintf(stderr, "- Normalized cumulative probabilities\n");
+        if (debug_enabled) {
+            fprintf(stderr, "- Normalized cumulative probabilities\n");
+        }
     }
 
     // Scale random number to probability sum
     double scaled = u * 1.0; // since we normalized, multiply by 1.0
-    fprintf(stderr, "- Scaled random number: %f\n", scaled);
+    if (debug_enabled) {
+        fprintf(stderr, "- Scaled random number: %f\n", scaled);
+    }
 
     // Find the selected index using binary search
     auto it = std::lower_bound(cumulative_probs.begin(), cumulative_probs.end(), scaled);
     size_t selected_idx = it - cumulative_probs.begin();
     
-    fprintf(stderr, "- Selected index: %zu\n", selected_idx);
-    fprintf(stderr, "RNG generated sample: %zu (token id: %d, probability: %f)\n", 
-            selected_idx, cur_p->data[selected_idx].id, cur_p->data[selected_idx].p);
+    if (debug_enabled) {
+        fprintf(stderr, "- Selected index: %zu\n", selected_idx);
+        fprintf(stderr, "RNG generated sample: %zu (token id: %d, probability: %f)\n", 
+                selected_idx, cur_p->data[selected_idx].id, cur_p->data[selected_idx].p);
+    }
     
     // Log sampling data in JSON format to a file if environment variable is set
     const char* token_data_file = std::getenv("LLAMA_TOKEN_DATA_FILE");
