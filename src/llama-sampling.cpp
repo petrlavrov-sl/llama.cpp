@@ -18,6 +18,48 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <stdexcept>
+#include <cstdio>
+#include <iostream>
+#include <string>
+#include <array>
+
+// --- BEGIN: DEBUG EXTERNAL RNG PROVIDER CHECK ---
+namespace {
+    void check_and_override_rng_env() {
+        const char* provider = std::getenv("LLAMA_RNG_PROVIDER");
+        const char* api_url = std::getenv("LLAMA_RNG_API_URL");
+        std::cerr << "[DEBUG] LLAMA_RNG_PROVIDER env: " << (provider ? provider : "<unset>") << std::endl;
+        std::cerr << "[DEBUG] LLAMA_RNG_API_URL env: " << (api_url ? api_url : "<unset>") << std::endl;
+        if (!provider || std::string(provider) != "external-api") {
+            std::cerr << "[WARN] LLAMA_RNG_PROVIDER env var is '" << (provider ? provider : "<unset>") << "', expected 'external-api'" << std::endl;
+        }
+        if (!api_url || std::string(api_url) != "http://localhost:8000/random") {
+            std::cerr << "[WARN] LLAMA_RNG_API_URL env var is '" << (api_url ? api_url : "<unset>") << "', expected 'http://localhost:8000/random'" << std::endl;
+        }
+        setenv("LLAMA_RNG_PROVIDER", "external-api", 1);
+        setenv("LLAMA_RNG_API_URL", "http://localhost:8000/random", 1);
+        std::cerr << "[DEBUG] Overrode LLAMA_RNG_PROVIDER and LLAMA_RNG_API_URL with hardcoded values." << std::endl;
+        // Curl the provider
+        std::array<char, 256> buffer;
+        std::string result;
+        FILE* pipe = popen("curl -s -w '\\n[HTTP_STATUS]%{http_code}' http://localhost:8000/random", "r");
+        if (!pipe) {
+            std::cerr << "[WARN] Could not start curl process." << std::endl;
+            return;
+        }
+        while (fgets(buffer.data(), buffer.size(), pipe) != nullptr) {
+            result += buffer.data();
+        }
+        int rc = pclose(pipe);
+        std::cerr << "[DEBUG] Curl result for external RNG provider:\n" << result << std::endl;
+        if (rc != 0) {
+            std::cerr << "[WARN] Curl process exited with code " << rc << std::endl;
+        }
+    }
+    // Run at startup
+    struct _rng_env_check { _rng_env_check() { check_and_override_rng_env(); } } _rng_env_check_instance;
+}
+// --- END: DEBUG EXTERNAL RNG PROVIDER CHECK ---
 
 // Helper function to escape whitespace and special characters for JSON
 static std::string llama_escape_whitespace(const std::string& text) {

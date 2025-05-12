@@ -14,7 +14,7 @@ FLASH_ATTN=true
 
 # Start RNG service in the background
 echo "Starting RNG service..."
-python tools-superlinear/rng_provider/rng_service.py --host "$RNG_SERVICE_HOST" --port "$RNG_SERVICE_PORT" &
+poetry run python tools-superlinear/rng_provider/rng_service.py --host "$RNG_SERVICE_HOST" --port "$RNG_SERVICE_PORT" &
 RNG_SERVICE_PID=$!
 
 # Wait for the service to start

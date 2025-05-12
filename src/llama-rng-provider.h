@@ -47,7 +47,7 @@ public:
 protected:
     // Log the generated value to file if enabled
     void log_value(double value) {
-        if (output_file.is_open() && debug_enabled) {
+        if (output_file.is_open()) {
             output_file << value << "\n";
             output_file.flush();
         }
