@@ -16,7 +16,36 @@
 #include <numeric>
 #include <random>
 #include <unordered_map>
+#include <unordered_set>
 #include <stdexcept>
+
+// Helper function to escape whitespace and special characters for JSON
+static std::string llama_escape_whitespace(const std::string& text) {
+    std::string result;
+    result.reserve(text.size() * 2); // Reserve space to avoid reallocations
+    
+    for (char c : text) {
+        switch (c) {
+            case '\\': result += "\\\\"; break;
+            case '\"': result += "\\\""; break;
+            case '\n': result += "\\n"; break;
+            case '\r': result += "\\r"; break;
+            case '\t': result += "\\t"; break;
+            case '\b': result += "\\b"; break;
+            case '\f': result += "\\f"; break;
+            default:
+                if (static_cast<unsigned char>(c) < 32) {
+                    char buf[8];
+                    snprintf(buf, sizeof(buf), "\\u%04x", c);
+                    result += buf;
+                } else {
+                    result += c;
+                }
+        }
+    }
+    
+    return result;
+}
 
 // Global RNG provider instance
 static RNGProvider* g_rng_provider = nullptr;
@@ -206,6 +235,7 @@ static int llama_sample_dist(llama_token_data_array * cur_p, std::mt19937 & /*rn
     cumulative_probs.reserve(cur_p->size);
     float sum = 0.0f;
 
+    // Log token probabilities in human-readable format to stderr
     fprintf(stderr, "- Token probabilities:\n");
     for (size_t i = 0; i < cur_p->size; ++i) {
         sum += cur_p->data[i].p;
@@ -233,6 +263,39 @@ static int llama_sample_dist(llama_token_data_array * cur_p, std::mt19937 & /*rn
     fprintf(stderr, "- Selected index: %zu\n", selected_idx);
     fprintf(stderr, "RNG generated sample: %zu (token id: %d, probability: %f)\n", 
             selected_idx, cur_p->data[selected_idx].id, cur_p->data[selected_idx].p);
+    
+    // Log sampling data in JSON format to a file if environment variable is set
+    const char* token_data_file = std::getenv("LLAMA_TOKEN_DATA_FILE");
+    if (token_data_file != nullptr) {
+        FILE* f = fopen(token_data_file, "a");
+        if (f != nullptr) {
+            // Start JSON object
+            fprintf(f, "{\n");
+            fprintf(f, "  \"raw_random\": %f,\n", u);
+            fprintf(f, "  \"scaled_random\": %f,\n", scaled);
+            fprintf(f, "  \"selected_index\": %zu,\n", selected_idx);
+            fprintf(f, "  \"selected_token_id\": %d,\n", cur_p->data[selected_idx].id);
+            fprintf(f, "  \"selected_probability\": %f,\n", cur_p->data[selected_idx].p);
+            
+            // Add a placeholder for token text that can be filled in by post-processing
+            fprintf(f, "  \"selected_token_text\": \"<token_%d>\",\n", cur_p->data[selected_idx].id);
+            
+            // Token data array
+            fprintf(f, "  \"tokens\": [\n");
+            for (size_t i = 0; i < cur_p->size; ++i) {
+                fprintf(f, "    {\"index\": %zu, \"token_id\": %d, \"probability\": %f, \"cumulative\": %f", 
+                        i, cur_p->data[i].id, cur_p->data[i].p, cumulative_probs[i]);
+                
+                // Add placeholder for token text
+                fprintf(f, ", \"text\": \"<token_%d>\"", cur_p->data[i].id);
+                
+                fprintf(f, "}%s\n", (i < cur_p->size - 1) ? "," : "");
+            }
+            fprintf(f, "  ]\n");
+            fprintf(f, "}\n");
+            fclose(f);
+        }
+    }
     
     return selected_idx;
 }

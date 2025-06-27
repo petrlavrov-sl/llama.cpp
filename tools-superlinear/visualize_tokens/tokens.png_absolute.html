@@ -1,0 +1,981 @@
+
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Token Probability Visualization</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                margin: 20px;
+            }
+            .token-container {
+                display: flex;
+                flex-wrap: wrap;
+                margin-top: 20px;
+            }
+            .token {
+                display: inline-block;
+                padding: 5px 10px;
+                margin: 2px;
+                border-radius: 3px;
+                font-family: monospace;
+                font-weight: bold;
+                white-space: pre;
+                min-width: 20px;
+                text-align: center;
+            }
+            
+            /* Style for whitespace tokens to make them visible */
+            .whitespace-token {
+                border: 1px dashed #999;
+            }
+            
+            /* Style for newline tokens */
+            .newline-token {
+                display: block;
+                margin: 5px 0;
+                width: 100%;
+                height: 1px;
+                background-color: #ccc;
+            }
+            .tooltip {
+                position: relative;
+                display: inline-block;
+            }
+            .tooltip .tooltiptext {
+                visibility: hidden;
+                width: 200px;
+                background-color: #555;
+                color: #fff;
+                text-align: left;
+                border-radius: 6px;
+                padding: 5px;
+                position: absolute;
+                z-index: 1;
+                bottom: 125%;
+                left: 50%;
+                margin-left: -100px;
+                opacity: 0;
+                transition: opacity 0.3s;
+                font-size: 12px;
+            }
+            .tooltip:hover .tooltiptext {
+                visibility: visible;
+                opacity: 1;
+            }
+            .legend {
+                margin-top: 20px;
+                padding: 10px;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+                background-color: #f9f9f9;
+            }
+            .legend-item {
+                display: inline-block;
+                width: 20px;
+                height: 20px;
+                margin-right: 5px;
+                vertical-align: middle;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Token Probability Visualization - Absolute Mode</h1>
+        <p>This visualization shows tokens colored by their probability scores using absolute mode.</p>
+        <p><strong>Mode:</strong> Absolute (1/p)</p>
+        
+        <div class="token-container">
+    
+    <div class="legend">
+        <h3>Legend</h3>
+        <p>Green intensity represents token scores (1/probability):</p>
+        <div style="display: flex; align-items: center; margin-top: 10px; margin-bottom: 15px;">
+            <span style="display: inline-block; width: 20px; height: 20px; background-color: #00ff00;"></span>
+            <span style="margin: 0 5px;">→ Low score (high probability)</span>
+            <span style="display: inline-block; width: 20px; height: 20px; background-color: #003200;"></span>
+            <span style="margin: 0 5px;">→ High score (low probability)</span>
+        </div>
+        
+        <div style="display: flex; align-items: center; margin-top: 5px;">
+            <span style="display: inline-block; width: 300px; height: 20px; background: linear-gradient(to right, #00ff00, #003200);"></span>
+            <span style="margin-left: 10px;">Score gradient (low to high)</span>
+        </div>
+    </div>
+    <div/>
+
+        <div class="tooltip">
+            <span class="token" style="background-color: #005700; color: #FFFFFF;">Artificial</span>
+            <span class="tooltiptext">
+                Token ID: 105460<br>
+                Text: Artificial<br>
+                Probability: 0.173214<br>
+                Score: 5.77
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #000000; color: #FFFFFF;"> Intelligence</span>
+            <span class="tooltiptext">
+                Token ID: 30515<br>
+                Text:  Intelligence<br>
+                Probability: 0.046023<br>
+                Score: 21.73
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #008800; color: #FFFFFF;"> (</span>
+            <span class="tooltiptext">
+                Token ID: 591<br>
+                Text:  (<br>
+                Probability: 0.293526<br>
+                Score: 3.41
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #00b900; color: #FFFFFF;">AI</span>
+            <span class="tooltiptext">
+                Token ID: 11716<br>
+                Text: AI<br>
+                Probability: 1.000000<br>
+                Score: 1.00
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #00b900; color: #FFFFFF;">)</span>
+            <span class="tooltiptext">
+                Token ID: 235275<br>
+                Text: )<br>
+                Probability: 1.000000<br>
+                Score: 1.00
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #00b800; color: #FFFFFF;"> is</span>
+            <span class="tooltiptext">
+                Token ID: 603<br>
+                Text:  is<br>
+                Probability: 0.934620<br>
+                Score: 1.07
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #009200; color: #FFFFFF;"> the</span>
+            <span class="tooltiptext">
+                Token ID: 573<br>
+                Text:  the<br>
+                Probability: 0.342451<br>
+                Score: 2.92
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #007200; color: #FFFFFF;"> simulation</span>
+            <span class="tooltiptext">
+                Token ID: 20095<br>
+                Text:  simulation<br>
+                Probability: 0.224367<br>
+                Score: 4.46
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #00b900; color: #FFFFFF;"> of</span>
+            <span class="tooltiptext">
+                Token ID: 576<br>
+                Text:  of<br>
+                Probability: 1.000000<br>
+                Score: 1.00
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #00b900; color: #FFFFFF;"> human</span>
+            <span class="tooltiptext">
+                Token ID: 3515<br>
+                Text:  human<br>
+                Probability: 1.000000<br>
+                Score: 1.00
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #00b900; color: #FFFFFF;"> intelligence</span>
+            <span class="tooltiptext">
+                Token ID: 17273<br>
+                Text:  intelligence<br>
+                Probability: 1.000000<br>
+                Score: 1.00
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #00a900; color: #FFFFFF;"> processes</span>
+            <span class="tooltiptext">
+                Token ID: 9756<br>
+                Text:  processes<br>
+                Probability: 0.568624<br>
+                Score: 1.76
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #00b900; color: #FFFFFF;"> by</span>
+            <span class="tooltiptext">
+                Token ID: 731<br>
+                Text:  by<br>
+                Probability: 1.000000<br>
+                Score: 1.00
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #000000; color: #FFFFFF;"> computers</span>
+            <span class="tooltiptext">
+                Token ID: 25175<br>
+                Text:  computers<br>
+                Probability: 0.054977<br>
+                Score: 18.19
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #00aa00; color: #FFFFFF;">,</span>
+            <span class="tooltiptext">
+                Token ID: 235269<br>
+                Text: ,<br>
+                Probability: 0.575647<br>
+                Score: 1.74
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #00aa00; color: #FFFFFF;"> especially</span>
+            <span class="tooltiptext">
+                Token ID: 5199<br>
+                Text:  especially<br>
+                Probability: 0.574271<br>
+                Score: 1.74
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #004500; color: #FFFFFF;"> computer</span>
+            <span class="tooltiptext">
+                Token ID: 6875<br>
+                Text:  computer<br>
+                Probability: 0.150116<br>
+                Score: 6.66
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #009500; color: #FFFFFF;"> systems</span>
+            <span class="tooltiptext">
+                Token ID: 5188<br>
+                Text:  systems<br>
+                Probability: 0.363668<br>
+                Score: 2.75
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #00a500; color: #FFFFFF;"> able</span>
+            <span class="tooltiptext">
+                Token ID: 3326<br>
+                Text:  able<br>
+                Probability: 0.502875<br>
+                Score: 1.99
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #00b900; color: #FFFFFF;"> to</span>
+            <span class="tooltiptext">
+                Token ID: 577<br>
+                Text:  to<br>
+                Probability: 1.000000<br>
+                Score: 1.00
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #00b100; color: #FFFFFF;"> perform</span>
+            <span class="tooltiptext">
+                Token ID: 3114<br>
+                Text:  perform<br>
+                Probability: 0.720249<br>
+                Score: 1.39
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #00b900; color: #FFFFFF;"> tasks</span>
+            <span class="tooltiptext">
+                Token ID: 13333<br>
+                Text:  tasks<br>
+                Probability: 1.000000<br>
+                Score: 1.00
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #00b600; color: #FFFFFF;"> that</span>
+            <span class="tooltiptext">
+                Token ID: 674<br>
+                Text:  that<br>
+                Probability: 0.887141<br>
+                Score: 1.13
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #00b800; color: #FFFFFF;"> normally</span>
+            <span class="tooltiptext">
+                Token ID: 16342<br>
+                Text:  normally<br>
+                Probability: 0.937017<br>
+                Score: 1.07
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #00b900; color: #FFFFFF;"> require</span>
+            <span class="tooltiptext">
+                Token ID: 2817<br>
+                Text:  require<br>
+                Probability: 1.000000<br>
+                Score: 1.00
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #00b900; color: #FFFFFF;"> human</span>
+            <span class="tooltiptext">
+                Token ID: 3515<br>
+                Text:  human<br>
+                Probability: 1.000000<br>
+                Score: 1.00
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #00b900; color: #FFFFFF;"> intelligence</span>
+            <span class="tooltiptext">
+                Token ID: 17273<br>
+                Text:  intelligence<br>
+                Probability: 1.000000<br>
+                Score: 1.00
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #00b500; color: #FFFFFF;">,</span>
+            <span class="tooltiptext">
+                Token ID: 235269<br>
+                Text: ,<br>
+                Probability: 0.823856<br>
+                Score: 1.21
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #00b900; color: #FFFFFF;"> such</span>
+            <span class="tooltiptext">
+                Token ID: 1582<br>
+                Text:  such<br>
+                Probability: 1.000000<br>
+                Score: 1.00
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #00b900; color: #FFFFFF;"> as</span>
+            <span class="tooltiptext">
+                Token ID: 685<br>
+                Text:  as<br>
+                Probability: 1.000000<br>
+                Score: 1.00
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #00b900; color: #FFFFFF;"> visual</span>
+            <span class="tooltiptext">
+                Token ID: 9095<br>
+                Text:  visual<br>
+                Probability: 1.000000<br>
+                Score: 1.00
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #00b900; color: #FFFFFF;"> perception</span>
+            <span class="tooltiptext">
+                Token ID: 20908<br>
+                Text:  perception<br>
+                Probability: 1.000000<br>
+                Score: 1.00
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #00b900; color: #FFFFFF;">,</span>
+            <span class="tooltiptext">
+                Token ID: 235269<br>
+                Text: ,<br>
+                Probability: 1.000000<br>
+                Score: 1.00
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #00b900; color: #FFFFFF;"> speech</span>
+            <span class="tooltiptext">
+                Token ID: 11360<br>
+                Text:  speech<br>
+                Probability: 1.000000<br>
+                Score: 1.00
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #00b900; color: #FFFFFF;"> recognition</span>
+            <span class="tooltiptext">
+                Token ID: 16398<br>
+                Text:  recognition<br>
+                Probability: 1.000000<br>
+                Score: 1.00
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #00b900; color: #FFFFFF;">,</span>
+            <span class="tooltiptext">
+                Token ID: 235269<br>
+                Text: ,<br>
+                Probability: 1.000000<br>
+                Score: 1.00
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #00b900; color: #FFFFFF;"> decision</span>
+            <span class="tooltiptext">
+                Token ID: 4530<br>
+                Text:  decision<br>
+                Probability: 1.000000<br>
+                Score: 1.00
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #00b700; color: #FFFFFF;">-</span>
+            <span class="tooltiptext">
+                Token ID: 235290<br>
+                Text: -<br>
+                Probability: 0.904792<br>
+                Score: 1.11
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #00b900; color: #FFFFFF;">making</span>
+            <span class="tooltiptext">
+                Token ID: 14577<br>
+                Text: making<br>
+                Probability: 1.000000<br>
+                Score: 1.00
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #00b800; color: #FFFFFF;">,</span>
+            <span class="tooltiptext">
+                Token ID: 235269<br>
+                Text: ,<br>
+                Probability: 0.973670<br>
+                Score: 1.03
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #00b900; color: #FFFFFF;"> and</span>
+            <span class="tooltiptext">
+                Token ID: 578<br>
+                Text:  and<br>
+                Probability: 1.000000<br>
+                Score: 1.00
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #00b800; color: #FFFFFF;"> translation</span>
+            <span class="tooltiptext">
+                Token ID: 17183<br>
+                Text:  translation<br>
+                Probability: 0.954026<br>
+                Score: 1.05
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #00b900; color: #FFFFFF;"> between</span>
+            <span class="tooltiptext">
+                Token ID: 1865<br>
+                Text:  between<br>
+                Probability: 1.000000<br>
+                Score: 1.00
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #00b900; color: #FFFFFF;"> languages</span>
+            <span class="tooltiptext">
+                Token ID: 17044<br>
+                Text:  languages<br>
+                Probability: 1.000000<br>
+                Score: 1.00
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #00b500; color: #FFFFFF;">.</span>
+            <span class="tooltiptext">
+                Token ID: 235265<br>
+                Text: .<br>
+                Probability: 0.821057<br>
+                Score: 1.22
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #000c00; color: #FFFFFF;">&lt;T109&gt;</span>
+            <span class="tooltiptext">
+                Token ID: 109<br>
+                Text: &lt;T109&gt;<br>
+                Probability: 0.105776<br>
+                Score: 9.45
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #009c00; color: #FFFFFF;">The</span>
+            <span class="tooltiptext">
+                Token ID: 651<br>
+                Text: The<br>
+                Probability: 0.412099<br>
+                Score: 2.43
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #00a500; color: #FFFFFF;"> term</span>
+            <span class="tooltiptext">
+                Token ID: 5168<br>
+                Text:  term<br>
+                Probability: 0.501435<br>
+                Score: 1.99
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #009e00; color: #FFFFFF;"> was</span>
+            <span class="tooltiptext">
+                Token ID: 729<br>
+                Text:  was<br>
+                Probability: 0.430098<br>
+                Score: 2.33
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #00b700; color: #FFFFFF;"> coined</span>
+            <span class="tooltiptext">
+                Token ID: 124133<br>
+                Text:  coined<br>
+                Probability: 0.923018<br>
+                Score: 1.08
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #00ae00; color: #FFFFFF;"> in</span>
+            <span class="tooltiptext">
+                Token ID: 575<br>
+                Text:  in<br>
+                Probability: 0.658250<br>
+                Score: 1.52
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token whitespace-token" style="background-color: #00b700; color: #FFFFFF;">␣</span>
+            <span class="tooltiptext">
+                Token ID: 235248<br>
+                Text:  <br>
+                Probability: 0.930672<br>
+                Score: 1.07
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #00b900; color: #FFFFFF;">1</span>
+            <span class="tooltiptext">
+                Token ID: 235274<br>
+                Text: 1<br>
+                Probability: 1.000000<br>
+                Score: 1.00
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #00b900; color: #FFFFFF;">9</span>
+            <span class="tooltiptext">
+                Token ID: 235315<br>
+                Text: 9<br>
+                Probability: 1.000000<br>
+                Score: 1.00
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #00b900; color: #FFFFFF;">5</span>
+            <span class="tooltiptext">
+                Token ID: 235308<br>
+                Text: 5<br>
+                Probability: 1.000000<br>
+                Score: 1.00
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #00b800; color: #FFFFFF;">6</span>
+            <span class="tooltiptext">
+                Token ID: 235318<br>
+                Text: 6<br>
+                Probability: 0.954344<br>
+                Score: 1.05
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #00b800; color: #FFFFFF;"> by</span>
+            <span class="tooltiptext">
+                Token ID: 731<br>
+                Text:  by<br>
+                Probability: 0.968712<br>
+                Score: 1.03
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #007800; color: #FFFFFF;"> John</span>
+            <span class="tooltiptext">
+                Token ID: 3350<br>
+                Text:  John<br>
+                Probability: 0.238503<br>
+                Score: 4.19
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #00b900; color: #FFFFFF;"> McCarthy</span>
+            <span class="tooltiptext">
+                Token ID: 55900<br>
+                Text:  McCarthy<br>
+                Probability: 1.000000<br>
+                Score: 1.00
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #000000; color: #FFFFFF;">.</span>
+            <span class="tooltiptext">
+                Token ID: 235265<br>
+                Text: .<br>
+                Probability: 0.070430<br>
+                Score: 14.20
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #000000; color: #FFFFFF;"> AI</span>
+            <span class="tooltiptext">
+                Token ID: 16481<br>
+                Text:  AI<br>
+                Probability: 0.045761<br>
+                Score: 21.85
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #009a00; color: #FFFFFF;"> is</span>
+            <span class="tooltiptext">
+                Token ID: 603<br>
+                Text:  is<br>
+                Probability: 0.398631<br>
+                Score: 2.51
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #000000; color: #FFFFFF;"> an</span>
+            <span class="tooltiptext">
+                Token ID: 671<br>
+                Text:  an<br>
+                Probability: 0.074210<br>
+                Score: 13.48
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #00b700; color: #FFFFFF;"> inter</span>
+            <span class="tooltiptext">
+                Token ID: 1061<br>
+                Text:  inter<br>
+                Probability: 0.918106<br>
+                Score: 1.09
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #00b900; color: #FFFFFF;">disciplinary</span>
+            <span class="tooltiptext">
+                Token ID: 44894<br>
+                Text: disciplinary<br>
+                Probability: 1.000000<br>
+                Score: 1.00
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #00ae00; color: #FFFFFF;"> field</span>
+            <span class="tooltiptext">
+                Token ID: 2725<br>
+                Text:  field<br>
+                Probability: 0.652847<br>
+                Score: 1.53
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #000000; color: #FFFFFF;">,</span>
+            <span class="tooltiptext">
+                Token ID: 235269<br>
+                Text: ,<br>
+                Probability: 0.054459<br>
+                Score: 18.36
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #000000; color: #FFFFFF;"> and</span>
+            <span class="tooltiptext">
+                Token ID: 578<br>
+                Text:  and<br>
+                Probability: 0.088508<br>
+                Score: 11.30
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #000000; color: #FFFFFF;"> it</span>
+            <span class="tooltiptext">
+                Token ID: 665<br>
+                Text:  it<br>
+                Probability: 0.099797<br>
+                Score: 10.02
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #007700; color: #FFFFFF;"> has</span>
+            <span class="tooltiptext">
+                Token ID: 919<br>
+                Text:  has<br>
+                Probability: 0.237671<br>
+                Score: 4.21
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #009100; color: #FFFFFF;"> been</span>
+            <span class="tooltiptext">
+                Token ID: 1125<br>
+                Text:  been<br>
+                Probability: 0.337246<br>
+                Score: 2.97
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #000000; color: #FFFFFF;"> developed</span>
+            <span class="tooltiptext">
+                Token ID: 6990<br>
+                Text:  developed<br>
+                Probability: 0.089251<br>
+                Score: 11.20
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #007e00; color: #FFFFFF;"> in</span>
+            <span class="tooltiptext">
+                Token ID: 575<br>
+                Text:  in<br>
+                Probability: 0.257349<br>
+                Score: 3.89
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #000000; color: #FFFFFF;"> collaboration</span>
+            <span class="tooltiptext">
+                Token ID: 18872<br>
+                Text:  collaboration<br>
+                Probability: 0.012660<br>
+                Score: 78.99
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #00b800; color: #FFFFFF;"> with</span>
+            <span class="tooltiptext">
+                Token ID: 675<br>
+                Text:  with<br>
+                Probability: 0.966162<br>
+                Score: 1.04
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #000000; color: #FFFFFF;"> disciplines</span>
+            <span class="tooltiptext">
+                Token ID: 50416<br>
+                Text:  disciplines<br>
+                Probability: 0.020325<br>
+                Score: 49.20
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #00b700; color: #FFFFFF;"> such</span>
+            <span class="tooltiptext">
+                Token ID: 1582<br>
+                Text:  such<br>
+                Probability: 0.929477<br>
+                Score: 1.08
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #00b900; color: #FFFFFF;"> as</span>
+            <span class="tooltiptext">
+                Token ID: 685<br>
+                Text:  as<br>
+                Probability: 1.000000<br>
+                Score: 1.00
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #00b200; color: #FFFFFF;"> computer</span>
+            <span class="tooltiptext">
+                Token ID: 6875<br>
+                Text:  computer<br>
+                Probability: 0.753354<br>
+                Score: 1.33
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #00b900; color: #FFFFFF;"> science</span>
+            <span class="tooltiptext">
+                Token ID: 8042<br>
+                Text:  science<br>
+                Probability: 1.000000<br>
+                Score: 1.00
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #00b900; color: #FFFFFF;">,</span>
+            <span class="tooltiptext">
+                Token ID: 235269<br>
+                Text: ,<br>
+                Probability: 1.000000<br>
+                Score: 1.00
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #007500; color: #FFFFFF;"> cognitive</span>
+            <span class="tooltiptext">
+                Token ID: 31572<br>
+                Text:  cognitive<br>
+                Probability: 0.230400<br>
+                Score: 4.34
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #00b800; color: #FFFFFF;"> science</span>
+            <span class="tooltiptext">
+                Token ID: 8042<br>
+                Text:  science<br>
+                Probability: 0.950245<br>
+                Score: 1.05
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #00b900; color: #FFFFFF;">,</span>
+            <span class="tooltiptext">
+                Token ID: 235269<br>
+                Text: ,<br>
+                Probability: 1.000000<br>
+                Score: 1.00
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #00a100; color: #FFFFFF;"> linguistics</span>
+            <span class="tooltiptext">
+                Token ID: 146721<br>
+                Text:  linguistics<br>
+                Probability: 0.456733<br>
+                Score: 2.19
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #00b900; color: #FFFFFF;">,</span>
+            <span class="tooltiptext">
+                Token ID: 235269<br>
+                Text: ,<br>
+                Probability: 1.000000<br>
+                Score: 1.00
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #003700; color: #FFFFFF;"> and</span>
+            <span class="tooltiptext">
+                Token ID: 578<br>
+                Text:  and<br>
+                Probability: 0.136408<br>
+                Score: 7.33
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #00ad00; color: #FFFFFF;"> philosophy</span>
+            <span class="tooltiptext">
+                Token ID: 19754<br>
+                Text:  philosophy<br>
+                Probability: 0.639822<br>
+                Score: 1.56
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #00b700; color: #FFFFFF;">.</span>
+            <span class="tooltiptext">
+                Token ID: 235265<br>
+                Text: .<br>
+                Probability: 0.900454<br>
+                Score: 1.11
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #00af00; color: #FFFFFF;">&lt;T109&gt;</span>
+            <span class="tooltiptext">
+                Token ID: 109<br>
+                Text: &lt;T109&gt;<br>
+                Probability: 0.671588<br>
+                Score: 1.49
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #000000; color: #FFFFFF;">Since</span>
+            <span class="tooltiptext">
+                Token ID: 12496<br>
+                Text: Since<br>
+                Probability: 0.011366<br>
+                Score: 87.98
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #00b300; color: #FFFFFF;"> the</span>
+            <span class="tooltiptext">
+                Token ID: 573<br>
+                Text:  the<br>
+                Probability: 0.787236<br>
+                Score: 1.27
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token whitespace-token" style="background-color: #00b500; color: #FFFFFF;">␣</span>
+            <span class="tooltiptext">
+                Token ID: 235248<br>
+                Text:  <br>
+                Probability: 0.839815<br>
+                Score: 1.19
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #00b900; color: #FFFFFF;">1</span>
+            <span class="tooltiptext">
+                Token ID: 235274<br>
+                Text: 1<br>
+                Probability: 1.000000<br>
+                Score: 1.00
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #00b900; color: #FFFFFF;">9</span>
+            <span class="tooltiptext">
+                Token ID: 235315<br>
+                Text: 9<br>
+                Probability: 1.000000<br>
+                Score: 1.00
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #004800; color: #FFFFFF;">6</span>
+            <span class="tooltiptext">
+                Token ID: 235318<br>
+                Text: 6<br>
+                Probability: 0.153813<br>
+                Score: 6.50
+            </span>
+        </div>
+        <div class="tooltip">
+            <span class="token" style="background-color: #00b900; color: #FFFFFF;">0</span>
+            <span class="tooltiptext">
+                Token ID: 235276<br>
+                Text: 0<br>
+                Probability: 1.000000<br>
+                Score: 1.00
+            </span>
+        </div>
+    </div>
+</body>
+</html>

@@ -66,7 +66,8 @@ You need to request access to the models before downloading them:
 poetry run huggingface-cli download meta-llama/Llama-3.2-1B-Instruct --local-dir ./models-superlinear/llama/llama-3.2-1b-instruct/huggingface && \
 poetry run huggingface-cli download meta-llama/Llama-3.1-8B-Instruct --local-dir ./models-superlinear/llama/llama-3.1-8b-instruct/huggingface && \
 poetry run huggingface-cli download meta-llama/Llama-3.1-8B --local-dir ./models-superlinear/llama/llama-3.1-8b/huggingface && \
-poetry run huggingface-cli download google/gemma-2-2b-it --local-dir ./models-superlinear/gemma/gemma-2-2b-it/huggingface
+poetry run huggingface-cli download google/gemma-2-2b-it --local-dir ./models-superlinear/gemma/gemma-2-2b-it/huggingface && \
+poetry run huggingface-cli download google/gemma-2-2b --local-dir ./models-superlinear/gemma/gemma-2-2b/huggingface
 ```
 
 ### Converting All Models to GGUF
@@ -76,7 +77,8 @@ poetry run huggingface-cli download google/gemma-2-2b-it --local-dir ./models-su
 poetry run python convert_hf_to_gguf.py --outfile ./models-superlinear/llama-3.2-1b-instruct.gguf ./models-superlinear/llama/llama-3.2-1b-instruct/huggingface && \
 poetry run python convert_hf_to_gguf.py --outfile ./models-superlinear/llama-3.1-8b-instruct.gguf ./models-superlinear/llama/llama-3.1-8b-instruct/huggingface && \
 poetry run python convert_hf_to_gguf.py --outfile ./models-superlinear/llama-3.1-8b.gguf ./models-superlinear/llama/llama-3.1-8b/huggingface && \
-poetry run python convert_hf_to_gguf.py --outfile ./models-superlinear/gemma-2-2b-it.gguf ./models-superlinear/gemma/gemma-2-2b-it/huggingface
+poetry run python convert_hf_to_gguf.py --outfile ./models-superlinear/gemma-2-2b-it.gguf ./models-superlinear/gemma/gemma-2-2b-it/huggingface && \
+poetry run python convert_hf_to_gguf.py --outfile ./models-superlinear/gemma-2-2b.gguf ./models-superlinear/gemma/gemma-2-2b/huggingface
 ```
 
 ## Verifying Models

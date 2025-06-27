@@ -1,0 +1,1400 @@
+[KLoading model[K
+RNG internal:
+- Raw uniform random number: 0.592845
+- Token probabilities:
+  [0] token 651 = 0.274210 (cumulative: 0.274210)
+  [1] token 105460 = 0.173214 (cumulative: 0.447424)
+  [2] token 235285 = 0.099415 (cumulative: 0.546839)
+  [3] token 886 = 0.089622 (cumulative: 0.636461)
+  [4] token 1718 = 0.087311 (cumulative: 0.723772)
+  [5] token 235322 = 0.063815 (cumulative: 0.787587)
+  [6] token 6179 = 0.028784 (cumulative: 0.816371)
+  [7] token 3493 = 0.026248 (cumulative: 0.842619)
+  [8] token 1734 = 0.020323 (cumulative: 0.862942)
+  [9] token 2045 = 0.019132 (cumulative: 0.882074)
+  [10] token 1596 = 0.017878 (cumulative: 0.899952)
+  [11] token 2339 = 0.013984 (cumulative: 0.913936)
+  [12] token 235280 = 0.013243 (cumulative: 0.927179)
+  [13] token 11716 = 0.011606 (cumulative: 0.938784)
+  [14] token 4521 = 0.010636 (cumulative: 0.949421)
+  [15] token 2169 = 0.010023 (cumulative: 0.959444)
+  [16] token 5331 = 0.009342 (cumulative: 0.968786)
+  [17] token 235274 = 0.008652 (cumulative: 0.977437)
+  [18] token 1841 = 0.008484 (cumulative: 0.985922)
+  [19] token 235281 = 0.007568 (cumulative: 0.993490)
+  [20] token 12362 = 0.006510 (cumulative: 1.000000)
+- Scaled random number: 0.592845
+- Selected index: 3
+RNG generated sample: 3 (token id: 886, probability: 0.089622)
+
+RNG internal:
+- Raw uniform random number: 0.844266
+- Token probabilities:
+  [0] token 573 = 0.704883 (cumulative: 0.704883)
+  [1] token 235248 = 0.295117 (cumulative: 1.000000)
+- Normalized cumulative probabilities
+- Scaled random number: 0.844266
+- Selected index: 1
+RNG generated sample: 1 (token id: 235248, probability: 0.295117)
+
+RNG internal:
+- Raw uniform random number: 0.857946
+- Token probabilities:
+  [0] token 235274 = 1.000000 (cumulative: 1.000000)
+- Scaled random number: 0.857946
+- Selected index: 0
+RNG generated sample: 0 (token id: 235274, probability: 1.000000)
+
+RNG internal:
+- Raw uniform random number: 0.847252
+- Token probabilities:
+  [0] token 235315 = 0.956310 (cumulative: 0.956310)
+  [1] token 235321 = 0.043690 (cumulative: 1.000000)
+- Scaled random number: 0.847252
+- Selected index: 0
+RNG generated sample: 0 (token id: 235315, probability: 0.956310)
+
+RNG internal:
+- Raw uniform random number: 0.623564
+- Token probabilities:
+  [0] token 235308 = 0.798478 (cumulative: 0.798478)
+  [1] token 235310 = 0.174579 (cumulative: 0.973057)
+  [2] token 235304 = 0.026943 (cumulative: 1.000000)
+- Normalized cumulative probabilities
+- Scaled random number: 0.623564
+- Selected index: 0
+RNG generated sample: 0 (token id: 235308, probability: 0.798478)
+
+RNG internal:
+- Raw uniform random number: 0.384382
+- Token probabilities:
+  [0] token 235318 = 0.689007 (cumulative: 0.689007)
+  [1] token 235276 = 0.221302 (cumulative: 0.910309)
+  [2] token 235308 = 0.089691 (cumulative: 1.000000)
+- Scaled random number: 0.384382
+- Selected index: 0
+RNG generated sample: 0 (token id: 235318, probability: 0.689007)
+
+RNG internal:
+- Raw uniform random number: 0.297535
+- Token probabilities:
+  [0] token 235269 = 1.000000 (cumulative: 1.000000)
+- Scaled random number: 0.297535
+- Selected index: 0
+RNG generated sample: 0 (token id: 235269, probability: 1.000000)
+
+RNG internal:
+- Raw uniform random number: 0.056713
+- Token probabilities:
+  [0] token 573 = 0.460858 (cumulative: 0.460858)
+  [1] token 21786 = 0.240546 (cumulative: 0.701403)
+  [2] token 476 = 0.084558 (cumulative: 0.785961)
+  [3] token 3350 = 0.084262 (cumulative: 0.870223)
+  [4] token 696 = 0.041919 (cumulative: 0.912142)
+  [5] token 575 = 0.028854 (cumulative: 0.940996)
+  [6] token 3725 = 0.016436 (cumulative: 0.957431)
+  [7] token 6875 = 0.015974 (cumulative: 0.973405)
+  [8] token 135853 = 0.014047 (cumulative: 0.987452)
+  [9] token 671 = 0.012548 (cumulative: 1.000000)
+- Normalized cumulative probabilities
+- Scaled random number: 0.056713
+- Selected index: 0
+RNG generated sample: 0 (token id: 573, probability: 0.460858)
+
+RNG internal:
+- Raw uniform random number: 0.272656
+- Token probabilities:
+  [0] token 3725 = 0.195866 (cumulative: 0.195866)
+  [1] token 1370 = 0.184608 (cumulative: 0.380474)
+  [2] token 10964 = 0.108066 (cumulative: 0.488540)
+  [3] token 135853 = 0.094987 (cumulative: 0.583527)
+  [4] token 5168 = 0.057533 (cumulative: 0.641060)
+  [5] token 2379 = 0.054607 (cumulative: 0.695667)
+  [6] token 6875 = 0.050389 (cumulative: 0.746056)
+  [7] token 135348 = 0.039124 (cumulative: 0.785180)
+  [8] token 112034 = 0.038773 (cumulative: 0.823953)
+  [9] token 7149 = 0.034064 (cumulative: 0.858017)
+  [10] token 38692 = 0.028553 (cumulative: 0.886570)
+  [11] token 2134 = 0.026986 (cumulative: 0.913556)
+  [12] token 3520 = 0.024039 (cumulative: 0.937594)
+  [13] token 17569 = 0.011420 (cumulative: 0.949015)
+  [14] token 35679 = 0.009318 (cumulative: 0.958333)
+  [15] token 664 = 0.008199 (cumulative: 0.966532)
+  [16] token 4645 = 0.007035 (cumulative: 0.973567)
+  [17] token 752 = 0.005918 (cumulative: 0.979485)
+  [18] token 11200 = 0.005384 (cumulative: 0.984870)
+  [19] token 61270 = 0.005166 (cumulative: 0.990035)
+  [20] token 4268 = 0.004983 (cumulative: 0.995018)
+  [21] token 1578 = 0.004982 (cumulative: 1.000000)
+- Normalized cumulative probabilities
+- Scaled random number: 0.272656
+- Selected index: 1
+RNG generated sample: 1 (token id: 1370, probability: 0.184608)
+
+RNG internal:
+- Raw uniform random number: 0.477665
+- Token probabilities:
+  [0] token 6875 = 0.393525 (cumulative: 0.393525)
+  [1] token 18225 = 0.321882 (cumulative: 0.715407)
+  [2] token 16481 = 0.080545 (cumulative: 0.795952)
+  [3] token 2733 = 0.028537 (cumulative: 0.824489)
+  [4] token 6479 = 0.028276 (cumulative: 0.852765)
+  [5] token 3311 = 0.024508 (cumulative: 0.877273)
+  [6] token 17234 = 0.024271 (cumulative: 0.901544)
+  [7] token 25175 = 0.018235 (cumulative: 0.919779)
+  [8] token 8697 = 0.013655 (cumulative: 0.933434)
+  [9] token 16034 = 0.013360 (cumulative: 0.946794)
+  [10] token 33436 = 0.012121 (cumulative: 0.958915)
+  [11] token 11982 = 0.011358 (cumulative: 0.970273)
+  [12] token 3364 = 0.010219 (cumulative: 0.980492)
+  [13] token 3434 = 0.009990 (cumulative: 0.990482)
+  [14] token 4065 = 0.009518 (cumulative: 1.000000)
+- Normalized cumulative probabilities
+- Scaled random number: 0.477665
+- Selected index: 1
+RNG generated sample: 1 (token id: 18225, probability: 0.321882)
+
+RNG internal:
+- Raw uniform random number: 0.812169
+- Token probabilities:
+  [0] token 17273 = 1.000000 (cumulative: 1.000000)
+- Scaled random number: 0.812169
+- Selected index: 0
+RNG generated sample: 0 (token id: 17273, probability: 1.000000)
+
+RNG internal:
+- Raw uniform random number: 0.479977
+- Token probabilities:
+  [0] token 2733 = 0.258680 (cumulative: 0.258680)
+  [1] token 591 = 0.089152 (cumulative: 0.347832)
+  [2] token 729 = 0.081580 (cumulative: 0.429411)
+  [3] token 6875 = 0.078708 (cumulative: 0.508119)
+  [4] token 1812 = 0.073030 (cumulative: 0.581150)
+  [5] token 11982 = 0.070477 (cumulative: 0.651626)
+  [6] token 3679 = 0.051340 (cumulative: 0.702966)
+  [7] token 2121 = 0.042049 (cumulative: 0.745016)
+  [8] token 11010 = 0.038663 (cumulative: 0.783679)
+  [9] token 3542 = 0.033921 (cumulative: 0.817600)
+  [10] token 7658 = 0.026228 (cumulative: 0.843829)
+  [11] token 6479 = 0.026172 (cumulative: 0.870001)
+  [12] token 10844 = 0.025484 (cumulative: 0.895486)
+  [13] token 17355 = 0.025298 (cumulative: 0.920783)
+  [14] token 33436 = 0.020719 (cumulative: 0.941502)
+  [15] token 13865 = 0.013621 (cumulative: 0.955123)
+  [16] token 235269 = 0.011338 (cumulative: 0.966461)
+  [17] token 17418 = 0.010205 (cumulative: 0.976666)
+  [18] token 5188 = 0.008470 (cumulative: 0.985136)
+  [19] token 19991 = 0.008405 (cumulative: 0.993541)
+  [20] token 2398 = 0.006459 (cumulative: 1.000000)
+- Normalized cumulative probabilities
+- Scaled random number: 0.479977
+- Selected index: 3
+RNG generated sample: 3 (token id: 6875, probability: 0.078708)
+
+RNG internal:
+- Raw uniform random number: 0.392785
+- Token probabilities:
+  [0] token 2733 = 0.639389 (cumulative: 0.639389)
+  [1] token 729 = 0.206443 (cumulative: 0.845832)
+  [2] token 2398 = 0.049539 (cumulative: 0.895370)
+  [3] token 235269 = 0.043503 (cumulative: 0.938873)
+  [4] token 7658 = 0.033254 (cumulative: 0.972127)
+  [5] token 1812 = 0.027873 (cumulative: 1.000000)
+- Normalized cumulative probabilities
+- Scaled random number: 0.392785
+- Selected index: 0
+RNG generated sample: 0 (token id: 2733, probability: 0.639389)
+
+RNG internal:
+- Raw uniform random number: 0.836079
+- Token probabilities:
+  [0] token 729 = 0.832782 (cumulative: 0.832782)
+  [1] token 235269 = 0.106967 (cumulative: 0.939749)
+  [2] token 9223 = 0.060251 (cumulative: 1.000000)
+- Normalized cumulative probabilities
+- Scaled random number: 0.836079
+- Selected index: 1
+RNG generated sample: 1 (token id: 235269, probability: 0.106967)
+
+RNG internal:
+- Raw uniform random number: 0.337396
+- Token probabilities:
+  [0] token 664 = 0.203086 (cumulative: 0.203086)
+  [1] token 573 = 0.174274 (cumulative: 0.377360)
+  [2] token 3151 = 0.156138 (cumulative: 0.533498)
+  [3] token 39045 = 0.131843 (cumulative: 0.665342)
+  [4] token 1080 = 0.068438 (cumulative: 0.733779)
+  [5] token 3836 = 0.063212 (cumulative: 0.796991)
+  [6] token 948 = 0.035247 (cumulative: 0.832238)
+  [7] token 476 = 0.026184 (cumulative: 0.858423)
+  [8] token 6990 = 0.023780 (cumulative: 0.882202)
+  [9] token 8602 = 0.021782 (cumulative: 0.903984)
+  [10] token 5483 = 0.019500 (cumulative: 0.923483)
+  [11] token 21786 = 0.017962 (cumulative: 0.941446)
+  [12] token 235248 = 0.014519 (cumulative: 0.955964)
+  [13] token 89826 = 0.011084 (cumulative: 0.967049)
+  [14] token 6135 = 0.008905 (cumulative: 0.975954)
+  [15] token 3482 = 0.007170 (cumulative: 0.983124)
+  [16] token 777 = 0.006334 (cumulative: 0.989457)
+  [17] token 629 = 0.005424 (cumulative: 0.994881)
+  [18] token 4082 = 0.005119 (cumulative: 1.000000)
+- Normalized cumulative probabilities
+- Scaled random number: 0.337396
+- Selected index: 1
+RNG generated sample: 1 (token id: 573, probability: 0.174274)
+
+RNG internal:
+- Raw uniform random number: 0.648172
+- Token probabilities:
+  [0] token 664 = 0.278440 (cumulative: 0.278440)
+  [1] token 2398 = 0.155195 (cumulative: 0.433635)
+  [2] token 39045 = 0.148617 (cumulative: 0.582252)
+  [3] token 1080 = 0.119049 (cumulative: 0.701301)
+  [4] token 40559 = 0.059905 (cumulative: 0.761206)
+  [5] token 14855 = 0.054982 (cumulative: 0.816188)
+  [6] token 2733 = 0.045274 (cumulative: 0.861461)
+  [7] token 5105 = 0.028696 (cumulative: 0.890157)
+  [8] token 135348 = 0.023370 (cumulative: 0.913527)
+  [9] token 6978 = 0.016393 (cumulative: 0.929920)
+  [10] token 712 = 0.014749 (cumulative: 0.944669)
+  [11] token 1370 = 0.012059 (cumulative: 0.956728)
+  [12] token 235248 = 0.011658 (cumulative: 0.968387)
+  [13] token 24742 = 0.010132 (cumulative: 0.978518)
+  [14] token 3311 = 0.007708 (cumulative: 0.986226)
+  [15] token 777 = 0.006966 (cumulative: 0.993192)
+  [16] token 6875 = 0.006808 (cumulative: 1.000000)
+- Normalized cumulative probabilities
+- Scaled random number: 0.648172
+- Selected index: 3
+RNG generated sample: 3 (token id: 1080, probability: 0.119049)
+
+RNG internal:
+- Raw uniform random number: 0.368242
+- Token probabilities:
+  [0] token 31616 = 0.823982 (cumulative: 0.823982)
+  [1] token 17112 = 0.050531 (cumulative: 0.874512)
+  [2] token 92690 = 0.047421 (cumulative: 0.921934)
+  [3] token 8723 = 0.029621 (cumulative: 0.951554)
+  [4] token 37441 = 0.024447 (cumulative: 0.976002)
+  [5] token 96815 = 0.023998 (cumulative: 1.000000)
+- Normalized cumulative probabilities
+- Scaled random number: 0.368242
+- Selected index: 0
+RNG generated sample: 0 (token id: 31616, probability: 0.823982)
+
+RNG internal:
+- Raw uniform random number: 0.957155
+- Token probabilities:
+  [0] token 140950 = 0.976798 (cumulative: 0.976798)
+  [1] token 13403 = 0.023202 (cumulative: 1.000000)
+- Scaled random number: 0.957155
+- Selected index: 0
+RNG generated sample: 0 (token id: 140950, probability: 0.976798)
+
+RNG internal:
+- Raw uniform random number: 0.140351
+- Token probabilities:
+  [0] token 694 = 1.000000 (cumulative: 1.000000)
+- Scaled random number: 0.140351
+- Selected index: 0
+RNG generated sample: 0 (token id: 694, probability: 1.000000)
+
+RNG internal:
+- Raw uniform random number: 0.870087
+- Token probabilities:
+  [0] token 5763 = 0.388286 (cumulative: 0.388286)
+  [1] token 2316 = 0.348432 (cumulative: 0.736718)
+  [2] token 235369 = 0.263282 (cumulative: 1.000000)
+- Scaled random number: 0.870087
+- Selected index: 2
+RNG generated sample: 2 (token id: 235369, probability: 0.263282)
+
+RNG internal:
+- Raw uniform random number: 0.473608
+- Token probabilities:
+  [0] token 729 = 0.759880 (cumulative: 0.759880)
+  [1] token 2733 = 0.074685 (cumulative: 0.834566)
+  [2] token 731 = 0.069062 (cumulative: 0.903627)
+  [3] token 591 = 0.048328 (cumulative: 0.951955)
+  [4] token 6990 = 0.026050 (cumulative: 0.978005)
+  [5] token 576 = 0.021995 (cumulative: 1.000000)
+- Normalized cumulative probabilities
+- Scaled random number: 0.473608
+- Selected index: 0
+RNG generated sample: 0 (token id: 729, probability: 0.759880)
+
+RNG internal:
+- Raw uniform random number: 0.800911
+- Token probabilities:
+  [0] token 5483 = 0.468313 (cumulative: 0.468313)
+  [1] token 6990 = 0.347191 (cumulative: 0.815503)
+  [2] token 5952 = 0.123011 (cumulative: 0.938515)
+  [3] token 42020 = 0.023079 (cumulative: 0.961594)
+  [4] token 7018 = 0.012982 (cumulative: 0.974576)
+  [5] token 11261 = 0.012837 (cumulative: 0.987413)
+  [6] token 6869 = 0.012587 (cumulative: 1.000000)
+- Scaled random number: 0.800911
+- Selected index: 1
+RNG generated sample: 1 (token id: 6990, probability: 0.347191)
+
+RNG internal:
+- Raw uniform random number: 0.520477
+- Token probabilities:
+  [0] token 731 = 0.423427 (cumulative: 0.423427)
+  [1] token 235265 = 0.406066 (cumulative: 0.829493)
+  [2] token 696 = 0.065436 (cumulative: 0.894929)
+  [3] token 235269 = 0.038590 (cumulative: 0.933519)
+  [4] token 575 = 0.023753 (cumulative: 0.957272)
+  [5] token 578 = 0.019943 (cumulative: 0.977214)
+  [6] token 35606 = 0.011805 (cumulative: 0.989020)
+  [7] token 235322 = 0.010980 (cumulative: 1.000000)
+- Normalized cumulative probabilities
+- Scaled random number: 0.520477
+- Selected index: 1
+RNG generated sample: 1 (token id: 235265, probability: 0.406066)
+
+RNG internal:
+- Raw uniform random number: 0.678880
+- Token probabilities:
+  [0] token 1165 = 0.348602 (cumulative: 0.348602)
+  [1] token 714 = 0.231325 (cumulative: 0.579928)
+  [2] token 1417 = 0.157429 (cumulative: 0.737357)
+  [3] token 108 = 0.098313 (cumulative: 0.835670)
+  [4] token 878 = 0.083861 (cumulative: 0.919531)
+  [5] token 8533 = 0.022440 (cumulative: 0.941971)
+  [6] token 9707 = 0.021040 (cumulative: 0.963012)
+  [7] token 4560 = 0.013822 (cumulative: 0.976834)
+  [8] token 586 = 0.013079 (cumulative: 0.989913)
+  [9] token 109 = 0.010087 (cumulative: 1.000000)
+- Normalized cumulative probabilities
+- Scaled random number: 0.678880
+- Selected index: 2
+RNG generated sample: 2 (token id: 1417, probability: 0.157429)
+
+RNG internal:
+- Raw uniform random number: 0.720633
+- Token probabilities:
+  [0] token 2733 = 0.787793 (cumulative: 0.787793)
+  [1] token 729 = 0.139156 (cumulative: 0.926949)
+  [2] token 6875 = 0.073051 (cumulative: 1.000000)
+- Scaled random number: 0.720633
+- Selected index: 0
+RNG generated sample: 0 (token id: 2733, probability: 0.787793)
+
+RNG internal:
+- Raw uniform random number: 0.582020
+- Token probabilities:
+  [0] token 729 = 0.793150 (cumulative: 0.793150)
+  [1] token 1538 = 0.111584 (cumulative: 0.904735)
+  [2] token 235269 = 0.048275 (cumulative: 0.953010)
+  [3] token 1671 = 0.026261 (cumulative: 0.979271)
+  [4] token 603 = 0.020729 (cumulative: 1.000000)
+- Normalized cumulative probabilities
+- Scaled random number: 0.582020
+- Selected index: 0
+RNG generated sample: 0 (token id: 729, probability: 0.793150)
+
+RNG internal:
+- Raw uniform random number: 0.537373
+- Token probabilities:
+  [0] token 3326 = 0.385277 (cumulative: 0.385277)
+  [1] token 6869 = 0.249536 (cumulative: 0.634813)
+  [2] token 5483 = 0.060900 (cumulative: 0.695713)
+  [3] token 13920 = 0.056935 (cumulative: 0.752648)
+  [4] token 476 = 0.053681 (cumulative: 0.806329)
+  [5] token 5952 = 0.045474 (cumulative: 0.851803)
+  [6] token 6990 = 0.038663 (cumulative: 0.890466)
+  [7] token 3482 = 0.029451 (cumulative: 0.919917)
+  [8] token 1671 = 0.025921 (cumulative: 0.945838)
+  [9] token 73517 = 0.021834 (cumulative: 0.967671)
+  [10] token 573 = 0.018142 (cumulative: 0.985814)
+  [11] token 671 = 0.014186 (cumulative: 1.000000)
+- Scaled random number: 0.537373
+- Selected index: 1
+RNG generated sample: 1 (token id: 6869, probability: 0.249536)
+
+RNG internal:
+- Raw uniform random number: 0.758616
+- Token probabilities:
+  [0] token 577 = 1.000000 (cumulative: 1.000000)
+- Scaled random number: 0.758616
+- Selected index: 0
+RNG generated sample: 0 (token id: 577, probability: 1.000000)
+
+RNG internal:
+- Raw uniform random number: 0.105908
+- Token probabilities:
+  [0] token 2121 = 0.246434 (cumulative: 0.246434)
+  [1] token 10244 = 0.234150 (cumulative: 0.480585)
+  [2] token 11560 = 0.196989 (cumulative: 0.677574)
+  [3] token 8363 = 0.073299 (cumulative: 0.750872)
+  [4] token 22101 = 0.038947 (cumulative: 0.789820)
+  [5] token 614 = 0.032567 (cumulative: 0.822387)
+  [6] token 3448 = 0.028042 (cumulative: 0.850429)
+  [7] token 1707 = 0.018386 (cumulative: 0.868815)
+  [8] token 11650 = 0.016934 (cumulative: 0.885750)
+  [9] token 3114 = 0.013968 (cumulative: 0.899718)
+  [10] token 1717 = 0.013778 (cumulative: 0.913496)
+  [11] token 27205 = 0.012402 (cumulative: 0.925898)
+  [12] token 1500 = 0.011485 (cumulative: 0.937383)
+  [13] token 58142 = 0.009571 (cumulative: 0.946953)
+  [14] token 4971 = 0.009086 (cumulative: 0.956039)
+  [15] token 3418 = 0.008351 (cumulative: 0.964391)
+  [16] token 1160 = 0.007878 (cumulative: 0.972269)
+  [17] token 3519 = 0.007504 (cumulative: 0.979773)
+  [18] token 1281 = 0.007264 (cumulative: 0.987036)
+  [19] token 1554 = 0.006595 (cumulative: 0.993631)
+  [20] token 2701 = 0.006369 (cumulative: 1.000000)
+- Scaled random number: 0.105908
+- Selected index: 0
+RNG generated sample: 0 (token id: 2121, probability: 0.246434)
+
+RNG internal:
+- Raw uniform random number: 0.473600
+- Token probabilities:
+  [0] token 573 = 0.525415 (cumulative: 0.525415)
+  [1] token 1277 = 0.119517 (cumulative: 0.644932)
+  [2] token 4270 = 0.108215 (cumulative: 0.753147)
+  [3] token 24742 = 0.063718 (cumulative: 0.816866)
+  [4] token 476 = 0.050223 (cumulative: 0.867089)
+  [5] token 30765 = 0.042634 (cumulative: 0.909723)
+  [6] token 578 = 0.028530 (cumulative: 0.938253)
+  [7] token 4282 = 0.026559 (cumulative: 0.964812)
+  [8] token 14855 = 0.020887 (cumulative: 0.985699)
+  [9] token 1013 = 0.014301 (cumulative: 1.000000)
+- Normalized cumulative probabilities
+- Scaled random number: 0.473600
+- Selected index: 0
+RNG generated sample: 0 (token id: 573, probability: 0.525415)
+
+RNG internal:
+- Raw uniform random number: 0.186332
+- Token probabilities:
+  [0] token 24742 = 0.289172 (cumulative: 0.289172)
+  [1] token 14855 = 0.211699 (cumulative: 0.500870)
+  [2] token 32413 = 0.146700 (cumulative: 0.647571)
+  [3] token 7374 = 0.112929 (cumulative: 0.760500)
+  [4] token 22466 = 0.039964 (cumulative: 0.800463)
+  [5] token 30765 = 0.035226 (cumulative: 0.835689)
+  [6] token 31724 = 0.026153 (cumulative: 0.861842)
+  [7] token 7873 = 0.022129 (cumulative: 0.883971)
+  [8] token 13121 = 0.017530 (cumulative: 0.901502)
+  [9] token 7900 = 0.017200 (cumulative: 0.918702)
+  [10] token 24743 = 0.013117 (cumulative: 0.931819)
+  [11] token 24995 = 0.012537 (cumulative: 0.944355)
+  [12] token 6364 = 0.011312 (cumulative: 0.955667)
+  [13] token 25087 = 0.009704 (cumulative: 0.965372)
+  [14] token 147272 = 0.009148 (cumulative: 0.974520)
+  [15] token 6859 = 0.008592 (cumulative: 0.983112)
+  [16] token 32346 = 0.008540 (cumulative: 0.991652)
+  [17] token 12555 = 0.008348 (cumulative: 1.000000)
+- Normalized cumulative probabilities
+- Scaled random number: 0.186332
+- Selected index: 0
+RNG generated sample: 0 (token id: 24742, probability: 0.289172)
+
+RNG internal:
+- Raw uniform random number: 0.736918
+- Token probabilities:
+  [0] token 32346 = 0.239266 (cumulative: 0.239266)
+  [1] token 31724 = 0.174619 (cumulative: 0.413885)
+  [2] token 32413 = 0.150410 (cumulative: 0.564295)
+  [3] token 22466 = 0.101935 (cumulative: 0.666230)
+  [4] token 24743 = 0.072473 (cumulative: 0.738702)
+  [5] token 7374 = 0.036904 (cumulative: 0.775606)
+  [6] token 7841 = 0.036750 (cumulative: 0.812356)
+  [7] token 6945 = 0.033726 (cumulative: 0.846083)
+  [8] token 5449 = 0.032540 (cumulative: 0.878622)
+  [9] token 12558 = 0.018514 (cumulative: 0.897136)
+  [10] token 188216 = 0.015791 (cumulative: 0.912926)
+  [11] token 12555 = 0.015351 (cumulative: 0.928277)
+  [12] token 25200 = 0.012549 (cumulative: 0.940826)
+  [13] token 7268 = 0.010211 (cumulative: 0.951038)
+  [14] token 578 = 0.008944 (cumulative: 0.959982)
+  [15] token 7166 = 0.008019 (cumulative: 0.968001)
+  [16] token 89330 = 0.007199 (cumulative: 0.975200)
+  [17] token 12225 = 0.006734 (cumulative: 0.981934)
+  [18] token 26387 = 0.006362 (cumulative: 0.988296)
+  [19] token 18255 = 0.006031 (cumulative: 0.994327)
+  [20] token 24097 = 0.005673 (cumulative: 1.000000)
+- Normalized cumulative probabilities
+- Scaled random number: 0.736918
+- Selected index: 4
+RNG generated sample: 4 (token id: 24743, probability: 0.072473)
+
+RNG internal:
+- Raw uniform random number: 0.216550
+- Token probabilities:
+  [0] token 576 = 1.000000 (cumulative: 1.000000)
+- Scaled random number: 0.216550
+- Selected index: 0
+RNG generated sample: 0 (token id: 576, probability: 1.000000)
+
+RNG internal:
+- Raw uniform random number: 0.135218
+- Token probabilities:
+  [0] token 476 = 0.258376 (cumulative: 0.258376)
+  [1] token 573 = 0.247880 (cumulative: 0.506256)
+  [2] token 25175 = 0.158203 (cumulative: 0.664459)
+  [3] token 17611 = 0.126207 (cumulative: 0.790666)
+  [4] token 1461 = 0.047754 (cumulative: 0.838420)
+  [5] token 1277 = 0.046543 (cumulative: 0.884963)
+  [6] token 3515 = 0.037474 (cumulative: 0.922437)
+  [7] token 671 = 0.025727 (cumulative: 0.948163)
+  [8] token 6875 = 0.022853 (cumulative: 0.971016)
+  [9] token 15051 = 0.011521 (cumulative: 0.982537)
+  [10] token 181591 = 0.009854 (cumulative: 0.992391)
+  [11] token 18225 = 0.007609 (cumulative: 1.000000)
+- Scaled random number: 0.135218
+- Selected index: 0
+RNG generated sample: 0 (token id: 476, probability: 0.258376)
+
+RNG internal:
+- Raw uniform random number: 0.324141
+- Token probabilities:
+  [0] token 6875 = 0.819789 (cumulative: 0.819789)
+  [1] token 3515 = 0.073029 (cumulative: 0.892819)
+  [2] token 6479 = 0.053858 (cumulative: 0.946677)
+  [3] token 1552 = 0.053323 (cumulative: 1.000000)
+- Scaled random number: 0.324141
+- Selected index: 0
+RNG generated sample: 0 (token id: 6875, probability: 0.819789)
+
+RNG internal:
+- Raw uniform random number: 0.149675
+- Token probabilities:
+  [0] token 235265 = 0.595366 (cumulative: 0.595366)
+  [1] token 731 = 0.164509 (cumulative: 0.759874)
+  [2] token 578 = 0.132724 (cumulative: 0.892598)
+  [3] token 235269 = 0.091434 (cumulative: 0.984032)
+  [4] token 2733 = 0.015968 (cumulative: 1.000000)
+- Scaled random number: 0.149675
+- Selected index: 0
+RNG generated sample: 0 (token id: 235265, probability: 0.595366)
+
+RNG internal:
+- Raw uniform random number: 0.222321
+- Token probabilities:
+  [0] token 1165 = 0.432864 (cumulative: 0.432864)
+  [1] token 714 = 0.342775 (cumulative: 0.775639)
+  [2] token 878 = 0.077039 (cumulative: 0.852678)
+  [3] token 108 = 0.063075 (cumulative: 0.915753)
+  [4] token 4560 = 0.022963 (cumulative: 0.938716)
+  [5] token 1417 = 0.022739 (cumulative: 0.961455)
+  [6] token 109 = 0.016129 (cumulative: 0.977584)
+  [7] token 8533 = 0.011547 (cumulative: 0.989130)
+  [8] token 9693 = 0.010870 (cumulative: 1.000000)
+- Normalized cumulative probabilities
+- Scaled random number: 0.222321
+- Selected index: 0
+RNG generated sample: 0 (token id: 1165, probability: 0.432864)
+
+RNG internal:
+- Raw uniform random number: 0.386489
+- Token probabilities:
+  [0] token 729 = 0.845230 (cumulative: 0.845230)
+  [1] token 1538 = 0.056396 (cumulative: 0.901626)
+  [2] token 1134 = 0.030819 (cumulative: 0.932445)
+  [3] token 1671 = 0.023895 (cumulative: 0.956340)
+  [4] token 14621 = 0.022608 (cumulative: 0.978949)
+  [5] token 603 = 0.021051 (cumulative: 1.000000)
+- Scaled random number: 0.386489
+- Selected index: 0
+RNG generated sample: 0 (token id: 729, probability: 0.845230)
+
+RNG internal:
+- Raw uniform random number: 0.902598
+- Token probabilities:
+  [0] token 3326 = 0.605022 (cumulative: 0.605022)
+  [1] token 476 = 0.084080 (cumulative: 0.689102)
+  [2] token 573 = 0.058482 (cumulative: 0.747584)
+  [3] token 780 = 0.043943 (cumulative: 0.791527)
+  [4] token 13920 = 0.039771 (cumulative: 0.831298)
+  [5] token 3482 = 0.035118 (cumulative: 0.866416)
+  [6] token 73517 = 0.033590 (cumulative: 0.900006)
+  [7] token 6869 = 0.032135 (cumulative: 0.932141)
+  [8] token 5483 = 0.025636 (cumulative: 0.957777)
+  [9] token 8385 = 0.025507 (cumulative: 0.983283)
+  [10] token 6990 = 0.016716 (cumulative: 1.000000)
+- Normalized cumulative probabilities
+- Scaled random number: 0.902598
+- Selected index: 7
+RNG generated sample: 7 (token id: 6869, probability: 0.032135)
+
+RNG internal:
+- Raw uniform random number: 0.449950
+- Token probabilities:
+  [0] token 577 = 0.899845 (cumulative: 0.899845)
+  [1] token 731 = 0.100155 (cumulative: 1.000000)
+- Scaled random number: 0.449950
+- Selected index: 0
+RNG generated sample: 0 (token id: 577, probability: 0.899845)
+
+RNG internal:
+- Raw uniform random number: 0.613063
+- Token probabilities:
+  [0] token 614 = 0.174297 (cumulative: 0.174297)
+  [1] token 2121 = 0.161849 (cumulative: 0.336147)
+  [2] token 10244 = 0.132728 (cumulative: 0.468875)
+  [3] token 11560 = 0.105713 (cumulative: 0.574588)
+  [4] token 8363 = 0.056397 (cumulative: 0.630985)
+  [5] token 3448 = 0.038994 (cumulative: 0.669979)
+  [6] token 1160 = 0.026719 (cumulative: 0.696698)
+  [7] token 3114 = 0.021097 (cumulative: 0.717795)
+  [8] token 749 = 0.019989 (cumulative: 0.737784)
+  [9] token 1717 = 0.019048 (cumulative: 0.756831)
+  [10] token 1281 = 0.018521 (cumulative: 0.775353)
+  [11] token 22101 = 0.017793 (cumulative: 0.793146)
+  [12] token 27205 = 0.017180 (cumulative: 0.810326)
+  [13] token 1500 = 0.016377 (cumulative: 0.826703)
+  [14] token 1554 = 0.015237 (cumulative: 0.841940)
+  [15] token 1987 = 0.010818 (cumulative: 0.852757)
+  [16] token 2701 = 0.010722 (cumulative: 0.863480)
+  [17] token 3519 = 0.010620 (cumulative: 0.874100)
+  [18] token 58142 = 0.010394 (cumulative: 0.884495)
+  [19] token 1501 = 0.009888 (cumulative: 0.894382)
+  [20] token 5291 = 0.009849 (cumulative: 0.904231)
+  [21] token 3418 = 0.009486 (cumulative: 0.913717)
+  [22] token 18739 = 0.008534 (cumulative: 0.922252)
+  [23] token 11441 = 0.007726 (cumulative: 0.929977)
+  [24] token 1611 = 0.007329 (cumulative: 0.937307)
+  [25] token 3104 = 0.006918 (cumulative: 0.944225)
+  [26] token 11941 = 0.006757 (cumulative: 0.950982)
+  [27] token 1443 = 0.006543 (cumulative: 0.957525)
+  [28] token 4544 = 0.006309 (cumulative: 0.963833)
+  [29] token 11650 = 0.005806 (cumulative: 0.969639)
+  [30] token 1707 = 0.005656 (cumulative: 0.975295)
+  [31] token 6502 = 0.005270 (cumulative: 0.980565)
+  [32] token 1612 = 0.005202 (cumulative: 0.985768)
+  [33] token 3508 = 0.005142 (cumulative: 0.990910)
+  [34] token 1080 = 0.004577 (cumulative: 0.995487)
+  [35] token 3918 = 0.004513 (cumulative: 1.000000)
+- Normalized cumulative probabilities
+- Scaled random number: 0.613063
+- Selected index: 4
+RNG generated sample: 4 (token id: 8363, probability: 0.056397)
+
+RNG internal:
+- Raw uniform random number: 0.902349
+- Token probabilities:
+  [0] token 4270 = 0.615477 (cumulative: 0.615477)
+  [1] token 1013 = 0.335167 (cumulative: 0.950644)
+  [2] token 573 = 0.049355 (cumulative: 1.000000)
+- Normalized cumulative probabilities
+- Scaled random number: 0.902349
+- Selected index: 1
+RNG generated sample: 1 (token id: 1013, probability: 0.335167)
+
+RNG internal:
+- Raw uniform random number: 0.099280
+- Token probabilities:
+  [0] token 476 = 0.716391 (cumulative: 0.716391)
+  [1] token 573 = 0.185919 (cumulative: 0.902310)
+  [2] token 665 = 0.097690 (cumulative: 1.000000)
+- Scaled random number: 0.099280
+- Selected index: 0
+RNG generated sample: 0 (token id: 476, probability: 0.716391)
+
+RNG internal:
+- Raw uniform random number: 0.969809
+- Token probabilities:
+  [0] token 6875 = 0.850031 (cumulative: 0.850031)
+  [1] token 2733 = 0.070531 (cumulative: 0.920563)
+  [2] token 2764 = 0.058698 (cumulative: 0.979261)
+  [3] token 6218 = 0.020739 (cumulative: 1.000000)
+- Scaled random number: 0.969809
+- Selected index: 2
+RNG generated sample: 2 (token id: 2764, probability: 0.058698)
+
+RNG internal:
+- Raw uniform random number: 0.653140
+- Token probabilities:
+  [0] token 6218 = 0.368522 (cumulative: 0.368522)
+  [1] token 1142 = 0.230611 (cumulative: 0.599133)
+  [2] token 30765 = 0.093099 (cumulative: 0.692232)
+  [3] token 30673 = 0.054071 (cumulative: 0.746303)
+  [4] token 2733 = 0.050353 (cumulative: 0.796655)
+  [5] token 10513 = 0.045775 (cumulative: 0.842431)
+  [6] token 24742 = 0.039840 (cumulative: 0.882271)
+  [7] token 3772 = 0.034020 (cumulative: 0.916290)
+  [8] token 3210 = 0.023679 (cumulative: 0.939969)
+  [9] token 9916 = 0.022963 (cumulative: 0.962932)
+  [10] token 6875 = 0.014606 (cumulative: 0.977538)
+  [11] token 6431 = 0.011682 (cumulative: 0.989220)
+  [12] token 13060 = 0.010780 (cumulative: 1.000000)
+- Normalized cumulative probabilities
+- Scaled random number: 0.653140
+- Selected index: 2
+RNG generated sample: 2 (token id: 30765, probability: 0.093099)
+
+RNG internal:
+- Raw uniform random number: 0.170910
+- Token probabilities:
+  [0] token 6218 = 0.665578 (cumulative: 0.665578)
+  [1] token 3210 = 0.079803 (cumulative: 0.745381)
+  [2] token 10513 = 0.075736 (cumulative: 0.821117)
+  [3] token 8738 = 0.059956 (cumulative: 0.881072)
+  [4] token 30673 = 0.041297 (cumulative: 0.922369)
+  [5] token 6887 = 0.038001 (cumulative: 0.960370)
+  [6] token 27321 = 0.023678 (cumulative: 0.984048)
+  [7] token 9102 = 0.015952 (cumulative: 1.000000)
+- Scaled random number: 0.170910
+- Selected index: 0
+RNG generated sample: 0 (token id: 6218, probability: 0.665578)
+
+RNG internal:
+- Raw uniform random number: 0.358152
+- Token probabilities:
+  [0] token 729 = 0.862046 (cumulative: 0.862046)
+  [1] token 603 = 0.109111 (cumulative: 0.971157)
+  [2] token 1538 = 0.028843 (cumulative: 1.000000)
+- Scaled random number: 0.358152
+- Selected index: 0
+RNG generated sample: 0 (token id: 729, probability: 0.862046)
+
+RNG internal:
+- Raw uniform random number: 0.750686
+- Token probabilities:
+  [0] token 1382 = 0.890231 (cumulative: 0.890231)
+  [1] token 4819 = 0.065597 (cumulative: 0.955829)
+  [2] token 5112 = 0.022657 (cumulative: 0.978485)
+  [3] token 476 = 0.021515 (cumulative: 1.000000)
+- Normalized cumulative probabilities
+- Scaled random number: 0.750686
+- Selected index: 0
+RNG generated sample: 0 (token id: 1382, probability: 0.890231)
+
+RNG internal:
+- Raw uniform random number: 0.607831
+- Token probabilities:
+  [0] token 689 = 0.937401 (cumulative: 0.937401)
+  [1] token 235265 = 0.062599 (cumulative: 1.000000)
+- Normalized cumulative probabilities
+- Scaled random number: 0.607831
+- Selected index: 0
+RNG generated sample: 0 (token id: 689, probability: 0.937401)
+
+RNG internal:
+- Raw uniform random number: 0.325047
+- Token probabilities:
+  [0] token 1566 = 1.000000 (cumulative: 1.000000)
+- Scaled random number: 0.325047
+- Selected index: 0
+RNG generated sample: 0 (token id: 1566, probability: 1.000000)
+
+RNG internal:
+- Raw uniform random number: 0.038425
+- Token probabilities:
+  [0] token 235265 = 0.826957 (cumulative: 0.826957)
+  [1] token 731 = 0.090979 (cumulative: 0.917936)
+  [2] token 235269 = 0.060614 (cumulative: 0.978550)
+  [3] token 578 = 0.021450 (cumulative: 1.000000)
+- Scaled random number: 0.038425
+- Selected index: 0
+RNG generated sample: 0 (token id: 235265, probability: 0.826957)
+
+RNG internal:
+- Raw uniform random number: 0.634274
+- Token probabilities:
+  [0] token 714 = 0.577312 (cumulative: 0.577312)
+  [1] token 1165 = 0.168872 (cumulative: 0.746184)
+  [2] token 1417 = 0.097621 (cumulative: 0.843805)
+  [3] token 108 = 0.089722 (cumulative: 0.933527)
+  [4] token 878 = 0.043604 (cumulative: 0.977131)
+  [5] token 109 = 0.022869 (cumulative: 1.000000)
+- Normalized cumulative probabilities
+- Scaled random number: 0.634274
+- Selected index: 1
+RNG generated sample: 1 (token id: 1165, probability: 0.168872)
+
+RNG internal:
+- Raw uniform random number: 0.958949
+- Token probabilities:
+  [0] token 729 = 0.796294 (cumulative: 0.796294)
+  [1] token 1671 = 0.055330 (cumulative: 0.851623)
+  [2] token 1498 = 0.053206 (cumulative: 0.904830)
+  [3] token 1538 = 0.028023 (cumulative: 0.932852)
+  [4] token 603 = 0.026168 (cumulative: 0.959021)
+  [5] token 1170 = 0.020723 (cumulative: 0.979743)
+  [6] token 1134 = 0.020257 (cumulative: 1.000000)
+- Scaled random number: 0.958949
+- Selected index: 4
+RNG generated sample: 4 (token id: 603, probability: 0.026168)
+
+RNG internal:
+- Raw uniform random number: 0.652790
+- Token probabilities:
+  [0] token 5604 = 0.175121 (cumulative: 0.175121)
+  [1] token 13277 = 0.153589 (cumulative: 0.328711)
+  [2] token 2845 = 0.100296 (cumulative: 0.429006)
+  [3] token 573 = 0.086324 (cumulative: 0.515330)
+  [4] token 1180 = 0.073832 (cumulative: 0.589162)
+  [5] token 476 = 0.050402 (cumulative: 0.639564)
+  [6] token 2076 = 0.049879 (cumulative: 0.689443)
+  [7] token 1170 = 0.039003 (cumulative: 0.728445)
+  [8] token 3421 = 0.033634 (cumulative: 0.762079)
+  [9] token 7103 = 0.029498 (cumulative: 0.791577)
+  [10] token 974 = 0.028961 (cumulative: 0.820538)
+  [11] token 1490 = 0.027479 (cumulative: 0.848017)
+  [12] token 3482 = 0.023851 (cumulative: 0.871869)
+  [13] token 780 = 0.021746 (cumulative: 0.893614)
+  [14] token 671 = 0.019661 (cumulative: 0.913275)
+  [15] token 16714 = 0.017120 (cumulative: 0.930394)
+  [16] token 3695 = 0.014283 (cumulative: 0.944677)
+  [17] token 3836 = 0.010992 (cumulative: 0.955669)
+  [18] token 5123 = 0.009935 (cumulative: 0.965604)
+  [19] token 11995 = 0.009515 (cumulative: 0.975120)
+  [20] token 3077 = 0.007914 (cumulative: 0.983034)
+  [21] token 7094 = 0.007153 (cumulative: 0.990186)
+  [22] token 736 = 0.005465 (cumulative: 0.995652)
+  [23] token 3151 = 0.004349 (cumulative: 1.000000)
+- Normalized cumulative probabilities
+- Scaled random number: 0.652790
+- Selected index: 6
+RNG generated sample: 6 (token id: 2076, probability: 0.049879)
+
+RNG internal:
+- Raw uniform random number: 0.635059
+- Token probabilities:
+  [0] token 1671 = 0.406296 (cumulative: 0.406296)
+  [1] token 575 = 0.192803 (cumulative: 0.599099)
+  [2] token 5604 = 0.168411 (cumulative: 0.767511)
+  [3] token 974 = 0.059525 (cumulative: 0.827035)
+  [4] token 1855 = 0.049729 (cumulative: 0.876765)
+  [5] token 573 = 0.049257 (cumulative: 0.926021)
+  [6] token 16714 = 0.021290 (cumulative: 0.947311)
+  [7] token 5327 = 0.021017 (cumulative: 0.968328)
+  [8] token 476 = 0.017716 (cumulative: 0.986044)
+  [9] token 3077 = 0.013956 (cumulative: 1.000000)
+- Scaled random number: 0.635059
+- Selected index: 2
+RNG generated sample: 2 (token id: 5604, probability: 0.168411)
+
+RNG internal:
+- Raw uniform random number: 0.995300
+- Token probabilities:
+  [0] token 577 = 0.451206 (cumulative: 0.451206)
+  [1] token 974 = 0.244825 (cumulative: 0.696031)
+  [2] token 573 = 0.198692 (cumulative: 0.894723)
+  [3] token 476 = 0.065625 (cumulative: 0.960347)
+  [4] token 671 = 0.014540 (cumulative: 0.974887)
+  [5] token 731 = 0.012775 (cumulative: 0.987662)
+  [6] token 685 = 0.012338 (cumulative: 1.000000)
+- Normalized cumulative probabilities
+- Scaled random number: 0.995300
+- Selected index: 6
+RNG generated sample: 6 (token id: 685, probability: 0.012338)
+
+RNG internal:
+- Raw uniform random number: 0.581850
+- Token probabilities:
+  [0] token 974 = 0.458660 (cumulative: 0.458660)
+  [1] token 573 = 0.456690 (cumulative: 0.915350)
+  [2] token 476 = 0.061865 (cumulative: 0.977215)
+  [3] token 671 = 0.022785 (cumulative: 1.000000)
+- Normalized cumulative probabilities
+- Scaled random number: 0.581850
+- Selected index: 1
+RNG generated sample: 1 (token id: 573, probability: 0.456690)
+
+RNG internal:
+- Raw uniform random number: 0.414369
+- Token probabilities:
+  [0] token 1370 = 0.925890 (cumulative: 0.925890)
+  [1] token 1546 = 0.050608 (cumulative: 0.976498)
+  [2] token 2134 = 0.023502 (cumulative: 1.000000)
+- Scaled random number: 0.414369
+- Selected index: 0
+RNG generated sample: 0 (token id: 1370, probability: 0.925890)
+
+RNG internal:
+- Raw uniform random number: 0.474698
+- Token probabilities:
+  [0] token 18225 = 0.322165 (cumulative: 0.322165)
+  [1] token 16481 = 0.198979 (cumulative: 0.521144)
+  [2] token 6875 = 0.132834 (cumulative: 0.653979)
+  [3] token 2733 = 0.079117 (cumulative: 0.733096)
+  [4] token 8385 = 0.061359 (cumulative: 0.794455)
+  [5] token 4065 = 0.052413 (cumulative: 0.846867)
+  [6] token 3364 = 0.043254 (cumulative: 0.890121)
+  [7] token 1382 = 0.038182 (cumulative: 0.928303)
+  [8] token 3287 = 0.017877 (cumulative: 0.946180)
+  [9] token 8697 = 0.015535 (cumulative: 0.961715)
+  [10] token 3885 = 0.010694 (cumulative: 0.972409)
+  [11] token 1879 = 0.009350 (cumulative: 0.981759)
+  [12] token 3836 = 0.009169 (cumulative: 0.990928)
+  [13] token 1080 = 0.009072 (cumulative: 1.000000)
+- Scaled random number: 0.474698
+- Selected index: 1
+RNG generated sample: 1 (token id: 16481, probability: 0.198979)
+
+RNG internal:
+- Raw uniform random number: 0.623510
+- Token probabilities:
+  [0] token 2733 = 0.814418 (cumulative: 0.814418)
+  [1] token 6875 = 0.152324 (cumulative: 0.966742)
+  [2] token 1812 = 0.033258 (cumulative: 1.000000)
+- Normalized cumulative probabilities
+- Scaled random number: 0.623510
+- Selected index: 0
+RNG generated sample: 0 (token id: 2733, probability: 0.814418)
+
+RNG internal:
+- Raw uniform random number: 0.338008
+- Token probabilities:
+  [0] token 235265 = 0.523983 (cumulative: 0.523983)
+  [1] token 577 = 0.141812 (cumulative: 0.665796)
+  [2] token 674 = 0.064771 (cumulative: 0.730567)
+  [3] token 575 = 0.063529 (cumulative: 0.794095)
+  [4] token 3364 = 0.048300 (cumulative: 0.842396)
+  [5] token 35606 = 0.041633 (cumulative: 0.884028)
+  [6] token 235269 = 0.039151 (cumulative: 0.923179)
+  [7] token 578 = 0.033886 (cumulative: 0.957065)
+  [8] token 3646 = 0.030427 (cumulative: 0.987492)
+  [9] token 6990 = 0.012508 (cumulative: 1.000000)
+- Scaled random number: 0.338008
+- Selected index: 0
+RNG generated sample: 0 (token id: 235265, probability: 0.523983)
+
+RNG internal:
+- Raw uniform random number: 0.674752
+- Token probabilities:
+  [0] token 108 = 0.530066 (cumulative: 0.530066)
+  [1] token 878 = 0.126280 (cumulative: 0.656346)
+  [2] token 109 = 0.122080 (cumulative: 0.778426)
+  [3] token 714 = 0.105097 (cumulative: 0.883522)
+  [4] token 1165 = 0.043589 (cumulative: 0.927112)
+  [5] token 968 = 0.031959 (cumulative: 0.959071)
+  [6] token 4560 = 0.014985 (cumulative: 0.974056)
+  [7] token 8533 = 0.013229 (cumulative: 0.987284)
+  [8] token 1417 = 0.012716 (cumulative: 1.000000)
+- Scaled random number: 0.674752
+- Selected index: 2
+RNG generated sample: 2 (token id: 109, probability: 0.122080)
+
+RNG internal:
+- Raw uniform random number: 0.317202
+- Token probabilities:
+  [0] token 886 = 0.668943 (cumulative: 0.668943)
+  [1] token 651 = 0.229445 (cumulative: 0.898389)
+  [2] token 235322 = 0.101611 (cumulative: 1.000000)
+- Scaled random number: 0.317202
+- Selected index: 0
+RNG generated sample: 0 (token id: 886, probability: 0.668943)
+
+RNG internal:
+- Raw uniform random number: 0.778345
+- Token probabilities:
+  [0] token 235248 = 0.862096 (cumulative: 0.862096)
+  [1] token 573 = 0.137904 (cumulative: 1.000000)
+- Scaled random number: 0.778345
+- Selected index: 0
+RNG generated sample: 0 (token id: 235248, probability: 0.862096)
+
+RNG internal:
+- Raw uniform random number: 0.949571
+- Token probabilities:
+  [0] token 235274 = 1.000000 (cumulative: 1.000000)
+- Scaled random number: 0.949571
+- Selected index: 0
+RNG generated sample: 0 (token id: 235274, probability: 1.000000)
+
+RNG internal:
+- Raw uniform random number: 0.662527
+- Token probabilities:
+  [0] token 235315 = 1.000000 (cumulative: 1.000000)
+- Scaled random number: 0.662527
+- Selected index: 0
+RNG generated sample: 0 (token id: 235315, probability: 1.000000)
+
+RNG internal:
+- Raw uniform random number: 0.013572
+- Token probabilities:
+  [0] token 235308 = 0.639661 (cumulative: 0.639661)
+  [1] token 235318 = 0.275343 (cumulative: 0.915004)
+  [2] token 235315 = 0.030109 (cumulative: 0.945113)
+  [3] token 235324 = 0.027641 (cumulative: 0.972754)
+  [4] token 235321 = 0.027246 (cumulative: 1.000000)
+- Normalized cumulative probabilities
+- Scaled random number: 0.013572
+- Selected index: 0
+RNG generated sample: 0 (token id: 235308, probability: 0.639661)
+
+RNG internal:
+- Raw uniform random number: 0.622846
+- Token probabilities:
+  [0] token 235318 = 0.396667 (cumulative: 0.396667)
+  [1] token 235324 = 0.285154 (cumulative: 0.681821)
+  [2] token 235321 = 0.161404 (cumulative: 0.843225)
+  [3] token 235315 = 0.067127 (cumulative: 0.910352)
+  [4] token 235308 = 0.048712 (cumulative: 0.959064)
+  [5] token 235276 = 0.040936 (cumulative: 1.000000)
+- Normalized cumulative probabilities
+- Scaled random number: 0.622846
+- Selected index: 1
+RNG generated sample: 1 (token id: 235324, probability: 0.285154)
+
+RNG internal:
+- Raw uniform random number: 0.673660
+- Token probabilities:
+  [0] token 235269 = 1.000000 (cumulative: 1.000000)
+- Scaled random number: 0.673660
+- Selected index: 0
+RNG generated sample: 0 (token id: 235269, probability: 1.000000)
+
+RNG internal:
+- Raw uniform random number: 0.971945
+- Token probabilities:
+  [0] token 573 = 0.743643 (cumulative: 0.743643)
+  [1] token 21786 = 0.116489 (cumulative: 0.860132)
+  [2] token 476 = 0.053962 (cumulative: 0.914093)
+  [3] token 3350 = 0.043848 (cumulative: 0.957941)
+  [4] token 2550 = 0.024190 (cumulative: 0.982131)
+  [5] token 1080 = 0.017869 (cumulative: 1.000000)
+- Normalized cumulative probabilities
+- Scaled random number: 0.971945
+- Selected index: 4
+RNG generated sample: 4 (token id: 2550, probability: 0.024190)
+
+RNG internal:
+- Raw uniform random number: 0.878193
+- Token probabilities:
+  [0] token 2733 = 0.356259 (cumulative: 0.356259)
+  [1] token 16481 = 0.350001 (cumulative: 0.706261)
+  [2] token 6875 = 0.157458 (cumulative: 0.863719)
+  [3] token 18225 = 0.112145 (cumulative: 0.975864)
+  [4] token 10964 = 0.013665 (cumulative: 0.989529)
+  [5] token 2845 = 0.010471 (cumulative: 1.000000)
+- Normalized cumulative probabilities
+- Scaled random number: 0.878193
+- Selected index: 3
+RNG generated sample: 3 (token id: 18225, probability: 0.112145)
+
+RNG internal:
+- Raw uniform random number: 0.509624
+- Token probabilities:
+  [0] token 17273 = 1.000000 (cumulative: 1.000000)
+- Scaled random number: 0.509624
+- Selected index: 0
+RNG generated sample: 0 (token id: 17273, probability: 1.000000)
+
+RNG internal:
+- Raw uniform random number: 0.055715
+- Token probabilities:
+  [0] token 2733 = 0.615609 (cumulative: 0.615609)
+  [1] token 6875 = 0.384391 (cumulative: 1.000000)
+- Scaled random number: 0.055715
+- Selected index: 0
+RNG generated sample: 0 (token id: 2733, probability: 0.615609)
+
+RNG internal:
+- Raw uniform random number: 0.451159
+- Token probabilities:
+  [0] token 729 = 0.488738 (cumulative: 0.488738)
+  [1] token 235269 = 0.431861 (cumulative: 0.920599)
+  [2] token 3151 = 0.079401 (cumulative: 1.000000)
+- Normalized cumulative probabilities
+- Scaled random number: 0.451159
+- Selected index: 0
+RNG generated sample: 0 (token id: 729, probability: 0.488738)
+
+RNG internal:
+- Raw uniform random number: 0.019988
+- Token probabilities:
+  [0] token 6990 = 0.828484 (cumulative: 0.828484)
+  [1] token 5483 = 0.171516 (cumulative: 1.000000)
+- Normalized cumulative probabilities
+- Scaled random number: 0.019988
+- Selected index: 0
+RNG generated sample: 0 (token id: 6990, probability: 0.828484)
+
+RNG internal:
+- Raw uniform random number: 0.441711
+- Token probabilities:
+  [0] token 235269 = 0.500042 (cumulative: 0.500042)
+  [1] token 235265 = 0.337281 (cumulative: 0.837323)
+  [2] token 731 = 0.092573 (cumulative: 0.929895)
+  [3] token 3151 = 0.070105 (cumulative: 1.000000)
+- Normalized cumulative probabilities
+- Scaled random number: 0.441711
+- Selected index: 0
+RNG generated sample: 0 (token id: 235269, probability: 0.500042)
+
+RNG internal:
+- Raw uniform random number: 0.979587
+- Token probabilities:
+  [0] token 573 = 0.556143 (cumulative: 0.556143)
+  [1] token 3151 = 0.155399 (cumulative: 0.711542)
+  [2] token 1080 = 0.124633 (cumulative: 0.836174)
+  [3] token 736 = 0.093069 (cumulative: 0.929243)
+  [4] token 3836 = 0.029464 (cumulative: 0.958707)
+  [5] token 8602 = 0.027943 (cumulative: 0.986650)
+  [6] token 948 = 0.013350 (cumulative: 1.000000)
+- Normalized cumulative probabilities
+- Scaled random number: 0.979587
+- Selected index: 5
+RNG generated sample: 5 (token id: 8602, probability: 0.027943)
+
+RNG internal:
+- Raw uniform random number: 0.359444
+- Token probabilities:
+  [0] token 1080 = 0.858274 (cumulative: 0.858274)
+  [1] token 573 = 0.141727 (cumulative: 1.000000)
+- Scaled random number: 0.359444
+- Selected index: 0
+RNG generated sample: 0 (token id: 1080, probability: 0.858274)
+
+RNG internal:
+- Raw uniform random number: 0.480894
+- Token probabilities:
+  [0] token 651 = 0.299088 (cumulative: 0.299088)
+  [1] token 31616 = 0.295837 (cumulative: 0.594925)
+  [2] token 198351 = 0.053919 (cumulative: 0.648844)
+  [3] token 8723 = 0.052521 (cumulative: 0.701365)
+  [4] token 235301 = 0.049580 (cumulative: 0.750945)
+  [5] token 96815 = 0.040190 (cumulative: 0.791135)
+  [6] token 2923 = 0.036209 (cumulative: 0.827343)
+  [7] token 92690 = 0.030223 (cumulative: 0.857566)
+  [8] token 105460 = 0.021409 (cumulative: 0.878975)
+  [9] token 83814 = 0.018627 (cumulative: 0.897603)
+  [10] token 946 = 0.013549 (cumulative: 0.911151)
+  [11] token 56755 = 0.012601 (cumulative: 0.923752)
+  [12] token 29564 = 0.011980 (cumulative: 0.935732)
+  [13] token 235279 = 0.011841 (cumulative: 0.947573)
+  [14] token 3275 = 0.010808 (cumulative: 0.958381)
+  [15] token 235291 = 0.009598 (cumulative: 0.967979)
+  [16] token 4122 = 0.009351 (cumulative: 0.977329)
+  [17] token 1905 = 0.008279 (cumulative: 0.985609)
+  [18] token 235296 = 0.007225 (cumulative: 0.992833)
+  [19] token 235280 = 0.007167 (cumulative: 1.000000)
+- Normalized cumulative probabilities
+- Scaled random number: 0.480894
+- Selected index: 1
+RNG generated sample: 1 (token id: 31616, probability: 0.295837)
+
+RNG internal:
+- Raw uniform random number: 0.688661
+- Token probabilities:
+  [0] token 140950 = 0.791303 (cumulative: 0.791303)
+  [1] token 13403 = 0.146731 (cumulative: 0.938034)
+  [2] token 694 = 0.032903 (cumulative: 0.970937)
+  [3] token 116628 = 0.029063 (cumulative: 1.000000)
+- Scaled random number: 0.688661
+- Selected index: 0
+RNG generated sample: 0 (token id: 140950, probability: 0.791303)
+
+RNG internal:
+- Raw uniform random number: 0.880476
+- Token probabilities:
+  [0] token 694 = 1.000000 (cumulative: 1.000000)
+- Scaled random number: 0.880476
+- Selected index: 0
+RNG generated sample: 0 (token id: 694, probability: 1.000000)
+
+RNG internal:
+- Raw uniform random number: 0.918235
+- Token probabilities:
+  [0] token 4474 = 0.322602 (cumulative: 0.322602)
+  [1] token 2515 = 0.258222 (cumulative: 0.580824)
+  [2] token 235248 = 0.233247 (cumulative: 0.814071)
+  [3] token 235369 = 0.075908 (cumulative: 0.889979)
+  [4] token 1816 = 0.057074 (cumulative: 0.947053)
+  [5] token 5763 = 0.023316 (cumulative: 0.970368)
+  [6] token 235290 = 0.017462 (cumulative: 0.987830)
+  [7] token 12623 = 0.012170 (cumulative: 1.000000)
+- Normalized cumulative probabilities
+- Scaled random number: 0.918235
+- Selected index: 4
+RNG generated sample: 4 (token id: 1816, probability: 0.057074)
+
+RNG internal:
+- Raw uniform random number: 0.216822
+- Token probabilities:
+  [0] token 1417 = 0.804431 (cumulative: 0.804431)
+  [1] token 1165 = 0.163081 (cumulative: 0.967512)
+  [2] token 714 = 0.032488 (cumulative: 1.000000)
+- Scaled random number: 0.216822
+- Selected index: 0
+RNG generated sample: 0 (token id: 1417, probability: 0.804431)
+
+RNG internal:
+- Raw uniform random number: 0.565189
+- Token probabilities:
+  [0] token 2733 = 1.000000 (cumulative: 1.000000)
+- Scaled random number: 0.565189
+- Selected index: 0
+RNG generated sample: 0 (token id: 2733, probability: 1.000000)
+
+RNG internal:
+- Raw uniform random number: 0.865103
+- Token probabilities:
+  [0] token 729 = 1.000000 (cumulative: 1.000000)
+- Scaled random number: 0.865103
+- Selected index: 0
+RNG generated sample: 0 (token id: 729, probability: 1.000000)
+
+RNG internal:
+- Raw uniform random number: 0.508969
+- Token probabilities:
+  [0] token 6869 = 0.842892 (cumulative: 0.842892)
+  [1] token 1170 = 0.072457 (cumulative: 0.915349)
+  [2] token 3326 = 0.035130 (cumulative: 0.950479)
+  [3] token 6990 = 0.027835 (cumulative: 0.978314)
+  [4] token 1671 = 0.021686 (cumulative: 1.000000)
+- Normalized cumulative probabilities
+- Scaled random number: 0.508969
+- Selected index: 0
+RNG generated sample: 0 (token id: 6869, probability: 0.842892)
+
+RNG internal:
+- Raw uniform random number: 0.916723
+- Token probabilities:
+  [0] token 577 = 1.000000 (cumulative: 1.000000)
+- Scaled random number: 0.916723
+- Selected index: 0
+RNG generated sample: 0 (token id: 577, probability: 1.000000)
+
+RNG internal:
+- Raw uniform random number: 0.921158
+- Token probabilities:
+  [0] token 2121 = 0.608715 (cumulative: 0.608715)
+  [1] token 8363 = 0.247062 (cumulative: 0.855778)
+  [2] token 11560 = 0.073957 (cumulative: 0.929735)
+  [3] token 614 = 0.021288 (cumulative: 0.951023)
+  [4] token 1707 = 0.018550 (cumulative: 0.969573)
+  [5] token 3114 = 0.015869 (cumulative: 0.985442)
+  [6] token 27205 = 0.014558 (cumulative: 1.000000)
+- Normalized cumulative probabilities
+- Scaled random number: 0.921158
+- Selected index: 2
+RNG generated sample: 2 (token id: 11560, probability: 0.073957)
+
+RNG internal:
+- Raw uniform random number: 0.083113
+- Token probabilities:
+  [0] token 30765 = 0.401319 (cumulative: 0.401319)
+  [1] token 4552 = 0.163355 (cumulative: 0.564674)
+  [2] token 24742 = 0.127465 (cumulative: 0.692139)
+  [3] token 14855 = 0.097238 (cumulative: 0.789378)
+  [4] token 476 = 0.056025 (cumulative: 0.845403)
+  [5] token 573 = 0.050174 (cumulative: 0.895577)
+  [6] token 5766 = 0.027732 (cumulative: 0.923309)
+  [7] token 3890 = 0.027200 (cumulative: 0.950509)
+  [8] token 10849 = 0.024459 (cumulative: 0.974968)
+  [9] token 56983 = 0.014469 (cumulative: 0.989437)
+  [10] token 40559 = 0.010563 (cumulative: 1.000000)
+- Normalized cumulative probabilities
+- Scaled random number: 0.083113
+- Selected index: 0
+RNG generated sample: 0 (token id: 30765, probability: 0.401319)
+
+RNG internal:
+- Raw uniform random number: 0.277719
+- Token probabilities:
+  [0] token 4552 = 0.898408 (cumulative: 0.898408)
+  [1] token 14845 = 0.073071 (cumulative: 0.971479)
+  [2] token 56983 = 0.028521 (cumulative: 1.000000)
+- Scaled random number: 0.277719
+- Selected index: 0
+RNG generated sample: 0 (token id: 4552, probability: 0.898408)
+
+RNG internal:
+- Raw uniform random number: 0.009357
+- Token probabilities:
+  [0] token 235265 = 0.723210 (cumulative: 0.723210)
+  [1] token 578 = 0.103099 (cumulative: 0.826310)
+  [2] token 731 = 0.068051 (cumulative: 0.894361)
+  [3] token 235269 = 0.055781 (cumulative: 0.950142)
+  [4] token 2177 = 0.049858 (cumulative: 1.000000)
+- Scaled random number: 0.009357
+- Selected index: 0
+RNG generated sample: 0 (token id: 235265, probability: 0.723210)
+
+RNG internal:
+- Raw uniform random number: 0.842342
+- Token probabilities:
+  [0] token 1165 = 0.878120 (cumulative: 0.878120)
+  [1] token 714 = 0.052768 (cumulative: 0.930887)
+  [2] token 109 = 0.042566 (cumulative: 0.973453)
+  [3] token 1417 = 0.026547 (cumulative: 1.000000)
+- Normalized cumulative probabilities
+- Scaled random number: 0.842342
+- Selected index: 0
+RNG generated sample: 0 (token id: 1165, probability: 0.878120)
+
+RNG internal:
+- Raw uniform random number: 0.647174
+- Token probabilities:
+  [0] token 729 = 0.878956 (cumulative: 0.878956)
+  [1] token 603 = 0.071867 (cumulative: 0.950822)
+  [2] token 1671 = 0.026227 (cumulative: 0.977049)
+  [3] token 1538 = 0.022951 (cumulative: 1.000000)
+- Normalized cumulative probabilities
+- Scaled random number: 0.647174
+- Selected index: 0
+RNG generated sample: 0 (token id: 729, probability: 0.878956)
+
+RNG internal:
+- Raw uniform random number: 0.841386
+- Token probabilities:
+  [0] token 3326 = 0.377647 (cumulative: 0.377647)
+  [1] token 6869 = 0.217934 (cumulative: 0.595581)
+  [2] token 1170 = 0.113663 (cumulative: 0.709244)
+  [3] token 573 = 0.075229 (cumulative: 0.784473)
+  [4] token 13920 = 0.033449 (cumulative: 0.817923)
+  [5] token 3482 = 0.032880 (cumulative: 0.850803)
+  [6] token 73517 = 0.028770 (cumulative: 0.879573)
+  [7] token 6990 = 0.024767 (cumulative: 0.904340)
+  [8] token 1671 = 0.023332 (cumulative: 0.927672)
+  [9] token 5604 = 0.018626 (cumulative: 0.946298)
+  [10] token 476 = 0.016679 (cumulative: 0.962977)
+  [11] token 780 = 0.012900 (cumulative: 0.975878)
+  [12] token 5483 = 0.012330 (cumulative: 0.988208)
+  [13] token 974 = 0.011792 (cumulative: 1.000000)
+- Scaled random number: 0.841386
+- Selected index: 5
+RNG generated sample: 5 (token id: 3482, probability: 0.032880)
+
+RNG internal:
+- Raw uniform random number: 0.264730
+- Token probabilities:
+  [0] token 611 = 1.000000 (cumulative: 1.000000)
+- Scaled random number: 0.264730
+- Selected index: 0
+RNG generated sample: 0 (token id: 611, probability: 1.000000)
+
+RNG internal:
+- Raw uniform random number: 0.397821
+- Token probabilities:
+  [0] token 573 = 0.820007 (cumulative: 0.820007)
+  [1] token 476 = 0.179993 (cumulative: 1.000000)
+- Scaled random number: 0.397821
+- Selected index: 0
+RNG generated sample: 0 (token id: 573, probability: 0.820007)
+
+RNG internal:
+- Raw uniform random number: 0.552821
+- Token probabilities:
+  [0] token 4268 = 0.208142 (cumulative: 0.208142)
+  [1] token 1160 = 0.167784 (cumulative: 0.375926)
+  [2] token 1809 = 0.143926 (cumulative: 0.519852)
+  [3] token 14855 = 0.132786 (cumulative: 0.652638)
+  [4] token 7819 = 0.068712 (cumulative: 0.721350)
+  [5] token 7900 = 0.067013 (cumulative: 0.788363)
+  [6] token 1080 = 0.048936 (cumulative: 0.837299)
+  [7] token 12555 = 0.037587 (cumulative: 0.874886)
+  [8] token 12854 = 0.031054 (cumulative: 0.905940)
+  [9] token 5793 = 0.020485 (cumulative: 0.926425)
+  [10] token 135348 = 0.019021 (cumulative: 0.945446)
+  [11] token 30765 = 0.018448 (cumulative: 0.963894)
+  [12] token 24742 = 0.013698 (cumulative: 0.977592)
+  [13] token 39045 = 0.011269 (cumulative: 0.988861)
+  [14] token 23342 = 0.005627 (cumulative: 0.994488)
+  [15] token 61023 = 0.005512 (cumulative: 1.000000)
+- Scaled random number: 0.552821
+- Selected index: 3
+RNG generated sample: 3 (token id: 14855, probability: 0.132786)
+context size exceeded
+llama_decode: failed to decode, ret = 1
+failed to decode
+failed to generate response
