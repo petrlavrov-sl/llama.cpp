@@ -36,12 +36,12 @@ except ImportError:
     RICH_AVAILABLE = False
     print("⚠️  Rich not available. Install with: pip install rich")
 
-# Setup loguru logging
+# Setup loguru logging (level will be set in main based on --debug flag)
 logger.remove()  # Remove default handler
 logger.add(
     lambda msg: print(msg, end=""),
     format="<green>{time:HH:mm:ss}</green> | <level>{level: <8}</level> | {message}",
-    level="DEBUG"
+    level="INFO"  # Default to INFO, will be changed to DEBUG if --debug flag is used
 )
 
 app = FastAPI(title="RNG Service")
@@ -287,7 +287,7 @@ def create_stats_table() -> Table:
     if use_fpga:
         fpga_stats = get_fpga_stats()
         table.add_row("", "", "", "")  # Separator
-        table.add_row("FPGA Throughput", f"{fpga_stats['throughput_kbps']:.1f} kbps", "", "")
+        table.add_row("FPGA Throughput", f"{fpga_stats['throughput_kbps']:.1f} kbps", f"{fpga_stats['peak_throughput_kbps']:.1f} kbps", f"{fpga_stats['avg_throughput_kbps']:.1f} kbps")
         table.add_row("FPGA Data Total", f"{fpga_stats['total_data_mb']:.2f} MiB", "", "")
         table.add_row("Buffer Size", f"{fpga_stats['buffer_size']}", "", "")
     
@@ -459,8 +459,32 @@ def find_serial_port() -> Optional[str]:
         else:
             logger.debug(f"⏸️  No active stream from {device}")
     
-    # If no device is actively streaming, use device identification to pick best candidate
-    logger.info("💡 No devices actively streaming, using device identification...")
+    # If no device is actively streaming, wait for user to press button
+    if unique_devices:
+        logger.info("🔘 No devices actively streaming. Please press the button on your FPGA board to start the RNG stream...")
+        logger.info("⏳ Waiting for FPGA stream (checking every 3 seconds, press Ctrl+C to skip)...")
+        
+        try:
+            # Wait up to 60 seconds for button press
+            for attempt in range(20):  # 20 attempts * 3 seconds = 60 seconds
+                time.sleep(3)
+                logger.debug(f"🔄 Checking attempt {attempt + 1}/20...")
+                
+                for device in unique_devices:
+                    if test_fpga_device(device):
+                        logger.info(f"🎯 FPGA stream detected on {device}!")
+                        return device
+                
+                # Show progress every 5 attempts
+                if (attempt + 1) % 5 == 0:
+                    logger.info(f"⏳ Still waiting... ({attempt + 1}/20 checks completed)")
+                    
+        except KeyboardInterrupt:
+            logger.info("⏹️  User interrupted waiting. Falling back to device identification...")
+    
+    # If we get here, either no devices or user interrupted waiting
+    # Fall back to device identification to pick best candidate
+    logger.debug("💡 Using device identification to pick best candidate...")
     
     # Use serial.tools.list_ports to get device info for smarter selection
     try:
@@ -496,7 +520,7 @@ def fpga_reader_thread(port: str, baudrate: int = 921600):
     """Background thread to read data from FPGA"""
     global fpga_serial, fpga_bytes_received, fpga_start_time
     
-    logger.info(f"🧵 Starting FPGA reader thread for {port}")
+    logger.debug(f"🧵 Starting FPGA reader thread for {port}")
     
     try:
         fpga_serial = serial.Serial(port, baudrate, timeout=1)
@@ -519,7 +543,7 @@ def fpga_reader_thread(port: str, baudrate: int = 921600):
             
             if data:
                 if not data_flowing:
-                    logger.info("🚀 FPGA data stream started!")
+                    logger.debug("🚀 FPGA data stream started!")
                     data_flowing = True
                 
                 fpga_bytes_received += len(data)
@@ -573,9 +597,15 @@ def get_fpga_stats() -> Dict[str, Any]:
     
     # Get recent throughput (last few readings for more responsive display)
     recent_throughput = 0
+    avg_throughput = 0
     if len(fpga_throughput_history) > 0:
         recent_readings = list(fpga_throughput_history)[-5:]  # Last 5 readings
         recent_throughput = sum(recent_readings) / len(recent_readings)
+        
+        # Calculate average of all non-zero values
+        non_zero_readings = [x for x in fpga_throughput_history if x > 0]
+        if non_zero_readings:
+            avg_throughput = sum(non_zero_readings) / len(non_zero_readings)
         
         # Update peak
         if recent_throughput > peak_fpga_throughput:
@@ -584,6 +614,7 @@ def get_fpga_stats() -> Dict[str, Any]:
     return {
         "throughput_kbps": recent_throughput,  # Use recent throughput for responsiveness
         "peak_throughput_kbps": peak_fpga_throughput,
+        "avg_throughput_kbps": avg_throughput,
         "throughput_kibps": recent_throughput / 1.024,  # Convert to Kibps
         "total_data_mb": total_data_mb,
         "buffer_size": len(fpga_buffer),
@@ -672,20 +703,36 @@ def main():
     parser.add_argument("--test-fpga", action="store_true", help="Test FPGA connection only (don't start web server)")
     parser.add_argument("--log-file", type=str, help="Path to save request logs (optional)")
     parser.add_argument("--no-access-logs", action="store_true", help="Disable FastAPI access logs")
+    parser.add_argument("--mock", action="store_true", help="Force software RNG generation (skip FPGA discovery)")
+    parser.add_argument("--debug", action="store_true", help="Enable debug logging")
     args = parser.parse_args()
+    
+    # Configure logging level based on --debug flag
+    if args.debug:
+        logger.remove()
+        logger.add(
+            lambda msg: print(msg, end=""),
+            format="<green>{time:HH:mm:ss}</green> | <level>{level: <8}</level> | {message}",
+            level="DEBUG"
+        )
     
     global random_numbers
     global current_index
     global use_file
     global use_fpga
     
-    # Always try FPGA auto-discovery first (highest priority)
-    fpga_port = args.fpga_port
-    if fpga_port:
-        logger.info(f"🎯 Using forced FPGA port: {fpga_port}")
-    elif SERIAL_AVAILABLE:
-        logger.info("🔍 Auto-detecting FPGA device...")
-        fpga_port = find_serial_port()
+    # Check if mock mode is enabled
+    if args.mock:
+        logger.info("🖥️  Mock mode enabled - using software RNG generation")
+        fpga_port = None
+    else:
+        # Try FPGA auto-discovery first (highest priority)
+        fpga_port = args.fpga_port
+        if fpga_port:
+            logger.info(f"🎯 Using forced FPGA port: {fpga_port}")
+        elif SERIAL_AVAILABLE:
+            logger.info("🔍 Auto-detecting FPGA device...")
+            fpga_port = find_serial_port()
     
     if fpga_port and SERIAL_AVAILABLE:
         try:
