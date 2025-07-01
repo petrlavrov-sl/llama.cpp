@@ -12,7 +12,6 @@ LOG_FILE ?= log.txt
 # RNG Service settings
 PORT ?= 8000
 HOST ?= 127.0.0.1
-RNG_FILE ?= tools-superlinear/rng_provider/rng_values_gemma-2-2b_uniform.txt
 RNG_LOG_FILE ?= # Optional: set to path for request logs, empty = disable logging
 
 help:
@@ -54,13 +53,19 @@ run-llama-run:
 
 run-rng-service-mock:
 	@echo "Starting RNG service on $(HOST):$(PORT)"
-	@echo "Using RNG file: $(RNG_FILE)"
-	@if [ -n "$(RNG_LOG_FILE)" ]; then \
+	@if [ -n "$(RNG_FILE)" ]; then \
+		echo "Using RNG file: $(RNG_FILE)"; \
+		RNG_FILE_ARG="--file ../../$(RNG_FILE)"; \
+	else \
+		echo "Generating random numbers on the fly"; \
+		RNG_FILE_ARG=""; \
+	fi; \
+	if [ -n "$(RNG_LOG_FILE)" ]; then \
 		echo "Request logs will be saved to: $(RNG_LOG_FILE)"; \
-		cd tools-superlinear/rng_provider && poetry run python rng_service.py --host $(HOST) --port $(PORT) --file "../../$(RNG_FILE)" --log-file "../../$(RNG_LOG_FILE)"; \
+		cd tools-superlinear/rng_provider && poetry run python rng_service.py --host $(HOST) --port $(PORT) $$RNG_FILE_ARG --log-file "../../$(RNG_LOG_FILE)"; \
 	else \
 		echo "Request logging disabled"; \
-		cd tools-superlinear/rng_provider && poetry run python rng_service.py --host $(HOST) --port $(PORT) --file "../../$(RNG_FILE)" --no-access-logs; \
+		cd tools-superlinear/rng_provider && poetry run python rng_service.py --host $(HOST) --port $(PORT) $$RNG_FILE_ARG --no-access-logs; \
 	fi
 	# ✅ Added dynamic console speed display with rich library
 	# Shows: requests/sec, bytes/sec, total requests, uptime, file progress

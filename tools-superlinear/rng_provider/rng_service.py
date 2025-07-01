@@ -214,14 +214,13 @@ def create_stats_table() -> Table:
     table.add_column("Average", style="yellow")
     
     table.add_row("Requests/sec", f"{stats['rps_current']:.1f}", f"{stats['rps_peak']:.1f}", f"{stats['rps_avg']:.1f}")
-    table.add_row("Moving Avg (5s)", f"{stats['rps_moving_avg']:.1f}", "", "")
-    table.add_row("10s Average", f"{stats['rps_10s']:.1f}", "", "")
     table.add_row("Bytes/sec", f"{stats['bps_current']:.0f}", "", f"{stats['bps_avg']:.0f}")
     table.add_row("Total Requests", f"{stats['total_requests']}", "", "")
     table.add_row("Uptime", f"{stats['uptime']:.1f}s", "", "")
     
-    if use_file:
-        table.add_row("File Progress", f"{current_index}/{len(random_numbers)}", "", f"{(current_index/len(random_numbers)*100):.1f}%" if random_numbers else "N/A")
+    # Only show file progress if actually using a file
+    if use_file and random_numbers:
+        table.add_row("File Progress", f"{current_index}/{len(random_numbers)}", "", f"{(current_index/len(random_numbers)*100):.1f}%")
     
     return table
 
