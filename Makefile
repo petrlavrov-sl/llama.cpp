@@ -1,7 +1,7 @@
 # Superlinear llama.cpp Makefile
 # Simple commands to avoid forgetting shell script meanings
 
-.PHONY: help build-mac run-llama-run run-rng-service test-fpga debug-serial download-models
+.PHONY: help build-mac run-llama-run run-rng-service test-fpga download-models
 
 # Default model settings
 MODEL ?= models-superlinear/gemma-2-2b-it.gguf
@@ -23,7 +23,6 @@ help:
 	@echo "  make run-llama-run     - Run llama-run with model (use MODEL=path, PROMPT='text')"
 	@echo "  make run-rng-service     - Run RNG service (auto-detects FPGA, use PORT=8000, HOST=127.0.0.1, RNG_FILE=path, RNG_LOG_FILE=path)"
 	@echo "  make test-fpga           - Test FPGA connection only (use FPGA_PORT=port to force specific port)"
-	@echo "  make debug-serial        - List and test all serial devices to find FPGA"
 	@echo "  make download-models   - Download models from HuggingFace"
 	@echo "  make help              - Show this help message"
 	@echo ""
@@ -33,8 +32,6 @@ help:
 	@echo "  make run-rng-service FPGA_PORT=/dev/tty.usbserial-XXXX  # Force specific FPGA port"
 	@echo "  make run-rng-service RNG_FILE=rng_values.txt  # Use file source (if no FPGA found)"
 	@echo "  make run-rng-service     # Auto-detect FPGA, fallback to software generation"
-	@echo "  make test-fpga           # Test FPGA connection (30-second test)"
-	@echo "  make debug-serial        # Find and test ALL serial devices"
 
 build-mac:
 	@echo "Building llama.cpp for macOS..."
@@ -81,23 +78,6 @@ run-rng-service:
 	# ✅ Auto-detects FPGA quantum RNG source with live throughput display
 	# Priority: FPGA → File → Software generation
 	# Shows: requests/sec, bytes/sec, total requests, uptime, FPGA stats
-
-test-fpga:
-	@echo "🧪 Testing FPGA connection..."
-	@ARGS="--test-fpga"; \
-	if [ -n "$(FPGA_PORT)" ]; then \
-		echo "🎯 Testing forced FPGA port: $(FPGA_PORT)"; \
-		ARGS="$$ARGS --fpga-port $(FPGA_PORT)"; \
-	else \
-		echo "🔍 Auto-detecting FPGA device for test..."; \
-	fi; \
-	cd tools-superlinear/rng_provider && poetry run python rng_service.py $$ARGS
-
-debug-serial:
-	@echo "🔧 Debugging all serial devices..."
-	@echo "📋 This will list ALL USB/serial devices and test each one"
-	@echo "🔘 Press the FPGA button when prompted for each device!"
-	cd tools-superlinear/rng_provider && poetry run python debug_serial.py
 
 download-models:
 	@echo "Model download not implemented yet"
