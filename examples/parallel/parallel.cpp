@@ -12,6 +12,8 @@
 #include <string>
 #include <vector>
 #include <ctime>
+#include <fstream>
+#include <unordered_map>
 
 // trim whitespace from the beginning and end of a string
 static std::string trim(const std::string & str) {
@@ -39,17 +41,8 @@ User: Who is Richard Feynman?
 Assistant: Richard Feynman was an American physicist who is best known for his work in quantum mechanics and particle physics. He was awarded the Nobel Prize in Physics in 1965 for his contributions to the development of quantum electrodynamics. He was a popular lecturer and author, and he wrote several books, including "Surely You're Joking, Mr. Feynman!" and "What Do You Care What Other People Think?".
 User:)";
 
-static std::vector<std::string> k_prompts = {
-    "What is the meaning of life?",
-    "Tell me an interesting fact about llamas.",
-    "What is the best way to cook a steak?",
-    "Are you familiar with the Special Theory of Relativity and can you explain it to me?",
-    "Recommend some interesting books to read.",
-    "What is the best way to learn a new language?",
-    "How to get a job at Google?",
-    "If you could have any superpower, what would it be?",
-    "I want to learn how to play the piano.",
-};
+// No more default prompts - prompts will be loaded from file
+std::vector<std::string> k_prompts;
 
 struct client {
     ~client() {
@@ -78,6 +71,15 @@ struct client {
     struct common_sampler * smpl = nullptr;
 };
 
+// Structure to track prompt-response pairs
+struct prompt_response {
+    std::string prompt;
+    std::string response;
+    int64_t processing_time_us;
+    int32_t prompt_tokens;
+    int32_t response_tokens;
+};
+
 static void print_date_time() {
     std::time_t current_time = std::time(nullptr);
     std::tm* local_time = std::localtime(&current_time);
@@ -100,10 +102,70 @@ static std::vector<std::string> split_string(const std::string& input, char deli
     return tokens;
 }
 
+// Print custom usage information
+static void print_custom_usage(const char* program_name) {
+    fprintf(stderr, "\nAdditional parameters for parallel processing:\n");
+    fprintf(stderr, "  -f, --file FNAME         input file with prompts (REQUIRED, one prompt per line)\n");
+    fprintf(stderr, "  -o, --output-file FNAME  save results to specified file\n");
+    fprintf(stderr, "\nUsage example:\n");
+    fprintf(stderr, "  %s -m models/7B/ggml-model-q4_0.bin -f prompts.txt -o results.txt --n-parallel 4\n\n", program_name);
+}
+
+// Process custom command line arguments
+bool process_custom_arguments(int argc, char ** argv, std::string & output_file) {
+    bool file_arg_present = false;
+    
+    // Check if help is requested
+    for (int i = 1; i < argc; i++) {
+        std::string arg = argv[i];
+        if (arg == "-h" || arg == "--help") {
+            // Print our custom usage first
+            print_custom_usage(argv[0]);
+            // Don't modify these, let common_params_parse handle them
+            continue;
+        }
+        
+        // Check if file argument is present
+        if (arg == "-f" || arg == "--file") {
+            file_arg_present = true;
+        }
+    }
+    
+    if (!file_arg_present) {
+        fprintf(stderr, "\033[31mError: No prompt file specified. A file with prompts is required.\033[0m\n");
+        fprintf(stderr, "Please provide a file with prompts using the -f/--file option.\n\n");
+        print_custom_usage(argv[0]);
+        return false;
+    }
+    
+    for (int i = 1; i < argc - 1; i++) {
+        std::string arg = argv[i];
+        
+        if (arg == "--output-file" || arg == "-o") {
+            output_file = argv[++i];
+            // Skip this argument so it won't be processed by common_params_parse
+            argv[i-1] = argv[i] = (char *)"";
+        }
+    }
+    
+    return true;
+}
+
 int main(int argc, char ** argv) {
     srand(1234);
 
     common_params params;
+    
+    // custom parameters not handled by common_params
+    std::string output_file_path;
+    
+    // Container to store all prompt-response pairs
+    std::vector<prompt_response> results;
+
+    // Process our custom arguments first
+    if (!process_custom_arguments(argc, argv, output_file_path)) {
+        return 1;
+    }
 
     if (!common_params_parse(argc, argv, params, LLAMA_EXAMPLE_PARALLEL)) {
         return 1;
@@ -118,7 +180,7 @@ int main(int argc, char ** argv) {
     params.n_parallel += 1;
 
     // requests to simulate
-    const int32_t n_seq = params.n_sequences;
+    const int32_t n_seq_param = params.n_sequences;
 
     // insert new requests as soon as the previous one is done
     const bool cont_batching = params.cont_batching;
@@ -137,22 +199,42 @@ int main(int argc, char ** argv) {
 
     const llama_vocab * vocab = llama_model_get_vocab(model);
 
-    // load the prompts from an external file if there are any
+    // load the prompts from file - required
     if (params.prompt.empty()) {
-        LOG_INF("\033[32mNo new questions so proceed with build-in defaults.\033[0m\n");
-    } else {
-        // Output each line of the input params.prompts vector and copy to k_prompts
-        int index = 0;
-        LOG_INF("\033[32mNow printing the external prompt file %s\033[0m\n\n", params.prompt_file.c_str());
+        LOG_ERR("\033[31mError: No prompt file provided. A file with prompts is required.\033[0m\n");
+        LOG_ERR("Please provide a file with prompts using the -f/--file option.\n");
+        return 1;
+    }
+    
+    // Load prompts from the file
+    LOG_INF("\033[32mLoading prompts from file: %s\033[0m\n\n", params.prompt_file.c_str());
 
-        std::vector<std::string> prompts = split_string(params.prompt, '\n');
-        for (const auto& prompt : prompts) {
+    std::vector<std::string> prompts = split_string(params.prompt, '\n');
+    int index = 0;
+    for (const auto& prompt : prompts) {
+        if (!prompt.empty()) {
             k_prompts.resize(index + 1);
             k_prompts[index] = prompt;
             index++;
             LOG_INF("%3d prompt: %s\n", index, prompt.c_str());
         }
     }
+    
+    // Check if we have any valid prompts
+    if (k_prompts.empty()) {
+        LOG_ERR("\033[31mError: No valid prompts found in the file.\033[0m\n");
+        return 1;
+    }
+    
+    // Adjust number of sequences to match number of prompts
+    // We want to process each prompt exactly once
+    int32_t n_seq = k_prompts.size();
+    if (n_seq_param < n_seq) {
+        // If user specified fewer sequences than prompts, respect their choice
+        n_seq = n_seq_param;
+    }
+    
+    LOG_INF("\n\nProcessing %d prompts sequentially (not randomly) with %d parallel clients\n\n", n_seq, params.n_parallel);
 
     LOG_INF("\n\n");
 
@@ -250,7 +332,9 @@ int main(int argc, char ** argv) {
                     client.t_start_prompt = ggml_time_us();
                     client.t_start_gen    = 0;
 
-                    client.input    = k_prompts[rand() % k_prompts.size()];
+                    // Get the next prompt in sequence instead of random
+                    const size_t prompt_idx = g_seq_id % k_prompts.size();
+                    client.input    = k_prompts[prompt_idx];
                     client.prompt   = client.input + "\nAssistant:";
                     client.response = "";
 
@@ -384,6 +468,15 @@ int main(int argc, char ** argv) {
                             ::trim(client.input).c_str(),
                             ::trim(client.response).c_str());
 
+                    // Store the result
+                    prompt_response result;
+                    result.prompt = ::trim(client.input);
+                    result.response = ::trim(client.response);
+                    result.processing_time_us = t_main_end - client.t_start_prompt;
+                    result.prompt_tokens = client.n_prompt;
+                    result.response_tokens = client.n_decoded;
+                    results.push_back(result);
+
                     n_total_prompt += client.n_prompt;
                     n_total_gen    += client.n_decoded;
 
@@ -419,6 +512,38 @@ int main(int argc, char ** argv) {
     llama_batch_free(batch);
 
     llama_backend_free();
+
+    // Save results to file if output file path was provided
+    if (!output_file_path.empty()) {
+        std::ofstream outfile(output_file_path);
+        if (outfile.is_open()) {
+            LOG_INF("Saving results to file: %s\n", output_file_path.c_str());
+            
+            outfile << "# Results from llama.cpp parallel processing\n";
+            outfile << "# Total prompts: " << results.size() << "\n";
+            outfile << "# Date: " << std::time(nullptr) << "\n\n";
+            
+            for (size_t i = 0; i < results.size(); ++i) {
+                const auto& result = results[i];
+                outfile << "### Prompt " << (i + 1) << ":\n";
+                outfile << result.prompt << "\n\n";
+                outfile << "### Response " << (i + 1) << ":\n";
+                outfile << result.response << "\n\n";
+                outfile << "### Stats " << (i + 1) << ":\n";
+                outfile << "Processing time: " << (result.processing_time_us / 1e6) << " seconds\n";
+                outfile << "Prompt tokens: " << result.prompt_tokens << "\n";
+                outfile << "Response tokens: " << result.response_tokens << "\n";
+                outfile << "Total tokens: " << (result.prompt_tokens + result.response_tokens) << "\n";
+                outfile << "Token generation speed: " << ((result.prompt_tokens + result.response_tokens) / (result.processing_time_us / 1e6)) << " tokens/second\n";
+                outfile << "\n---\n\n";
+            }
+            
+            outfile.close();
+            LOG_INF("Results saved successfully\n");
+        } else {
+            LOG_ERR("Failed to open output file: %s\n", output_file_path.c_str());
+        }
+    }
 
     LOG("\n\n");
 
