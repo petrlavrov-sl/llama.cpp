@@ -103,15 +103,27 @@ async def status() -> Dict[str, Any]:
 
 def get_speed_stats() -> Dict[str, Any]:
     """Calculate current speed statistics"""
+    global peak_rps
     current_time = time.time()
+    
+    # Calculate requests per second (last 1 second)
+    very_recent = [t for t in request_times if current_time - t <= 1.0]
+    rps_1s = len(very_recent)
     
     # Calculate requests per second (last 10 seconds)
     recent_requests = [t for t in request_times if current_time - t <= 10.0]
     rps_10s = len(recent_requests) / min(10.0, current_time - start_time)
     
-    # Calculate requests per second (last 1 second)
-    very_recent = [t for t in request_times if current_time - t <= 1.0]
-    rps_1s = len(very_recent)
+    # Moving average (last 5 seconds)
+    very_recent_5s = [t for t in request_times if current_time - t <= 5.0]
+    rps_moving_avg = len(very_recent_5s) / min(5.0, current_time - start_time)
+    
+    # Update peak
+    if rps_1s > peak_rps:
+        peak_rps = rps_1s
+    
+    # Add to history for plotting
+    rps_history.append(rps_1s)
     
     # Overall average
     total_time = current_time - start_time
@@ -123,14 +135,72 @@ def get_speed_stats() -> Dict[str, Any]:
     bps_avg = avg_rps * bytes_per_request
     
     return {
-        "rps_1s": rps_1s,
+        "rps_current": rps_1s,
         "rps_10s": rps_10s,
+        "rps_moving_avg": rps_moving_avg,
         "rps_avg": avg_rps,
+        "rps_peak": peak_rps,
         "bps_current": bps_current,
         "bps_avg": bps_avg,
         "total_requests": total_requests,
         "uptime": total_time
     }
+
+
+def create_ascii_plot(height: int = 8, width: int = 60) -> str:
+    """Create an ASCII plot of request rate over time (like htop)"""
+    if len(rps_history) < 2:
+        return "📊 [dim]Gathering data...[/dim]"
+    
+    # Get max value for scaling
+    max_val = max(rps_history) if rps_history else 1
+    if max_val == 0:
+        max_val = 1
+    
+    # Create the plot
+    plot_lines = []
+    
+    # Scale data to fit height
+    scaled_data = []
+    for val in list(rps_history)[-width:]:  # Take last `width` data points
+        scaled_height = int((val / max_val) * (height - 1))
+        scaled_data.append(scaled_height)
+    
+    # Build the plot from top to bottom
+    for row in range(height - 1, -1, -1):
+        line = ""
+        for col, val in enumerate(scaled_data):
+            if val >= row:
+                # Use different characters for different intensity
+                if val == height - 1:
+                    line += "█"  # Full block for peak
+                elif val >= height * 0.75:
+                    line += "▊"  # High
+                elif val >= height * 0.5:
+                    line += "▌"  # Medium
+                elif val >= height * 0.25:
+                    line += "▍"  # Low
+                else:
+                    line += "▏"  # Very low
+            else:
+                line += " "
+        
+        # Add Y-axis labels
+        if row == height - 1:
+            line += f" {max_val:.0f} req/s"
+        elif row == height // 2:
+            line += f" {max_val/2:.0f}"
+        elif row == 0:
+            line += " 0"
+        
+        plot_lines.append(line)
+    
+    # Add time axis
+    time_axis = "└" + "─" * len(scaled_data) + "┘"
+    plot_lines.append(time_axis)
+    plot_lines.append(f"📊 Request Rate (last {len(scaled_data)}s)")
+    
+    return "\n".join(plot_lines)
 
 
 def create_stats_table() -> Table:
@@ -140,18 +210,38 @@ def create_stats_table() -> Table:
     table = Table(title="🎲 RNG Service Stats", show_header=True, header_style="bold magenta")
     table.add_column("Metric", style="cyan", no_wrap=True)
     table.add_column("Current", style="green")
+    table.add_column("Peak", style="red")
     table.add_column("Average", style="yellow")
     
-    table.add_row("Requests/sec", f"{stats['rps_1s']:.1f}", f"{stats['rps_avg']:.1f}")
-    table.add_row("Requests/sec (10s)", f"{stats['rps_10s']:.1f}", "")
-    table.add_row("Bytes/sec", f"{stats['bps_current']:.0f}", f"{stats['bps_avg']:.0f}")
-    table.add_row("Total Requests", f"{stats['total_requests']}", "")
-    table.add_row("Uptime", f"{stats['uptime']:.1f}s", "")
+    table.add_row("Requests/sec", f"{stats['rps_current']:.1f}", f"{stats['rps_peak']:.1f}", f"{stats['rps_avg']:.1f}")
+    table.add_row("Moving Avg (5s)", f"{stats['rps_moving_avg']:.1f}", "", "")
+    table.add_row("10s Average", f"{stats['rps_10s']:.1f}", "", "")
+    table.add_row("Bytes/sec", f"{stats['bps_current']:.0f}", "", f"{stats['bps_avg']:.0f}")
+    table.add_row("Total Requests", f"{stats['total_requests']}", "", "")
+    table.add_row("Uptime", f"{stats['uptime']:.1f}s", "", "")
     
     if use_file:
-        table.add_row("File Progress", f"{current_index}/{len(random_numbers)}", f"{(current_index/len(random_numbers)*100):.1f}%" if random_numbers else "N/A")
+        table.add_row("File Progress", f"{current_index}/{len(random_numbers)}", "", f"{(current_index/len(random_numbers)*100):.1f}%" if random_numbers else "N/A")
     
     return table
+
+
+def create_combined_display():
+    """Create combined stats table and plot display"""
+    from rich.console import Group
+    from rich.panel import Panel
+    
+    # Create stats table
+    stats_table = create_stats_table()
+    
+    # Create ASCII plot
+    plot_text = create_ascii_plot(height=8, width=50)
+    
+    # Combine them
+    return Group(
+        stats_table,
+        Panel(plot_text, title="📈 Live Request Rate", border_style="blue")
+    )
 
 
 def stats_display_thread():
@@ -159,10 +249,10 @@ def stats_display_thread():
     if not RICH_AVAILABLE:
         return
         
-    with Live(create_stats_table(), refresh_per_second=2, console=console) as live:
+    with Live(create_combined_display(), refresh_per_second=2, console=console) as live:
         while True:
             time.sleep(0.5)
-            live.update(create_stats_table())
+            live.update(create_combined_display())
 
 
 def load_random_numbers(file_path: str) -> List[float]:
