@@ -13,6 +13,19 @@ from typing import List, Dict, Any
 import uvicorn
 from fastapi import FastAPI, HTTPException
 import random
+import time
+import threading
+from collections import deque
+
+try:
+    from rich.console import Console
+    from rich.live import Live
+    from rich.table import Table
+    from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TaskProgressColumn
+    RICH_AVAILABLE = True
+except ImportError:
+    RICH_AVAILABLE = False
+    print("⚠️  Rich not available. Install with: pip install rich")
 
 # Setup logging
 logging.basicConfig(
@@ -28,6 +41,12 @@ random_numbers: List[float] = []
 current_index: int = 0
 use_file = False
 
+# Speed tracking
+request_times = deque(maxlen=100)  # Keep last 100 request timestamps
+total_requests = 0
+start_time = time.time()
+console = Console() if RICH_AVAILABLE else None
+
 
 @app.get("/")
 async def root() -> Dict[str, str]:
@@ -38,7 +57,12 @@ async def root() -> Dict[str, str]:
 @app.get("/random")
 async def get_random() -> Dict[str, float]:
     """Get a random number between 0 and 1"""
-    global current_index
+    global current_index, total_requests
+    
+    # Track request timing
+    current_time = time.time()
+    request_times.append(current_time)
+    total_requests += 1
     
     if use_file:
         if not random_numbers:
@@ -54,7 +78,7 @@ async def get_random() -> Dict[str, float]:
         # Generate random number on the fly
         value = random.random()
     
-    logger.info(f"Serving random number: {value}")
+    # Only log to file, not console (console shows speed stats instead)
     return {"random": value}
 
 
@@ -107,6 +131,8 @@ def main():
     parser.add_argument("--host", type=str, default="127.0.0.1", help="Host to bind to")
     parser.add_argument("--port", type=int, default=8000, help="Port to bind to")
     parser.add_argument("--file", type=str, help="Path to random numbers file (optional)")
+    parser.add_argument("--log-file", type=str, help="Path to save request logs (optional)")
+    # parser.add_argument("--no-access-logs", action="store_true", help="Disable FastAPI access logs")
     args = parser.parse_args()
     
     global random_numbers
@@ -125,9 +151,47 @@ def main():
     else:
         logger.info("No file provided, generating random numbers on the fly")
     
+    # Configure logging
+    uvicorn_config = {
+        "app": app,
+        "host": args.host,
+        "port": args.port
+    }
+    
+    if args.log_file:
+        # Enable access logs and save to file
+        logger.info(f"Request logs will be saved to: {args.log_file}")
+        uvicorn_config["access_log"] = True
+        uvicorn_config["log_config"] = {
+            "version": 1,
+            "disable_existing_loggers": False,
+            "formatters": {
+                "access": {
+                    "format": "%(asctime)s - %(levelname)s - %(message)s",
+                },
+            },
+            "handlers": {
+                "access_file": {
+                    "formatter": "access",
+                    "class": "logging.FileHandler",
+                    "filename": args.log_file,
+                },
+            },
+            "loggers": {
+                "uvicorn.access": {
+                    "handlers": ["access_file"],
+                    "level": "INFO",
+                },
+            },
+        }
+    else:
+        # Disable access logs completely
+        logger.info("Access logging disabled")
+        uvicorn_config["access_log"] = False
+    
     # Start the server
     logger.info(f"Starting server on {args.host}:{args.port}")
-    uvicorn.run(app, host=args.host, port=args.port)
+    uvicorn.run(**uvicorn_config)
 
 
 if __name__ == "__main__":
