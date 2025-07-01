@@ -1,4 +1,0 @@
-model: gemma-2-2b-it
-num_tokens: 100
-prompt: Tell me about the history of artificial intelligence
-rng_provider: normal

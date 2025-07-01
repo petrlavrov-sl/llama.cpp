@@ -2,7 +2,8 @@
 """
 Random Number Generator Service for llama.cpp
 
-This service provides random numbers either from a file or generated on the fly.
+This service provides random numbers from a file via a REST API either from a file or generated on the fly.
+
 It's intended to be used with the llama-rng-provider-api in llama.cpp.
 """
 
@@ -26,6 +27,7 @@ app = FastAPI(title="RNG Service")
 # Global variables
 random_numbers: List[float] = []
 current_index: int = 0
+
 use_file = False
 
 
@@ -55,12 +57,14 @@ async def get_random() -> Dict[str, float]:
         value = random.random()
     
     logger.info(f"Serving random number: {value}")
+
     return {"random": value}
 
 
 @app.get("/status")
 async def status() -> Dict[str, Any]:
     """Get service status"""
+
     if use_file:
         return {
             "mode": "file",
@@ -101,12 +105,30 @@ def load_random_numbers(file_path: str) -> List[float]:
     return numbers
 
 
+def generate_random_numbers(count: int) -> List[float]:
+    """Generate random numbers if no file is provided"""
+    import random
+    logger.info(f"Generating {count} random numbers")
+    return [random.random() for _ in range(count)]
+
+
+def save_random_numbers(file_path: str, numbers: List[float]) -> None:
+    """Save random numbers to a file"""
+    with open(file_path, "w") as f:
+        for num in numbers:
+            f.write(f"{num}\n")
+    logger.info(f"Saved {len(numbers)} random numbers to {file_path}")
+
+
 def main():
     """Main entry point"""
     parser = argparse.ArgumentParser(description="RNG Service")
     parser.add_argument("--host", type=str, default="127.0.0.1", help="Host to bind to")
     parser.add_argument("--port", type=int, default=8000, help="Port to bind to")
+
     parser.add_argument("--file", type=str, help="Path to random numbers file (optional)")
+    parser.add_argument("--generate", type=int, default=0, 
+                        help="Generate N random numbers if file doesn't exist")
     args = parser.parse_args()
     
     global random_numbers
@@ -114,8 +136,13 @@ def main():
     global use_file
     
     if args.file:
-        # Load random numbers from file
-        random_numbers = load_random_numbers(args.file)
+        # If file doesn't exist and --generate is specified, generate random numbers
+        if not os.path.exists(args.file) and args.generate > 0:
+            random_numbers = generate_random_numbers(args.generate)
+            save_random_numbers(args.file, random_numbers)
+        else:
+            # Load random numbers from file
+            random_numbers = load_random_numbers(args.file)
         if random_numbers:
             use_file = True
             current_index = 0

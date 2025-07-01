@@ -98,6 +98,7 @@ private:
 class ExternalAPIRNGProvider : public RNGProvider {
 public:
     ExternalAPIRNGProvider(const std::string& api_url)
+
         : RNGProvider("external-api"), api_url(api_url) {
         // Initialize curl
         curl_global_init(CURL_GLOBAL_DEFAULT);
