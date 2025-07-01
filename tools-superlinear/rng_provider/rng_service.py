@@ -2,7 +2,8 @@
 """
 Random Number Generator Service for llama.cpp
 
-This service provides random numbers from a file via a REST API.
+This service provides random numbers from a file via a REST API either from a file or generated on the fly.
+
 It's intended to be used with the llama-rng-provider-api in llama.cpp.
 """
 
@@ -12,6 +13,7 @@ import logging
 from typing import List, Dict, Any
 import uvicorn
 from fastapi import FastAPI, HTTPException
+import random
 
 # Setup logging
 logging.basicConfig(
@@ -26,6 +28,8 @@ app = FastAPI(title="RNG Service")
 random_numbers: List[float] = []
 current_index: int = 0
 
+use_file = False
+
 
 @app.get("/")
 async def root() -> Dict[str, str]:
@@ -38,29 +42,41 @@ async def get_random() -> Dict[str, float]:
     """Get a random number between 0 and 1"""
     global current_index
     
-    if not random_numbers:
-        raise HTTPException(status_code=500, detail="No random numbers available")
+    if use_file:
+        if not random_numbers:
+            raise HTTPException(status_code=500, detail="No random numbers available")
+        
+        if current_index >= len(random_numbers):
+            logger.warning("Reached end of random number list, wrapping around")
+            current_index = 0
+        
+        value = random_numbers[current_index]
+        current_index += 1
+    else:
+        # Generate random number on the fly
+        value = random.random()
     
-    if current_index >= len(random_numbers):
-        logger.warning("Reached end of random number list, wrapping around")
-        current_index = 0
-    
-    value = random_numbers[current_index]
-    current_index += 1
-    
-    logger.info(f"Serving random number: {value} (index: {current_index-1})")
-    
+    logger.info(f"Serving random number: {value}")
+
     return {"random": value}
 
 
 @app.get("/status")
 async def status() -> Dict[str, Any]:
     """Get service status"""
-    return {
-        "total_numbers": len(random_numbers),
-        "current_index": current_index,
-        "remaining": len(random_numbers) - current_index if random_numbers else 0
-    }
+
+    if use_file:
+        return {
+            "mode": "file",
+            "total_numbers": len(random_numbers),
+            "current_index": current_index,
+            "remaining": len(random_numbers) - current_index if random_numbers else 0
+        }
+    else:
+        return {
+            "mode": "runtime",
+            "message": "Generating random numbers on the fly"
+        }
 
 
 def load_random_numbers(file_path: str) -> List[float]:
@@ -109,27 +125,32 @@ def main():
     parser = argparse.ArgumentParser(description="RNG Service")
     parser.add_argument("--host", type=str, default="127.0.0.1", help="Host to bind to")
     parser.add_argument("--port", type=int, default=8000, help="Port to bind to")
-    parser.add_argument("--file", type=str, required=True, help="Path to random numbers file")
+
+    parser.add_argument("--file", type=str, help="Path to random numbers file (optional)")
     parser.add_argument("--generate", type=int, default=0, 
                         help="Generate N random numbers if file doesn't exist")
     args = parser.parse_args()
     
     global random_numbers
     global current_index
+    global use_file
     
-    # If file doesn't exist and --generate is specified, generate random numbers
-    if not os.path.exists(args.file) and args.generate > 0:
-        random_numbers = generate_random_numbers(args.generate)
-        save_random_numbers(args.file, random_numbers)
+    if args.file:
+        # If file doesn't exist and --generate is specified, generate random numbers
+        if not os.path.exists(args.file) and args.generate > 0:
+            random_numbers = generate_random_numbers(args.generate)
+            save_random_numbers(args.file, random_numbers)
+        else:
+            # Load random numbers from file
+            random_numbers = load_random_numbers(args.file)
+        if random_numbers:
+            use_file = True
+            current_index = 0
+            logger.info("Using random numbers from file")
+        else:
+            logger.warning("No valid numbers in file, falling back to runtime generation")
     else:
-        # Load random numbers from file
-        random_numbers = load_random_numbers(args.file)
-    
-    if not random_numbers:
-        logger.error("No random numbers available. Exiting.")
-        return
-    
-    current_index = 0
+        logger.info("No file provided, generating random numbers on the fly")
     
     # Start the server
     logger.info(f"Starting server on {args.host}:{args.port}")

@@ -14,6 +14,7 @@
 #include <ctime>
 #include <fstream>
 #include <unordered_map>
+#include <algorithm>
 
 // trim whitespace from the beginning and end of a string
 static std::string trim(const std::string & str) {
@@ -113,8 +114,8 @@ static void print_custom_usage(const char* program_name) {
 
 // Process custom command line arguments
 bool process_custom_arguments(int argc, char ** argv, std::string & output_file) {
-    bool file_arg_present = false;
-    
+    bool file_arg_present = false;    
+
     // Check if help is requested
     for (int i = 1; i < argc; i++) {
         std::string arg = argv[i];
@@ -124,13 +125,13 @@ bool process_custom_arguments(int argc, char ** argv, std::string & output_file)
             // Don't modify these, let common_params_parse handle them
             continue;
         }
-        
+
         // Check if file argument is present
         if (arg == "-f" || arg == "--file") {
             file_arg_present = true;
         }
     }
-    
+
     if (!file_arg_present) {
         fprintf(stderr, "\033[31mError: No prompt file specified. A file with prompts is required.\033[0m\n");
         fprintf(stderr, "Please provide a file with prompts using the -f/--file option.\n\n");
@@ -164,6 +165,14 @@ int main(int argc, char ** argv) {
 
     // Process our custom arguments first
     if (!process_custom_arguments(argc, argv, output_file_path)) {
+        return 1;
+    }
+
+    // Container to store all prompt-response pairs
+    std::vector<prompt_response> results;
+
+    // Process our custom arguments first
+    if (!process_custom_arguments(argc, argv)) {
         return 1;
     }
 
@@ -205,7 +214,7 @@ int main(int argc, char ** argv) {
         LOG_ERR("Please provide a file with prompts using the -f/--file option.\n");
         return 1;
     }
-    
+
     // Load prompts from the file
     LOG_INF("\033[32mLoading prompts from file: %s\033[0m\n\n", params.prompt_file.c_str());
 
@@ -234,6 +243,24 @@ int main(int argc, char ** argv) {
         n_seq = n_seq_param;
     }
     
+    LOG_INF("\n\nProcessing %d prompts sequentially (not randomly) with %d parallel clients\n\n", n_seq, params.n_parallel);
+
+    // Check if we have any valid prompts
+    if (k_prompts.empty()) {
+        LOG_ERR("\033[31mError: No valid prompts found in the file.\033[0m\n");
+        return 1;
+    }
+
+    // Always set the number of sequences to match number of prompts
+    // We want to process each prompt exactly once
+    int32_t n_seq = k_prompts.size();
+
+    // Inform the user if they specified a different number of sequences
+    if (params.n_sequences != 1 && params.n_sequences != (int32_t)k_prompts.size()) {
+        LOG_INF("\n\nNote: Ignoring specified --sequences %d, using number of prompts (%d) instead\n\n",
+                params.n_sequences, (int32_t)k_prompts.size());
+    }
+
     LOG_INF("\n\nProcessing %d prompts sequentially (not randomly) with %d parallel clients\n\n", n_seq, params.n_parallel);
 
     LOG_INF("\n\n");
@@ -283,7 +310,7 @@ int main(int argc, char ** argv) {
 
         // assign the system KV cache to all parallel sequences
         for (int32_t i = 1; i <= n_clients; ++i) {
-            llama_kv_cache_seq_cp(ctx, 0, i, -1, -1);
+            llama_kv_self_seq_cp(ctx, 0, i, -1, -1);
         }
 
         LOG_INF("\n");
@@ -315,9 +342,9 @@ int main(int argc, char ** argv) {
         if (batch.n_tokens == 0) {
             // all sequences have ended - clear the entire KV cache
             for (int i = 1; i <= n_clients; ++i) {
-                llama_kv_cache_seq_rm(ctx, i, -1, -1);
+                llama_kv_self_seq_rm(ctx, i, -1, -1);
                 // but keep the system prompt
-                llama_kv_cache_seq_cp(ctx, 0, i, -1, -1);
+                llama_kv_self_seq_cp(ctx, 0, i, -1, -1);
             }
 
             LOG_INF("%s: clearing the KV cache\n", __func__);
@@ -455,8 +482,8 @@ int main(int argc, char ** argv) {
                     }
 
                     // delete only the generated part of the sequence, i.e. keep the system prompt in the cache
-                    llama_kv_cache_seq_rm(ctx,    client.id + 1, -1, -1);
-                    llama_kv_cache_seq_cp(ctx, 0, client.id + 1, -1, -1);
+                    llama_kv_self_seq_rm(ctx,    client.id + 1, -1, -1);
+                    llama_kv_self_seq_cp(ctx, 0, client.id + 1, -1, -1);
 
                     const auto t_main_end = ggml_time_us();
 
@@ -514,6 +541,7 @@ int main(int argc, char ** argv) {
     llama_backend_free();
 
     // Save results to file if output file path was provided
+
     if (!output_file_path.empty()) {
         std::ofstream outfile(output_file_path);
         if (outfile.is_open()) {
@@ -523,6 +551,7 @@ int main(int argc, char ** argv) {
             outfile << "# Total prompts: " << results.size() << "\n";
             outfile << "# Date: " << std::time(nullptr) << "\n\n";
             
+
             for (size_t i = 0; i < results.size(); ++i) {
                 const auto& result = results[i];
                 outfile << "### Prompt " << (i + 1) << ":\n";
@@ -537,7 +566,7 @@ int main(int argc, char ** argv) {
                 outfile << "Token generation speed: " << ((result.prompt_tokens + result.response_tokens) / (result.processing_time_us / 1e6)) << " tokens/second\n";
                 outfile << "\n---\n\n";
             }
-            
+
             outfile.close();
             LOG_INF("Results saved successfully\n");
         } else {
