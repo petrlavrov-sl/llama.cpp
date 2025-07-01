@@ -62,8 +62,8 @@ run-rng-service-mock:
 		echo "Request logging disabled"; \
 		cd tools-superlinear/rng_provider && poetry run python rng_service.py --host $(HOST) --port $(PORT) --file "../../$(RNG_FILE)" --no-access-logs; \
 	fi
-	# TODO: Add dynamic console output with kbps/mbps speed display (like tqdm)
-	# TODO: Use rich/plotext/asciimatics for console plots
+	# ✅ Added dynamic console speed display with rich library
+	# Shows: requests/sec, bytes/sec, total requests, uptime, file progress
 
 download-models:
 	@echo "Model download not implemented yet"

@@ -43,7 +43,9 @@ use_file = False
 
 # Speed tracking
 request_times = deque(maxlen=100)  # Keep last 100 request timestamps
+rps_history = deque(maxlen=60)  # Keep 60 seconds of RPS data for plotting
 total_requests = 0
+peak_rps = 0.0
 start_time = time.time()
 console = Console() if RICH_AVAILABLE else None
 
@@ -99,6 +101,70 @@ async def status() -> Dict[str, Any]:
         }
 
 
+def get_speed_stats() -> Dict[str, Any]:
+    """Calculate current speed statistics"""
+    current_time = time.time()
+    
+    # Calculate requests per second (last 10 seconds)
+    recent_requests = [t for t in request_times if current_time - t <= 10.0]
+    rps_10s = len(recent_requests) / min(10.0, current_time - start_time)
+    
+    # Calculate requests per second (last 1 second)
+    very_recent = [t for t in request_times if current_time - t <= 1.0]
+    rps_1s = len(very_recent)
+    
+    # Overall average
+    total_time = current_time - start_time
+    avg_rps = total_requests / total_time if total_time > 0 else 0
+    
+    # Estimate data rate (assuming ~50 bytes per response)
+    bytes_per_request = 50  # JSON response size estimate
+    bps_current = rps_1s * bytes_per_request
+    bps_avg = avg_rps * bytes_per_request
+    
+    return {
+        "rps_1s": rps_1s,
+        "rps_10s": rps_10s,
+        "rps_avg": avg_rps,
+        "bps_current": bps_current,
+        "bps_avg": bps_avg,
+        "total_requests": total_requests,
+        "uptime": total_time
+    }
+
+
+def create_stats_table() -> Table:
+    """Create a rich table with current statistics"""
+    stats = get_speed_stats()
+    
+    table = Table(title="🎲 RNG Service Stats", show_header=True, header_style="bold magenta")
+    table.add_column("Metric", style="cyan", no_wrap=True)
+    table.add_column("Current", style="green")
+    table.add_column("Average", style="yellow")
+    
+    table.add_row("Requests/sec", f"{stats['rps_1s']:.1f}", f"{stats['rps_avg']:.1f}")
+    table.add_row("Requests/sec (10s)", f"{stats['rps_10s']:.1f}", "")
+    table.add_row("Bytes/sec", f"{stats['bps_current']:.0f}", f"{stats['bps_avg']:.0f}")
+    table.add_row("Total Requests", f"{stats['total_requests']}", "")
+    table.add_row("Uptime", f"{stats['uptime']:.1f}s", "")
+    
+    if use_file:
+        table.add_row("File Progress", f"{current_index}/{len(random_numbers)}", f"{(current_index/len(random_numbers)*100):.1f}%" if random_numbers else "N/A")
+    
+    return table
+
+
+def stats_display_thread():
+    """Background thread to display live statistics"""
+    if not RICH_AVAILABLE:
+        return
+        
+    with Live(create_stats_table(), refresh_per_second=2, console=console) as live:
+        while True:
+            time.sleep(0.5)
+            live.update(create_stats_table())
+
+
 def load_random_numbers(file_path: str) -> List[float]:
     """Load random numbers from a file, one per line"""
     if not os.path.exists(file_path):
@@ -132,7 +198,7 @@ def main():
     parser.add_argument("--port", type=int, default=8000, help="Port to bind to")
     parser.add_argument("--file", type=str, help="Path to random numbers file (optional)")
     parser.add_argument("--log-file", type=str, help="Path to save request logs (optional)")
-    # parser.add_argument("--no-access-logs", action="store_true", help="Disable FastAPI access logs")
+    parser.add_argument("--no-access-logs", action="store_true", help="Disable FastAPI access logs")
     args = parser.parse_args()
     
     global random_numbers
@@ -184,10 +250,16 @@ def main():
                 },
             },
         }
-    else:
+    elif args.no_access_logs:
         # Disable access logs completely
         logger.info("Access logging disabled")
         uvicorn_config["access_log"] = False
+    
+    # Start stats display thread if rich is available
+    if RICH_AVAILABLE:
+        stats_thread = threading.Thread(target=stats_display_thread, daemon=True)
+        stats_thread.start()
+        logger.info("Live stats display started")
     
     # Start the server
     logger.info(f"Starting server on {args.host}:{args.port}")
