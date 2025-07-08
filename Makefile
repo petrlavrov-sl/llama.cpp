@@ -1,13 +1,15 @@
 # Superlinear llama.cpp Makefile
 # Simple commands to avoid forgetting shell script meanings
 
-.PHONY: help build-mac run-llama-run run-rng-service test-fpga download-models
+.PHONY: help build-mac run-llama-run run-rng-service test-fpga download-models run-with-fpga
 
 # Default model settings
 MODEL ?= models-superlinear/gemma-2-2b-it.gguf
 PROMPT ?= "Tell me about the history of artificial intelligence"
 OUTPUT_FILE ?= output.txt
 LOG_FILE ?= log.txt
+ARGS ?= ""
+LLAMA_EXECUTABLE ?= ./build/bin/main
 
 # RNG Service settings
 PORT ?= 8000
@@ -21,6 +23,7 @@ help:
 	@echo "Available commands:"
 	@echo "  make build-mac         - Build llama.cpp for macOS"
 	@echo "  make run-llama-run     - Run llama-run with model (use MODEL=path, PROMPT='text')"
+	@echo "  make run-with-fpga     - Run main llama executable with direct FPGA RNG (use MODEL=, PROMPT=, ARGS=)"
 	@echo "  make run-rng-service     - Run RNG service (auto-detects FPGA, use PORT=8000, HOST=127.0.0.1, RNG_FILE=path, RNG_LOG_FILE=path)"
 	@echo "  make test-fpga           - Test FPGA connection only (use FPGA_PORT=port to force specific port)"
 	@echo "  make download-models   - Download models from HuggingFace"
@@ -29,6 +32,7 @@ help:
 	@echo "Examples:"
 	@echo "  make run-llama-run MODEL=models-superlinear/llama-3.2-1b-instruct.gguf PROMPT='Hello world'"
 	@echo "  make run-llama-run     # Uses defaults"
+	@echo "  make run-with-fpga ARGS='-c 2048' # Run with FPGA and custom llama arguments"
 	@echo "  make run-rng-service FPGA_PORT=/dev/tty.usbserial-XXXX  # Force specific FPGA port"
 	@echo "  make run-rng-service RNG_FILE=rng_values.txt  # Use file source (if no FPGA found)"
 	@echo "  make run-rng-service     # Auto-detect FPGA, fallback to software generation"
@@ -46,6 +50,33 @@ build-mac:
 		exit 1; \
 	}
 	@echo "✅ Build complete! Binaries in ./build/bin/"
+
+run-with-fpga: build-mac
+	@echo "🚀 Running llama.cpp with direct FPGA RNG..."
+	@echo "🔎 Attempting to auto-detect FPGA device..."
+	@FPGA_DEVICE=$$(cd tools-superlinear/rng_provider && poetry run python run_auto_detect.py); \
+	if [ -z "$$FPGA_DEVICE" ]; then \
+		echo "❌ Error: Could not auto-detect FPGA device."; \
+		echo "Please ensure the device is connected and the Python environment is set up."; \
+		exit 1; \
+	fi; \
+	echo "✅ FPGA device detected at: $$FPGA_DEVICE"; \
+	\
+	export LLAMA_RNG_PROVIDER="fpga-serial"; \
+	export LLAMA_FPGA_PORT="$$FPGA_DEVICE"; \
+	export LLAMA_FPGA_BAUDRATE="$(FPGA_BAUDRATE)"; \
+	export LLAMA_RNG_DEBUG="1"; \
+	\
+	echo "🔧 Environment variables set:"; \
+	echo "   - LLAMA_RNG_PROVIDER=$$LLAMA_RNG_PROVIDER"; \
+	echo "   - LLAMA_FPGA_PORT=$$LLAMA_FPGA_PORT"; \
+	echo "   - LLAMA_RNG_DEBUG=$$LLAMA_RNG_DEBUG"; \
+	\
+	echo "🎬 Executing $(LLAMA_EXECUTABLE)..."; \
+	echo "------------------------------------------"; \
+	$(LLAMA_EXECUTABLE) -m "$(MODEL)" -p "$(PROMPT)" $(ARGS); \
+	echo "------------------------------------------"; \
+	echo "✅ Execution finished."
 
 run-llama-run:
 	@echo "Running llama-run with:"
