@@ -194,15 +194,10 @@ public:
         if (port_name.empty() || !open_serial_port()) {
             throw std::runtime_error("Failed to open or configure serial port: " + port_name);
         }
-
-        // Any character will toggle the stream on.
-        send_toggle_command();
     }
 
     ~SerialFPGARNGProvider() override {
         if (is_open()) {
-            // Any character will toggle the stream off before closing.
-            send_toggle_command();
             close_serial_port();
         }
     }
