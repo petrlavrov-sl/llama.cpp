@@ -46,8 +46,9 @@ def check_fpga_conn(device_path: str, baudrate: int = 921600, timeout: float = 0
     # step 1: read data first, make sure there's nothing there
     data = read_data(device_path, baudrate, timeout, check_duration)
     if data:
-        logger.error("Data detected before sending start signal! Please disable the signal before running this script.")
-        raise DataAlreadyStreamingError("Data detected before sending start signal! Please disable the signal before running this script.")
+        logger.warning(f"{device_path} is sending data before we sent the start signal!")
+        raise DataAlreadyStreamingError("{device_path} is sending data before we sent the start signal! "
+                                        "Please disable the signal before running your script.")
 
     # step 2: send start signal
     send_start_signal(device_path)
@@ -59,7 +60,7 @@ def check_fpga_conn(device_path: str, baudrate: int = 921600, timeout: float = 0
     else:
         logger.error("No data received after sending start signal!")
         return False
-    
+
 
     # step 4: send stop signal
     send_start_signal(device_path)

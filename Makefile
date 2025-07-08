@@ -58,23 +58,23 @@ build-mac:
 	}
 	@echo "✅ Build complete! Binaries in ./build/bin/"
 
-run-with-fpga: build-mac
+# Example:
+# make run-with-fpga MODEL=./models-superlinear/gemma-2-2b-it.gguf ARGS="-c 4096 --temp 0.5"
+run-llama-run-with-fpga: build-mac
 	@set -e; \
 	echo "🚀 Running llama-run with direct FPGA RNG..."; \
-	@mkdir -p "$(RUN_DIR)"; \
+	mkdir -p "$(RUN_DIR)"; \
 	echo "📝 Outputs will be saved in $(RUN_DIR)"; \
 	echo "🔎 Attempting to auto-detect FPGA device..."; \
-	@FPGA_DEVICE=$$(cd tools-superlinear/rng_provider && poetry run python run_auto_detect.py); \
+	FPGA_DEVICE=$$(cd tools-superlinear/rng_provider && poetry run python run_auto_detect.py); \
 	if [ -z "$$FPGA_DEVICE" ]; then \
 		echo "❌ Error: Could not auto-detect FPGA device."; \
 		exit 1; \
 	fi; \
 	echo "✅ FPGA device detected at: $$FPGA_DEVICE"; \
-	\
-	trap 'echo "🔌 Stopping FPGA stream..."; cd tools-superlinear/rng_provider && poetry run python run_stop_fpga.py "$$FPGA_DEVICE"' EXIT; \
-	\
+	sleep 0.1; \
 	echo "⚡ Starting FPGA stream..."; \
-	cd tools-superlinear/rng_provider && poetry run python run_start_fpga.py "$$FPGA_DEVICE"; \
+	cd $(CURDIR)/tools-superlinear/rng_provider && poetry run python run_start_fpga.py "$$FPGA_DEVICE"; \
 	\
 	export LLAMA_RNG_PROVIDER="fpga-serial"; \
 	export LLAMA_FPGA_PORT="$$FPGA_DEVICE"; \
@@ -82,6 +82,7 @@ run-with-fpga: build-mac
 	export LLAMA_RNG_DEBUG="1"; \
 	export LLAMA_RNG_OUTPUT="$(RNG_VALUES_FILE)"; \
 	\
+	cd $(CURDIR); \
 	echo "🔧 Environment variables set, running llama-run with:"; \
 	echo "   - Model: $(MODEL)"; \
 	echo "   - Prompt: $(PROMPT)"; \
@@ -92,6 +93,8 @@ run-with-fpga: build-mac
 	echo "------------------------------------------"; \
 	./build/bin/llama-run "$(MODEL)" "$(PROMPT)" $(ARGS) > "$(OUTPUT_FILE)" 2>"$(LOG_FILE)"; \
 	echo "------------------------------------------"; \
+	echo "⚡ Stopping FPGA stream..."; \
+	cd $(CURDIR)/tools-superlinear/rng_provider && poetry run python run_stop_fpga.py "$$FPGA_DEVICE"; \
 	echo "✅ Execution finished. Check $(RUN_DIR) for outputs."
 
 run-llama-run:
@@ -160,9 +163,3 @@ stop-fpga:
 		exit 1; \
 	fi; \
 	cd tools-superlinear/rng_provider && poetry run python run_stop_fpga.py "$$FPGA_DEVICE"
-
-# TODO: Add more commands as needed
-# TODO: make run-llama-server (with RNG provider service)
-# TODO: make clean (clean build artifacts)
-# TODO: make test (run basic model test)
-# TODO: make check-models (verify downloaded models)
