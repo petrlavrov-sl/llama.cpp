@@ -10,6 +10,7 @@
 #include <stdexcept>
 #include <curl/curl.h>
 #include <nlohmann/json.hpp>
+#include <iomanip> // Required for std::fixed and std::setprecision
 
 // Platform-specific serial includes
 #ifdef _WIN32
@@ -52,6 +53,7 @@ public:
             output_file.open(filename);
             if (output_file.is_open()) {
                 output_file << "# RNG values from " << name << " provider\n";
+                output_file << "# Format: timestamp_ms,random_value\n";
                 output_file.flush();
             }
         }
@@ -66,7 +68,10 @@ protected:
     // Log the generated value to file if enabled
     void log_value(double value) {
         if (output_file.is_open()) {
-            output_file << value << "\n";
+            auto now = std::chrono::duration_cast<std::chrono::milliseconds>(
+                std::chrono::system_clock::now().time_since_epoch()
+            ).count();
+            output_file << now << "," << std::fixed << std::setprecision(10) << value << "\n";
             output_file.flush();
         }
     }

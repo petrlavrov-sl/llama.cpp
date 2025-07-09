@@ -1,7 +1,7 @@
 # Superlinear llama.cpp Makefile
 # Simple commands to avoid forgetting shell script meanings
 
-.PHONY: help build-mac run-llama-run run-rng-service test-fpga download-models run-with-fpga start-fpga stop-fpga
+.PHONY: help build-mac run-llama-run run-rng-service test-fpga download-models run-with-fpga start-fpga stop-fpga visualize-rng-log
 
 # Default model settings
 MODEL ?= models-superlinear/gemma-2-2b-it.gguf
@@ -107,6 +107,16 @@ run-llama-run:
 	@echo "  Log: $(LOG_FILE)"
 	./build/bin/llama-run "$(MODEL)" "$(PROMPT)" > "$(OUTPUT_FILE)" 2>"$(LOG_FILE)"
 	@echo "Done! Check $(RUN_DIR) for results"
+
+visualize-rng-log:
+	@LOG_FILE_PATH=${LOG_FILE} ; \
+	if [ -z "$${LOG_FILE_PATH}" ]; then \
+		echo "Usage: make visualize-rng-log LOG_FILE=<path-to-log-file>"; \
+		echo "Example: make visualize-rng-log LOG_FILE=runs/run_20250709_103000/rng_values.txt"; \
+		exit 1; \
+	fi; \
+	echo "📊 Starting visualizer for: $${LOG_FILE_PATH}"; \
+	cd tools-superlinear/rng_provider && poetry run python rng_visualizer.py --file ../../$${LOG_FILE_PATH}
 
 run-rng-service:
 	@echo "Starting RNG service on $(HOST):$(PORT)"
