@@ -208,8 +208,10 @@ public:
     }
 
     double generate() override {
-        uint8_t random_byte = read_byte();
-        double value = random_byte / 255.0; // Convert byte to 0-1 range
+        // Read 4 bytes to form a 32-bit integer for higher precision
+        uint32_t random_int = read_u32();
+        // Normalize to [0, 1] using the full range of uint32_t
+        double value = random_int / (double)0xFFFFFFFF;
         log_value(value);
         return value;
     }
@@ -390,6 +392,18 @@ private:
         }
 #endif
         return byte;
+    }
+
+    uint32_t read_u32() {
+        uint8_t bytes[4];
+        for (int i = 0; i < 4; ++i) {
+            bytes[i] = read_byte();
+        }
+        // Combine bytes into a 32-bit integer (assuming little-endian from FPGA)
+        return ((uint32_t)bytes[3] << 24) |
+               ((uint32_t)bytes[2] << 16) |
+               ((uint32_t)bytes[1] << 8)  |
+               ((uint32_t)bytes[0]);
     }
 };
 
