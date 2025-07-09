@@ -64,35 +64,45 @@ class RNGVisualizer:
                     time.sleep(1)
                     continue
 
-                with self.log_file.open('r') as f:
-                    if f.tell() < self.last_pos:
-                        logger.info("Log file reset, starting from beginning.")
-                        self.last_pos = 0
+                # Correctly check for file truncation by comparing size
+                current_size = self.log_file.stat().st_size
+                if current_size < self.last_pos:
+                    logger.info("Log file was truncated, restarting from beginning.")
+                    self.last_pos = 0
 
-                    f.seek(self.last_pos)
-                    lines = f.readlines()
-                    self.last_pos = f.tell()
-                    
-                    for line in lines:
-                        line = line.strip()
-                        if not line or line.startswith('#'):
-                            continue
+                # Only read if the file has grown
+                if current_size > self.last_pos:
+                    with self.log_file.open('r') as f:
+                        f.seek(self.last_pos)
+                        lines = f.readlines()
+                        self.last_pos = f.tell()
                         
-                        try:
-                            parts = line.split(',')
-                            if len(parts) == 2:
-                                timestamp, value_str = parts
-                                value = float(value_str)
-                                
-                                self.values.append(value)
-                                self.timestamps.append(int(timestamp))
-                                self.total_values += 1
+                        for line in lines:
+                            line = line.strip()
+                            if not line or line.startswith('#'):
+                                continue
+                            
+                            try:
+                                parts = line.split(',')
+                                if len(parts) == 2:
+                                    timestamp, value_str = parts
+                                    value = float(value_str)
+                                    
+                                    self.values.append(value)
+                                    self.timestamps.append(int(timestamp))
+                                    self.total_values += 1
 
-                        except ValueError as e:
-                            logger.warning(f"Skipping malformed line: '{line}' ({e})")
-                            continue
-                
-                time.sleep(0.1)
+                            except ValueError as e:
+                                logger.warning(f"Skipping malformed line: '{line}' ({e})")
+                                continue
+                else:
+                    # If no new data, wait a bit
+                    time.sleep(0.1)
+
+            except FileNotFoundError:
+                logger.warning(f"Log file disappeared. Waiting for it to reappear at {self.log_file}")
+                self.last_pos = 0
+                time.sleep(2)
             except Exception as e:
                 logger.error(f"Error reading log file: {e}")
                 time.sleep(2)
