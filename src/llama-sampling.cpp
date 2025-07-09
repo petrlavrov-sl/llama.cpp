@@ -28,10 +28,21 @@ namespace {
 void check_and_override_rng_env() {
     const char* provider = std::getenv("LLAMA_RNG_PROVIDER");
     const char* api_url = std::getenv("LLAMA_RNG_API_URL");
+    const char* fpga_port = std::getenv("LLAMA_FPGA_PORT");
     std::cerr << "[DEBUG] LLAMA_RNG_PROVIDER env: " << (provider ? provider : "<unset>") << std::endl;
     std::cerr << "[DEBUG] LLAMA_RNG_API_URL env: " << (api_url ? api_url : "<unset>") << std::endl;
+    std::cerr << "[DEBUG] LLAMA_FPGA_PORT env: " << (fpga_port ? fpga_port : "<unset>") << std::endl;
+
+    if (provider && std::string(provider) == "fpga-serial") {
+        std::cerr << "[INFO] Using FPGA-Serial RNG Provider." << std::endl;
+        if (!fpga_port) {
+            std::cerr << "[WARN] LLAMA_FPGA_PORT is not set. Will attempt auto-detection." << std::endl;
+        }
+        return;
+    }
+
     if (!provider || std::string(provider) != "external-api") {
-        std::cerr << "[WARN] LLAMA_RNG_PROVIDER env var is '" << (provider ? provider : "<unset>") << "', expected 'external-api'" << std::endl;
+        std::cerr << "[WARN] LLAMA_RNG_PROVIDER env var is '" << (provider ? provider : "<unset>") << "', expected 'external-api' or 'fpga-serial'" << std::endl;
     }
     if (!api_url || std::string(api_url) != "http://localhost:8000/random") {
         std::cerr << "[WARN] LLAMA_RNG_API_URL env var is '" << (api_url ? api_url : "<unset>") << "', expected 'http://localhost:8000/random'" << std::endl;

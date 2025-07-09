@@ -1,13 +1,20 @@
 # Superlinear llama.cpp Makefile
 # Simple commands to avoid forgetting shell script meanings
 
-.PHONY: help build-mac run-llama-run run-rng-service test-fpga debug-serial download-models
+.PHONY: help build-mac run-llama-run run-rng-service test-fpga download-models run-with-fpga start-fpga stop-fpga visualize-rng-log
 
 # Default model settings
 MODEL ?= models-superlinear/gemma-2-2b-it.gguf
 PROMPT ?= "Tell me about the history of artificial intelligence"
-OUTPUT_FILE ?= output.txt
-LOG_FILE ?= log.txt
+
+# --- Run directory setup ---
+TIMESTAMP := $(shell date +%Y%m%d_%H%M%S)
+RUN_DIR ?= runs/run_$(TIMESTAMP)
+OUTPUT_FILE ?= $(RUN_DIR)/output.txt
+LOG_FILE ?= $(RUN_DIR)/log.txt
+RNG_VALUES_FILE ?= $(RUN_DIR)/rng_values.txt
+
+ARGS ?= ""
 
 # RNG Service settings
 PORT ?= 8000
@@ -21,20 +28,21 @@ help:
 	@echo "Available commands:"
 	@echo "  make build-mac         - Build llama.cpp for macOS"
 	@echo "  make run-llama-run     - Run llama-run with model (use MODEL=path, PROMPT='text')"
+	@echo "  make run-with-fpga     - Run llama-run with direct FPGA RNG (use MODEL=, PROMPT=, ARGS=)"
+	@echo "  make start-fpga        - Send start (toggle) signal to FPGA"
+	@echo "  make stop-fpga         - Send stop (toggle) signal to FPGA"
 	@echo "  make run-rng-service     - Run RNG service (auto-detects FPGA, use PORT=8000, HOST=127.0.0.1, RNG_FILE=path, RNG_LOG_FILE=path)"
 	@echo "  make test-fpga           - Test FPGA connection only (use FPGA_PORT=port to force specific port)"
-	@echo "  make debug-serial        - List and test all serial devices to find FPGA"
 	@echo "  make download-models   - Download models from HuggingFace"
 	@echo "  make help              - Show this help message"
 	@echo ""
 	@echo "Examples:"
 	@echo "  make run-llama-run MODEL=models-superlinear/llama-3.2-1b-instruct.gguf PROMPT='Hello world'"
-	@echo "  make run-llama-run     # Uses defaults"
+	@echo "  make run-llama-run     # Uses defaults, saves to a timestamped folder in runs/"
+	@echo "  make run-with-fpga ARGS='-c 2048' # Run with FPGA and custom llama arguments"
 	@echo "  make run-rng-service FPGA_PORT=/dev/tty.usbserial-XXXX  # Force specific FPGA port"
 	@echo "  make run-rng-service RNG_FILE=rng_values.txt  # Use file source (if no FPGA found)"
 	@echo "  make run-rng-service     # Auto-detect FPGA, fallback to software generation"
-	@echo "  make test-fpga           # Test FPGA connection (30-second test)"
-	@echo "  make debug-serial        # Find and test ALL serial devices"
 
 build-mac:
 	@echo "Building llama.cpp for macOS..."
@@ -50,14 +58,65 @@ build-mac:
 	}
 	@echo "✅ Build complete! Binaries in ./build/bin/"
 
+# Example:
+# make run-with-fpga MODEL=./models-superlinear/gemma-2-2b-it.gguf ARGS="-c 4096 --temp 0.5"
+run-llama-run-with-fpga: build-mac
+	@set -e; \
+	echo "🚀 Running llama-run with direct FPGA RNG..."; \
+	mkdir -p "$(RUN_DIR)"; \
+	echo "📝 Outputs will be saved in $(RUN_DIR)"; \
+	echo "🔎 Attempting to auto-detect FPGA device..."; \
+	FPGA_DEVICE=$$(cd tools-superlinear/rng_provider && poetry run python run_auto_detect.py); \
+	if [ -z "$$FPGA_DEVICE" ]; then \
+		echo "❌ Error: Could not auto-detect FPGA device."; \
+		exit 1; \
+	fi; \
+	echo "✅ FPGA device detected at: $$FPGA_DEVICE"; \
+	sleep 0.1; \
+	echo "⚡ Starting FPGA stream..."; \
+	cd $(CURDIR)/tools-superlinear/rng_provider && poetry run python run_start_fpga.py "$$FPGA_DEVICE"; \
+	\
+	export LLAMA_RNG_PROVIDER="fpga-serial"; \
+	export LLAMA_FPGA_PORT="$$FPGA_DEVICE"; \
+	export LLAMA_FPGA_BAUDRATE="$(FPGA_BAUDRATE)"; \
+	export LLAMA_RNG_DEBUG="1"; \
+	export LLAMA_RNG_OUTPUT="$(RNG_VALUES_FILE)"; \
+	\
+	cd $(CURDIR); \
+	echo "🔧 Environment variables set, running llama-run with:"; \
+	echo "   - Model: $(MODEL)"; \
+	echo "   - Prompt: $(PROMPT)"; \
+	echo "   - Extra args: $(ARGS)"; \
+	echo "   - Output: $(OUTPUT_FILE)"; \
+	echo "   - Log: $(LOG_FILE)"; \
+	echo "   - RNG Data: $(RNG_VALUES_FILE)"; \
+	echo "------------------------------------------"; \
+	./build/bin/llama-run "$(MODEL)" "$(PROMPT)" $(ARGS) > "$(OUTPUT_FILE)" 2>"$(LOG_FILE)"; \
+	echo "------------------------------------------"; \
+	echo "⚡ Stopping FPGA stream..."; \
+	cd $(CURDIR)/tools-superlinear/rng_provider && poetry run python run_stop_fpga.py "$$FPGA_DEVICE"; \
+	echo "✅ Execution finished. Check $(RUN_DIR) for outputs."
+
 run-llama-run:
-	@echo "Running llama-run with:"
+	@mkdir -p "$(RUN_DIR)"; \
+	echo "📝 Outputs will be saved in $(RUN_DIR)"; \
+	echo "Running llama-run with:"
 	@echo "  Model: $(MODEL)"
 	@echo "  Prompt: $(PROMPT)"
 	@echo "  Output: $(OUTPUT_FILE)"
 	@echo "  Log: $(LOG_FILE)"
 	./build/bin/llama-run "$(MODEL)" "$(PROMPT)" > "$(OUTPUT_FILE)" 2>"$(LOG_FILE)"
-	@echo "Done! Check $(OUTPUT_FILE) for results, $(LOG_FILE) for logs"
+	@echo "Done! Check $(RUN_DIR) for results"
+
+visualize-rng-log:
+	@LOG_FILE_PATH=${LOG_FILE} ; \
+	if [ -z "$${LOG_FILE_PATH}" ]; then \
+		echo "Usage: make visualize-rng-log LOG_FILE=<path-to-log-file>"; \
+		echo "Example: make visualize-rng-log LOG_FILE=runs/run_20250709_103000/rng_values.txt"; \
+		exit 1; \
+	fi; \
+	echo "📊 Starting visualizer for: $${LOG_FILE_PATH}"; \
+	cd tools-superlinear/rng_provider && poetry run python rng_visualizer.py --file ../../$${LOG_FILE_PATH}
 
 run-rng-service:
 	@echo "Starting RNG service on $(HOST):$(PORT)"
@@ -82,23 +141,6 @@ run-rng-service:
 	# Priority: FPGA → File → Software generation
 	# Shows: requests/sec, bytes/sec, total requests, uptime, FPGA stats
 
-test-fpga:
-	@echo "🧪 Testing FPGA connection..."
-	@ARGS="--test-fpga"; \
-	if [ -n "$(FPGA_PORT)" ]; then \
-		echo "🎯 Testing forced FPGA port: $(FPGA_PORT)"; \
-		ARGS="$$ARGS --fpga-port $(FPGA_PORT)"; \
-	else \
-		echo "🔍 Auto-detecting FPGA device for test..."; \
-	fi; \
-	cd tools-superlinear/rng_provider && poetry run python rng_service.py $$ARGS
-
-debug-serial:
-	@echo "🔧 Debugging all serial devices..."
-	@echo "📋 This will list ALL USB/serial devices and test each one"
-	@echo "🔘 Press the FPGA button when prompted for each device!"
-	cd tools-superlinear/rng_provider && poetry run python debug_serial.py
-
 download-models:
 	@echo "Model download not implemented yet"
 	@echo "TODO: Implement HuggingFace model download"
@@ -114,8 +156,20 @@ download-models:
 	@echo "  - models-superlinear/llama-3.1-8b-instruct.gguf" 
 	@echo "  - models-superlinear/llama-3.2-1b-instruct.gguf"
 
-# TODO: Add more commands as needed
-# TODO: make run-llama-server (with RNG provider service)
-# TODO: make clean (clean build artifacts)
-# TODO: make test (run basic model test)
-# TODO: make check-models (verify downloaded models)
+start-fpga:
+	@echo "🚀 Starting FPGA stream..."
+	@FPGA_DEVICE=$$(cd tools-superlinear/rng_provider && poetry run python run_auto_detect.py); \
+	if [ -z "$$FPGA_DEVICE" ]; then \
+		echo "❌ Error: Could not auto-detect FPGA device."; \
+		exit 1; \
+	fi; \
+	cd tools-superlinear/rng_provider && poetry run python run_start_fpga.py "$$FPGA_DEVICE"
+
+stop-fpga:
+	@echo "🔌 Stopping FPGA stream..."
+	@FPGA_DEVICE=$$(cd tools-superlinear/rng_provider && poetry run python run_auto_detect.py); \
+	if [ -z "$$FPGA_DEVICE" ]; then \
+		echo "❌ Error: Could not auto-detect FPGA device."; \
+		exit 1; \
+	fi; \
+	cd tools-superlinear/rng_provider && poetry run python run_stop_fpga.py "$$FPGA_DEVICE"

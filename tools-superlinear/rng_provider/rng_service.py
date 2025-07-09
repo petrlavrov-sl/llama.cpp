@@ -8,7 +8,6 @@ It's intended to be used with the llama-rng-provider-api in llama.cpp.
 
 import argparse
 import os
-import logging
 from typing import List, Dict, Any, Optional
 import uvicorn
 from fastapi import FastAPI, HTTPException
@@ -18,6 +17,7 @@ import threading
 from collections import deque
 import struct
 import glob
+from loguru import logger
 
 try:
     import serial
@@ -36,12 +36,13 @@ except ImportError:
     RICH_AVAILABLE = False
     print("⚠️  Rich not available. Install with: pip install rich")
 
-# Setup logging
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+# Setup loguru logging (level will be set in main based on --debug flag)
+logger.remove()  # Remove default handler
+logger.add(
+    lambda msg: print(msg, end=""),
+    format="<green>{time:HH:mm:ss}</green> | <level>{level: <8}</level> | {message}",
+    level="INFO"  # Default to INFO, will be changed to DEBUG if --debug flag is used
 )
-logger = logging.getLogger("rng_service")
 
 app = FastAPI(title="RNG Service")
 
@@ -56,13 +57,15 @@ fpga_serial: Optional[serial.Serial] = None
 fpga_buffer = deque(maxlen=10000)  # Buffer for FPGA data
 fpga_bytes_received = 0
 fpga_start_time = time.time()
-fpga_throughput_history = deque(maxlen=60)  # FPGA throughput history for plotting
+fpga_throughput_history = deque(maxlen=600)  # FPGA throughput history for plotting (10 minutes)
 
 # Speed tracking
 request_times = deque(maxlen=100)  # Keep last 100 request timestamps
-rps_history = deque(maxlen=60)  # Keep 60 seconds of RPS data for plotting
+rps_history = deque(maxlen=600)  # Keep 10 minutes of RPS data for plotting
 total_requests = 0
 peak_rps = 0.0
+peak_bps = 0.0
+peak_fpga_throughput = 0.0
 start_time = time.time()
 console = Console() if RICH_AVAILABLE else None
 
@@ -138,7 +141,7 @@ async def status() -> Dict[str, Any]:
 
 def get_speed_stats() -> Dict[str, Any]:
     """Calculate current speed statistics"""
-    global peak_rps
+    global peak_rps, peak_bps
     current_time = time.time()
     
     # Calculate requests per second (last 1 second)
@@ -153,9 +156,16 @@ def get_speed_stats() -> Dict[str, Any]:
     very_recent_5s = [t for t in request_times if current_time - t <= 5.0]
     rps_moving_avg = len(very_recent_5s) / min(5.0, current_time - start_time)
     
-    # Update peak
+    # Estimate data rate (assuming ~50 bytes per response)
+    bytes_per_request = 50  # JSON response size estimate
+    bps_current = rps_1s * bytes_per_request
+    bps_avg = (total_requests / (current_time - start_time) if current_time > start_time else 0) * bytes_per_request
+    
+    # Update peaks
     if rps_1s > peak_rps:
         peak_rps = rps_1s
+    if bps_current > peak_bps:
+        peak_bps = bps_current
     
     # Add to history for plotting
     rps_history.append(rps_1s)
@@ -164,11 +174,6 @@ def get_speed_stats() -> Dict[str, Any]:
     total_time = current_time - start_time
     avg_rps = total_requests / total_time if total_time > 0 else 0
     
-    # Estimate data rate (assuming ~50 bytes per response)
-    bytes_per_request = 50  # JSON response size estimate
-    bps_current = rps_1s * bytes_per_request
-    bps_avg = avg_rps * bytes_per_request
-    
     return {
         "rps_current": rps_1s,
         "rps_10s": rps_10s,
@@ -176,28 +181,41 @@ def get_speed_stats() -> Dict[str, Any]:
         "rps_avg": avg_rps,
         "rps_peak": peak_rps,
         "bps_current": bps_current,
+        "bps_peak": peak_bps,
         "bps_avg": bps_avg,
         "total_requests": total_requests,
         "uptime": total_time
     }
 
 
-def create_ascii_plot(height: int = 8, width: int = 60) -> str:
+def create_ascii_plot(height: int = 8, width: int = 80) -> str:
     """Create an ASCII plot of request rate over time (like htop)"""
     if len(rps_history) < 2:
         return "📊 [dim]Gathering data...[/dim]"
     
+    # Always display full 10-minute range (600 data points)
+    # Pad with zeros if we don't have enough data yet
+    full_data = [0.0] * 600  # 10 minutes of zeros
+    if rps_history:
+        # Fill in the actual data at the end
+        data_list = list(rps_history)
+        start_idx = 600 - len(data_list)
+        for i, val in enumerate(data_list):
+            full_data[start_idx + i] = val
+    
+    # Sample data to fit width (e.g., every 8th point for 80 width)
+    sample_rate = max(1, len(full_data) // width)
+    sampled_data = [full_data[i] for i in range(0, len(full_data), sample_rate)][:width]
+    
     # Get max value for scaling
-    max_val = max(rps_history) if rps_history else 1
-    if max_val == 0:
-        max_val = 1
+    max_val = max(sampled_data) if sampled_data and max(sampled_data) > 0 else 1
     
     # Create the plot
     plot_lines = []
     
     # Scale data to fit height
     scaled_data = []
-    for val in list(rps_history)[-width:]:  # Take last `width` data points
+    for val in sampled_data:
         scaled_height = int((val / max_val) * (height - 1))
         scaled_data.append(scaled_height)
     
@@ -233,7 +251,7 @@ def create_ascii_plot(height: int = 8, width: int = 60) -> str:
     # Add time axis
     time_axis = "└" + "─" * len(scaled_data) + "┘"
     plot_lines.append(time_axis)
-    plot_lines.append(f"📊 Request Rate (last {len(scaled_data)}s)")
+    plot_lines.append("📊 Service Request Rate (last 10m)")
     
     return "\n".join(plot_lines)
 
@@ -261,20 +279,17 @@ def create_stats_table() -> Table:
     table.add_column("Peak", style="red")
     table.add_column("Average", style="yellow")
     
-    table.add_row("Requests/sec", f"{stats['rps_current']:.1f}", f"{stats['rps_peak']:.1f}", f"{stats['rps_avg']:.1f}")
-    table.add_row("Bytes/sec", f"{stats['bps_current']:.0f}", "", f"{stats['bps_avg']:.0f}")
+    table.add_row("Service Requests/sec", f"{stats['rps_current']:.1f}", f"{stats['rps_peak']:.1f}", f"{stats['rps_avg']:.1f}")
+    table.add_row("Service Throughput", f"{stats['bps_current']/1000:.1f} kbps", f"{stats['bps_peak']/1000:.1f} kbps", f"{stats['bps_avg']/1000:.1f} kbps")
     table.add_row("Total Requests", f"{stats['total_requests']}", "", "")
-    table.add_row("Uptime", f"{stats['uptime']:.1f}s", "", "")
     
     # Show FPGA-specific stats
     if use_fpga:
         fpga_stats = get_fpga_stats()
         table.add_row("", "", "", "")  # Separator
-        table.add_row("FPGA Source", f"{source_emoji} {'Connected' if fpga_stats['connected'] else 'Disconnected'}", "", "")
-        table.add_row("FPGA Throughput", f"{fpga_stats['throughput_kbps']:.1f} kbps", "", f"{fpga_stats['throughput_kibps']:.1f} Kibps")
+        table.add_row("FPGA Throughput", f"{fpga_stats['throughput_kbps']:.1f} kbps", f"{fpga_stats['peak_throughput_kbps']:.1f} kbps", f"{fpga_stats['avg_throughput_kbps']:.1f} kbps")
         table.add_row("FPGA Data Total", f"{fpga_stats['total_data_mb']:.2f} MiB", "", "")
         table.add_row("Buffer Size", f"{fpga_stats['buffer_size']}", "", "")
-        table.add_row("Bytes Received", f"{fpga_stats['bytes_received']}", "", "")  # Debug info
     
     # Only show file progress if actually using a file
     elif use_file and random_numbers:
@@ -283,22 +298,34 @@ def create_stats_table() -> Table:
     return table
 
 
-def create_fpga_throughput_plot(height: int = 6, width: int = 50) -> str:
+def create_fpga_throughput_plot(height: int = 6, width: int = 80) -> str:
     """Create ASCII plot of FPGA throughput over time"""
     if not use_fpga or len(fpga_throughput_history) < 2:
         return "📊 [dim]FPGA not active or gathering data...[/dim]"
     
+    # Always display full 10-minute range (600 data points)
+    # Pad with zeros if we don't have enough data yet
+    full_data = [0.0] * 600  # 10 minutes of zeros
+    if fpga_throughput_history:
+        # Fill in the actual data at the end
+        data_list = list(fpga_throughput_history)
+        start_idx = 600 - len(data_list)
+        for i, val in enumerate(data_list):
+            full_data[start_idx + i] = val
+    
+    # Sample data to fit width (e.g., every 8th point for 80 width)
+    sample_rate = max(1, len(full_data) // width)
+    sampled_data = [full_data[i] for i in range(0, len(full_data), sample_rate)][:width]
+    
     # Get max value for scaling
-    max_val = max(fpga_throughput_history) if fpga_throughput_history else 1
-    if max_val == 0:
-        max_val = 1
+    max_val = max(sampled_data) if sampled_data and max(sampled_data) > 0 else 1
     
     # Create the plot
     plot_lines = []
     
     # Scale data to fit height
     scaled_data = []
-    for val in list(fpga_throughput_history)[-width:]:  # Take last `width` data points
+    for val in sampled_data:
         scaled_height = int((val / max_val) * (height - 1))
         scaled_data.append(scaled_height)
     
@@ -334,7 +361,7 @@ def create_fpga_throughput_plot(height: int = 6, width: int = 50) -> str:
     # Add time axis
     time_axis = "└" + "─" * len(scaled_data) + "┘"
     plot_lines.append(time_axis)
-    plot_lines.append(f"⚡ FPGA Throughput (last {len(scaled_data)}s)")
+    plot_lines.append("⚡ FPGA Throughput (last 10m)")
     
     return "\n".join(plot_lines)
 
@@ -351,13 +378,13 @@ def create_combined_display():
     plots = []
     
     # Request rate plot
-    request_plot = create_ascii_plot(height=6, width=50)
-    plots.append(Panel(request_plot, title="📈 Live Request Rate", border_style="blue"))
+    request_plot = create_ascii_plot(height=6, width=80)
+    plots.append(Panel(request_plot, title="📈 Service Request Rate", border_style="blue"))
     
     # FPGA throughput plot if using FPGA
     if use_fpga:
-        fpga_plot = create_fpga_throughput_plot(height=6, width=50)
-        plots.append(Panel(fpga_plot, title="⚡ FPGA Source Throughput", border_style="yellow"))
+        fpga_plot = create_fpga_throughput_plot(height=6, width=80)
+        plots.append(Panel(fpga_plot, title="⚡ FPGA Throughput", border_style="yellow"))
     
     # Combine them
     return Group(stats_table, *plots)
@@ -418,22 +445,46 @@ def find_serial_port() -> Optional[str]:
             unique_devices.append(device)
     
     if not unique_devices:
-        logger.info("🔍 No serial devices found")
+        logger.debug("🔍 No serial devices found")
         return None
     
-    logger.info(f"🔍 Found {len(unique_devices)} serial devices: {unique_devices}")
+    logger.debug(f"🔍 Found {len(unique_devices)} serial devices: {unique_devices}")
     
     # First, try to find a device that's currently streaming (button pressed)
     for device in unique_devices:
-        logger.info(f"🧪 Quick test: {device} for active FPGA stream...")
+        logger.debug(f"🧪 Quick test: {device} for active FPGA stream...")
         if test_fpga_device(device):
-            logger.info(f"🎯 Found actively streaming FPGA: {device}")
+            logger.debug(f"🎯 Found actively streaming FPGA: {device}")
             return device
         else:
-            logger.info(f"⏸️  No active stream from {device}")
+            logger.debug(f"⏸️  No active stream from {device}")
     
-    # If no device is actively streaming, use device identification to pick best candidate
-    logger.info("💡 No devices actively streaming, using device identification...")
+    # If no device is actively streaming, wait for user to press button
+    if unique_devices:
+        logger.info("🔘 No devices actively streaming. Please press the button on your FPGA board to start the RNG stream...")
+        logger.info("⏳ Waiting for FPGA stream (checking every 3 seconds, press Ctrl+C to skip)...")
+        
+        try:
+            # Wait up to 60 seconds for button press
+            for attempt in range(20):  # 20 attempts * 3 seconds = 60 seconds
+                time.sleep(3)
+                logger.debug(f"🔄 Checking attempt {attempt + 1}/20...")
+                
+                for device in unique_devices:
+                    if test_fpga_device(device):
+                        logger.info(f"🎯 FPGA stream detected on {device}!")
+                        return device
+                
+                # Show progress every 5 attempts
+                if (attempt + 1) % 5 == 0:
+                    logger.info(f"⏳ Still waiting... ({attempt + 1}/20 checks completed)")
+                    
+        except KeyboardInterrupt:
+            logger.info("⏹️  User interrupted waiting. Falling back to device identification...")
+    
+    # If we get here, either no devices or user interrupted waiting
+    # Fall back to device identification to pick best candidate
+    logger.debug("💡 Using device identification to pick best candidate...")
     
     # Use serial.tools.list_ports to get device info for smarter selection
     try:
@@ -469,13 +520,13 @@ def fpga_reader_thread(port: str, baudrate: int = 921600):
     """Background thread to read data from FPGA"""
     global fpga_serial, fpga_bytes_received, fpga_start_time
     
-    logger.info(f"🧵 Starting FPGA reader thread for {port}")
+    logger.debug(f"🧵 Starting FPGA reader thread for {port}")
     
     try:
         fpga_serial = serial.Serial(port, baudrate, timeout=1)
         logger.info(f"✅ Connected to FPGA on {port} at {baudrate} baud")
-        logger.info("🔘 Press the button on the FPGA board to start sending data")
-        logger.info("⏳ Waiting for FPGA data stream...")
+        logger.debug("🔘 Press the button on the FPGA board to start sending data")
+        logger.debug("⏳ Waiting for FPGA data stream...")
         
         data_flowing = False
         last_data_time = time.time()
@@ -485,14 +536,14 @@ def fpga_reader_thread(port: str, baudrate: int = 921600):
         while True:
             loop_count += 1
             # Log every 100 loops (about 1 second) to show thread is alive
-            if loop_count % 100 == 0:
-                logger.info(f"🔄 FPGA reader thread alive (loop {loop_count}), bytes_received: {fpga_bytes_received}")
+            # if loop_count % 100 == 0:
+            #     logger.debug(f"🔄 FPGA reader thread alive (loop {loop_count}), bytes_received: {fpga_bytes_received}")
             data = fpga_serial.read(1024)  # Same chunk size as your consumer
             current_time = time.time()
             
             if data:
                 if not data_flowing:
-                    logger.info("🚀 FPGA data stream started!")
+                    logger.debug("🚀 FPGA data stream started!")
                     data_flowing = True
                 
                 fpga_bytes_received += len(data)
@@ -530,9 +581,9 @@ def fpga_reader_thread(port: str, baudrate: int = 921600):
         logger.error(f"❌ FPGA reader error: {e}")
         fpga_serial = None
 
-
 def get_fpga_stats() -> Dict[str, Any]:
     """Get FPGA throughput statistics"""
+    global peak_fpga_throughput
     elapsed = time.time() - fpga_start_time
     
     if elapsed > 0 and fpga_bytes_received > 0:
@@ -546,12 +597,24 @@ def get_fpga_stats() -> Dict[str, Any]:
     
     # Get recent throughput (last few readings for more responsive display)
     recent_throughput = 0
+    avg_throughput = 0
     if len(fpga_throughput_history) > 0:
         recent_readings = list(fpga_throughput_history)[-5:]  # Last 5 readings
         recent_throughput = sum(recent_readings) / len(recent_readings)
+        
+        # Calculate average of all non-zero values
+        non_zero_readings = [x for x in fpga_throughput_history if x > 0]
+        if non_zero_readings:
+            avg_throughput = sum(non_zero_readings) / len(non_zero_readings)
+        
+        # Update peak
+        if recent_throughput > peak_fpga_throughput:
+            peak_fpga_throughput = recent_throughput
     
     return {
         "throughput_kbps": recent_throughput,  # Use recent throughput for responsiveness
+        "peak_throughput_kbps": peak_fpga_throughput,
+        "avg_throughput_kbps": avg_throughput,
         "throughput_kibps": recent_throughput / 1.024,  # Convert to Kibps
         "total_data_mb": total_data_mb,
         "buffer_size": len(fpga_buffer),
@@ -640,25 +703,41 @@ def main():
     parser.add_argument("--test-fpga", action="store_true", help="Test FPGA connection only (don't start web server)")
     parser.add_argument("--log-file", type=str, help="Path to save request logs (optional)")
     parser.add_argument("--no-access-logs", action="store_true", help="Disable FastAPI access logs")
+    parser.add_argument("--mock", action="store_true", help="Force software RNG generation (skip FPGA discovery)")
+    parser.add_argument("--debug", action="store_true", help="Enable debug logging")
     args = parser.parse_args()
+    
+    # Configure logging level based on --debug flag
+    if args.debug:
+        logger.remove()
+        logger.add(
+            lambda msg: print(msg, end=""),
+            format="<green>{time:HH:mm:ss}</green> | <level>{level: <8}</level> | {message}",
+            level="DEBUG"
+        )
     
     global random_numbers
     global current_index
     global use_file
     global use_fpga
     
-    # Always try FPGA auto-discovery first (highest priority)
-    fpga_port = args.fpga_port
-    if fpga_port:
-        logger.info(f"🎯 Using forced FPGA port: {fpga_port}")
-    elif SERIAL_AVAILABLE:
-        logger.info("🔍 Auto-detecting FPGA device...")
-        fpga_port = find_serial_port()
+    # Check if mock mode is enabled
+    if args.mock:
+        logger.info("🖥️  Mock mode enabled - using software RNG generation")
+        fpga_port = None
+    else:
+        # Try FPGA auto-discovery first (highest priority)
+        fpga_port = args.fpga_port
+        if fpga_port:
+            logger.info(f"🎯 Using forced FPGA port: {fpga_port}")
+        elif SERIAL_AVAILABLE:
+            logger.info("🔍 Auto-detecting FPGA device...")
+            fpga_port = find_serial_port()
     
     if fpga_port and SERIAL_AVAILABLE:
         try:
             use_fpga = True
-            logger.info(f"⚡ Setting up FPGA connection at {args.fpga_baudrate} baud")
+            logger.debug(f"⚡ Setting up FPGA connection at {args.fpga_baudrate} baud")
             
             # Start FPGA reader thread
             fpga_thread = threading.Thread(
@@ -667,14 +746,14 @@ def main():
                 daemon=True
             )
             fpga_thread.start()
-            logger.info("✅ FPGA reader thread started - using FPGA as RNG source")
+            logger.debug("✅ FPGA reader thread started - using FPGA as RNG source")
             
             # Give the thread a moment to start and connect
             time.sleep(0.5)
             
             # Check if thread is actually running
             if fpga_thread.is_alive():
-                logger.info("🔄 FPGA thread is running")
+                logger.debug("🔄 FPGA thread is running")
             else:
                 logger.error("❌ FPGA thread failed to start")
                 use_fpga = False
@@ -747,14 +826,14 @@ def main():
         }
     elif args.no_access_logs:
         # Disable access logs completely
-        logger.info("Access logging disabled")
+        logger.debug("Access logging disabled")
         uvicorn_config["access_log"] = False
     
     # Start stats display thread if rich is available
     if RICH_AVAILABLE:
         stats_thread = threading.Thread(target=stats_display_thread, daemon=True)
         stats_thread.start()
-        logger.info("Live stats display started")
+        logger.debug("Live stats display started")
     
     # Start the server
     logger.info(f"Starting server on {args.host}:{args.port}")
