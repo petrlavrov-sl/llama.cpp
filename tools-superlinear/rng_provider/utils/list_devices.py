@@ -1,5 +1,6 @@
 import glob
 import os
+from loguru import logger
 
 def list_devices():
     """
@@ -17,5 +18,6 @@ def list_devices():
 
     # Filter out non-existent paths
     devices = [d for d in devices if os.path.exists(d)]
+    logger.debug(f"Found {len(devices)} devices")
 
     return devices

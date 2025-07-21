@@ -6,6 +6,7 @@ from shell scripts.
 """
 import sys
 from loguru import logger
+from utils.setup_logger import setup_logger
 
 # Add the parent directory to the path to allow relative imports
 sys.path.append('.')
@@ -17,6 +18,13 @@ logger.remove()
 logger.add(sys.stderr, level="WARNING")
 
 if __name__ == "__main__":
+    from argparse import ArgumentParser
+    parser = ArgumentParser()
+
+    parser.add_argument("--debug", action="store_true")
+    args = parser.parse_args()
+    setup_logger(level="DEBUG" if args.debug else "INFO")
+
     try:
         device = auto_detect_device()
         if device:
@@ -29,4 +37,4 @@ if __name__ == "__main__":
             sys.exit(1)
     except Exception as e:
         logger.error(f"An unexpected error occurred during device detection: {e}")
-        sys.exit(1) 
+        sys.exit(1)
