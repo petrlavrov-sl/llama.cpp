@@ -15,7 +15,7 @@ from utils.auto_detect_device import auto_detect_device
 
 # Configure logger to be minimal for scripting purposes
 logger.remove()
-logger.add(sys.stderr, level="WARNING")
+logger.add(sys.stderr, level="DEBUG")
 
 if __name__ == "__main__":
     from argparse import ArgumentParser
