@@ -271,6 +271,24 @@ download-gemma-3-12b: check_hf_token
 		}; \
 	fi
 
+download-mistral-small: check_hf_token
+	@if [ -f "./models/mistral-small-3.1-24b-instruct.gguf" ]; then \
+		echo "✅ Mistral-Small-3.1-24B-Instruct already downloaded. Skipping."; \
+	else \
+		echo "Downloading Mistral-Small-3.1-24B-Instruct..."; \
+		mkdir -p models/mistral/mistral-small-3.1-24b-instruct/huggingface; \
+		poetry run huggingface-cli download mistralai/Mistral-Small-3.1-24B-Instruct-2503 --local-dir ./models/mistral/mistral-small-3.1-24b-instruct/huggingface --quiet || { \
+			echo "❌ Failed to download Mistral-Small-3.1-24B-Instruct"; \
+			echo "💡 Ensure you have access to mistralai/Mistral-Small-3.1-24B-Instruct-2503"; \
+			exit 1; \
+		}; \
+		echo "Converting Mistral-Small-3.1-24B-Instruct to GGUF..."; \
+		poetry run python convert_hf_to_gguf.py --outfile ./models/mistral-small-3.1-24b-instruct.gguf ./models/mistral/mistral-small-3.1-24b-instruct/huggingface || { \
+			echo "❌ Failed to convert Mistral-Small-3.1-24B-Instruct"; \
+			exit 1; \
+		}; \
+	fi
+
 download-qwen3-8b: check_hf_token
 	@if [ -f "./models/qwen3-8b.gguf" ]; then \
 		echo "✅ Qwen3-8B already downloaded. Skipping."; \
@@ -290,27 +308,9 @@ download-qwen3-8b: check_hf_token
 	fi
 
 
-download-mistral-small: check_hf_token
-https://huggingface.co/
-	@if [ -f "./models/mistral-small-3.1-24b-instruct.gguf" ]; then \
-		echo "✅ Mistral-Small-3.1-24B-Instruct already downloaded. Skipping."; \
-	else \
-		echo "Downloading Mistral-Small-3.1-24B-Instruct..."; \
-		mkdir -p models/mistral/mistral-small-3.1-24b-instruct/huggingface; \
-		poetry run huggingface-cli download mistralai/Mistral-Small-3.1-24B-Instruct-2503 --local-dir ./models/mistral/mistral-small-3.1-24b-instruct/huggingface --quiet || { \
-			echo "❌ Failed to download Mistral-Small-3.1-24B-Instruct"; \
-			echo "💡 Ensure you have access to mistralai/Mistral-Small-3.1-24B-Instruct-2503"; \
-			exit 1; \
-		}; \
-		echo "Converting Mistral-Small-3.1-24B-Instruct to GGUF..."; \
-		poetry run python convert_hf_to_gguf.py --outfile ./models/mistral-small-3.1-24b-instruct.gguf ./models/mistral/mistral-small-3.1-24b-instruct/huggingface || { \
-			echo "❌ Failed to convert Mistral-Small-3.1-24B-Instruct"; \
-			exit 1; \
-		}; \
-	fi
 
 # Main download target that depends on all individual model downloads
-download-models: download-gemma-2-2b download-llama-3-2-1b download-llama-3-1-8b download-gemma-3-12b download-mistral-small download-qwen3-8b
+download-models: download-gemma-2-2b download-llama-3-2-1b download-llama-3-1-8b download-gemma-3-12b download-mistral-small # download-qwen3-8b
 	@echo "✅ Model download and conversion complete!"
 	@echo "Available models based on your setup:"
 	@echo "  - models/gemma-2-2b-it.gguf"
