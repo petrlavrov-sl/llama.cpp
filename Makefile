@@ -1,10 +1,10 @@
 # Superlinear llama.cpp Makefile
 # Simple commands to avoid forgetting shell script meanings
 
-.PHONY: help build build-mac build-ubuntu run-llama-run run-rng-service test-fpga download-models run-with-fpga start-fpga stop-fpga visualize-rng-log
+.PHONY: help build build-mac build-ubuntu run-llama-run run-rng-service test-fpga download-models run-with-fpga start-fpga stop-fpga visualize-rng-log check_hf_token download-llama-3-1-8b download-qwen-3-3b download-gemma-3-13b download-gemma-2-2b download-llama-3-2-1b
 
 # Default model settings
-MODEL ?= models-superlinear/gemma-2-2b-it.gguf
+MODEL ?= models/gemma-2-2b-it.gguf
 PROMPT ?= "Tell me about the history of artificial intelligence"
 
 # --- Run directory setup ---
@@ -37,7 +37,7 @@ help:
 	@echo "  make help              - Show this help message"
 	@echo ""
 	@echo "Examples:"
-	@echo "  make run-llama-run MODEL=models-superlinear/llama-3.2-1b-instruct.gguf PROMPT='Hello world'"
+	@echo "  make run-llama-run MODEL=models/llama-3.2-1b-instruct.gguf PROMPT='Hello world'"
 	@echo "  make run-llama-run     # Uses defaults, saves to a timestamped folder in runs/"
 	@echo "  make run-with-fpga ARGS='-c 2048' # Run with FPGA and custom llama arguments"
 	@echo "  make run-rng-service FPGA_PORT=/dev/tty.usbserial-XXXX  # Force specific FPGA port"
@@ -107,7 +107,7 @@ build-mac:
 	@echo "✅ Build complete! Binaries in ./build/bin/"
 
 # Example:
-# make run-with-fpga MODEL=./models-superlinear/gemma-2-2b-it.gguf ARGS="-c 4096 --temp 0.5"
+# make run-with-fpga MODEL=./models/gemma-2-2b-it.gguf ARGS="-c 4096 --temp 0.5"
 run-llama-run-with-fpga: build
 	@set -e; \
 	echo "🚀 Running llama-run with direct FPGA RNG..."; \
@@ -189,57 +189,96 @@ run-rng-service:
 	# Priority: FPGA → File → Software generation
 	# Shows: requests/sec, bytes/sec, total requests, uptime, FPGA stats
 
-download-models:
-	@echo "Downloading and converting models for llama.cpp..."
-	@mkdir -p models-superlinear/llama/llama-3.2-1b-instruct/huggingface
-	@mkdir -p models-superlinear/llama/llama-3.1-8b-instruct/huggingface
-	@mkdir -p models-superlinear/gemma/gemma-2-2b-it/huggingface
+check_hf_token:
 	@if [ -z "$$HF_TOKEN" ]; then \
 		echo "❌ HF_TOKEN environment variable not set!"; \
 		echo "💡 Run: export HF_TOKEN=<your_huggingface_token> or use huggingface-cli login"; \
 		exit 1; \
+	else \
+		echo "✅ HF_TOKEN is set. Proceeding with downloads..."; \
 	fi
 
+download-gemma-2-2b: check_hf_token
 	@echo "Downloading Gemma-2-2B-IT..."
-	@poetry run huggingface-cli download google/gemma-2-2b-it --local-dir ./models-superlinear/gemma/gemma-2-2b-it/huggingface --quiet || { \
+	@mkdir -p models/gemma/gemma-2-2b-it/huggingface
+	@poetry run huggingface-cli download google/gemma-2-2b-it --local-dir ./models/gemma/gemma-2-2b-it/huggingface --quiet || { \
 		echo "❌ Failed to download Gemma-2-2B-IT"; \
 		echo "💡 Ensure you have access to google/gemma-2-2b-it"; \
 		exit 1; \
 	}
 	@echo "Converting Gemma-2-2B-IT to GGUF..."
-	@poetry run python convert_hf_to_gguf.py --outfile ./models-superlinear/gemma-2-2b-it.gguf ./models-superlinear/gemma/gemma-2-2b-it/huggingface || { \
+	@poetry run python convert_hf_to_gguf.py --outfile ./models/gemma-2-2b-it.gguf ./models/gemma/gemma-2-2b-it/huggingface || { \
 		echo "❌ Failed to convert Gemma-2-2B-IT"; \
 		exit 1; \
 	}
 
+
+download-llama-3-2-1b: check_hf_token
 	@echo "Downloading Llama-3.2-1B-Instruct..."
-	@poetry run huggingface-cli download meta-llama/Llama-3.2-1B-Instruct --local-dir ./models-superlinear/llama/llama-3.2-1b-instruct/huggingface --quiet || { \
+	@mkdir -p models/llama/llama-3.2-1b-instruct/huggingface
+	@poetry run huggingface-cli download meta-llama/Llama-3.2-1B-Instruct --local-dir ./models/llama/llama-3.2-1b-instruct/huggingface --quiet || { \
 		echo "❌ Failed to download Llama-3.2-1B-Instruct"; \
 		echo "💡 Ensure you have access to meta-llama/Llama-3.2-1B-Instruct and HF_TOKEN is valid"; \
 		exit 1; \
 	}
 	@echo "Converting Llama-3.2-1B-Instruct to GGUF..."
-	@poetry run python convert_hf_to_gguf.py --outfile ./models-superlinear/llama-3.2-1b-instruct.gguf ./models-superlinear/llama/llama-3.2-1b-instruct/huggingface || { \
+	@poetry run python convert_hf_to_gguf.py --outfile ./models/llama-3.2-1b-instruct.gguf ./models/llama/llama-3.2-1b-instruct/huggingface || { \
 		echo "❌ Failed to convert Llama-3.2-1B-Instruct"; \
 		exit 1; \
 	}
+
+download-llama-3-1-8b: check_hf_token
 	@echo "Downloading Llama-3.1-8B-Instruct..."
-	@poetry run huggingface-cli download meta-llama/Llama-3.1-8B-Instruct --local-dir ./models-superlinear/llama/llama-3.1-8b-instruct/huggingface --quiet || { \
+	@mkdir -p models/llama/llama-3.1-8b-instruct/huggingface
+	@poetry run huggingface-cli download meta-llama/Llama-3.1-8B-Instruct --local-dir ./models/llama/llama-3.1-8b-instruct/huggingface --quiet || { \
 		echo "❌ Failed to download Llama-3.1-8B-Instruct"; \
 		echo "💡 Ensure you have access to meta-llama/Llama-3.1-8B-Instruct"; \
 		exit 1; \
 	}
 	@echo "Converting Llama-3.1-8B-Instruct to GGUF..."
-	@poetry run python convert_hf_to_gguf.py --outfile ./models-superlinear/llama-3.1-8b-instruct.gguf ./models-superlinear/llama/llama-3.1-8b-instruct/huggingface || { \
+	@poetry run python convert_hf_to_gguf.py --outfile ./models/llama-3.1-8b-instruct.gguf ./models/llama/llama-3.1-8b-instruct/huggingface || { \
 		echo "❌ Failed to convert Llama-3.1-8B-Instruct"; \
 		exit 1; \
 	}
 
+download-qwen-3-3b: check_hf_token
+	@echo "Downloading Qwen3-4B..."
+	@mkdir -p models/qwen/qwen3-4b/huggingface
+	@poetry run huggingface-cli download Qwen/Qwen3-4B --local-dir ./models/qwen/qwen3-4b/huggingface --quiet || { \
+		echo "❌ Failed to download Qwen3-4B"; \
+		echo "💡 Ensure you have access to Qwen/Qwen3-4B"; \
+		exit 1; \
+	}
+	@echo "Converting Qwen3-4B to GGUF..."
+	@poetry run python convert_hf_to_gguf.py --outfile ./models/qwen3-4b.gguf ./models/qwen/qwen3-4b/huggingface || { \
+		echo "❌ Failed to convert Qwen3-4B"; \
+		exit 1; \
+	}
+
+download-gemma-3-13b: check_hf_token
+	@echo "Downloading Gemma-3-13B-IT..."
+	@mkdir -p models/gemma/gemma-3-13b-it/huggingface
+	@poetry run huggingface-cli download google/gemma-3-13b-it --local-dir ./models/gemma/gemma-3-13b-it/huggingface --quiet || { \
+		echo "❌ Failed to download Gemma-3-13B-IT"; \
+		echo "💡 Ensure you have access to google/gemma-3-13b-it"; \
+		exit 1; \
+	}
+	@echo "Converting Gemma-3-13B-IT to GGUF..."
+	@poetry run python convert_hf_to_gguf.py --outfile ./models/gemma-3-13b-it.gguf ./models/gemma/gemma-3-13b-it/huggingface || { \
+		echo "❌ Failed to convert Gemma-3-13B-IT"; \
+		exit 1; \
+	}
+
+# Main download target that depends on all individual model downloads
+download-models: download-gemma-2-2b download-llama-3-2-1b download-llama-3-1-8b download-qwen-3-3b download-gemma-3-13b
 	@echo "✅ Model download and conversion complete!"
 	@echo "Available models based on your setup:"
-	@echo "  - models-superlinear/gemma-2-2b-it.gguf"
-	@echo "  - models-superlinear/llama-3.1-8b-instruct.gguf"
-	@echo "  - models-superlinear/llama-3.2-1b-instruct.gguf"
+	@echo "  - models/gemma-2-2b-it.gguf"
+	@echo "  - models/gemma-3-13b-it.gguf"
+	@echo "  - models/llama-3.1-8b-instruct.gguf"
+	@echo "  - models/llama-3.2-1b-instruct.gguf"
+	@echo "  - models/qwen3-4b.gguf"
+
 
 start-fpga:
 	@echo "🚀 Starting FPGA stream..."
