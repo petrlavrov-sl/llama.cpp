@@ -205,7 +205,7 @@ download-gemma-2-2b: check_hf_token
 	else \
 		echo "Downloading Gemma-2-2B-IT..."; \
 		mkdir -p models/gemma/gemma-2-2b-it/huggingface; \
-		poetry run huggingface-cli download google/gemma-2-2b-it --local-dir ./models/gemma/gemma-2-2b-it/huggingface --quiet || { \
+		poetry run huggingface-cli download google/gemma-2-2b-it --local-dir ./models/gemma/gemma-2-2b-it/huggingface || { \
 			echo "❌ Failed to download Gemma-2-2B-IT"; \
 			echo "💡 Ensure you have access to google/gemma-2-2b-it"; \
 			exit 1; \
@@ -223,7 +223,7 @@ download-llama-3-2-1b: check_hf_token
 	else \
 		echo "Downloading Llama-3.2-1B-Instruct..."; \
 		mkdir -p models/llama/llama-3.2-1b-instruct/huggingface; \
-		poetry run huggingface-cli download meta-llama/Llama-3.2-1B-Instruct --local-dir ./models/llama/llama-3.2-1b-instruct/huggingface --quiet || { \
+		poetry run huggingface-cli download meta-llama/Llama-3.2-1B-Instruct --local-dir ./models/llama/llama-3.2-1b-instruct/huggingface || { \
 			echo "❌ Failed to download Llama-3.2-1B-Instruct"; \
 			echo "💡 Ensure you have access to meta-llama/Llama-3.2-1B-Instruct and HF_TOKEN is valid"; \
 			exit 1; \
@@ -241,7 +241,7 @@ download-llama-3-1-8b: check_hf_token
 	else \
 		echo "Downloading Llama-3.1-8B-Instruct..."; \
 		mkdir -p models/llama/llama-3.1-8b-instruct/huggingface; \
-		poetry run huggingface-cli download meta-llama/Llama-3.1-8B-Instruct --local-dir ./models/llama/llama-3.1-8b-instruct/huggingface --quiet || { \
+		poetry run huggingface-cli download meta-llama/Llama-3.1-8B-Instruct --local-dir ./models/llama/llama-3.1-8b-instruct/huggingface  || { \
 			echo "❌ Failed to download Llama-3.1-8B-Instruct"; \
 			echo "💡 Ensure you have access to meta-llama/Llama-3.1-8B-Instruct"; \
 			exit 1; \
@@ -252,74 +252,77 @@ download-llama-3-1-8b: check_hf_token
 			exit 1; \
 		}; \
 	fi
-
 download-gemma-3-12b: check_hf_token
 	@if [ -f "./models/gemma-3-12b-it.gguf" ]; then \
 		echo "✅ Gemma-3-12B-IT already downloaded. Skipping."; \
 	else \
-		echo "Downloading Gemma-3-12B-IT..."; \
-		mkdir -p models/gemma/gemma-3-12b-it/huggingface; \
-		poetry run huggingface-cli download google/gemma-3-12b-it --local-dir ./models/gemma/gemma-3-12b-it/huggingface --quiet || { \
-			echo "❌ Failed to download Gemma-3-12B-IT"; \
-			echo "💡 Ensure you have access to google/gemma-3-12b-it"; \
+		echo "Downloading Gemma-3-12B-IT (pre-converted GGUF)..."; \
+		mkdir -p models; \
+		poetry run huggingface-cli download unsloth/gemma-3-12b-it-GGUF --local-dir ./models || { \
+			echo "❌ Failed to download Gemma-3-12B-IT GGUF"; \
+			echo "💡 Ensure you have access to unsloth/gemma-3-12b-it-GGUF"; \
 			exit 1; \
 		}; \
-		echo "Converting Gemma-3-12B-IT to GGUF..."; \
-		poetry run python convert_hf_to_gguf.py --outfile ./models/gemma-3-12b-it.gguf ./models/gemma/gemma-3-12b-it/huggingface || { \
-			echo "❌ Failed to convert Gemma-3-12B-IT"; \
-			exit 1; \
-		}; \
+		mv ./models/gemma-3-12b-it.Q4_K_M.gguf ./models/gemma-3-12b-it.gguf 2>/dev/null || true; \
+		echo "✅ Downloaded Gemma-3-12B-IT GGUF successfully"; \
 	fi
 
-download-mistral-small: check_hf_token
-	@if [ -f "./models/mistral-small-3.1-24b-instruct.gguf" ]; then \
-		echo "✅ Mistral-Small-3.1-24B-Instruct already downloaded. Skipping."; \
+download-gemma-3-4b: check_hf_token
+	@if [ -f "./models/gemma-3-4b-it.gguf" ]; then \
+		echo "✅ Gemma-3-4B-IT already downloaded. Skipping."; \
 	else \
-		echo "Downloading Mistral-Small-3.1-24B-Instruct..."; \
-		mkdir -p models/mistral/mistral-small-3.1-24b-instruct/huggingface; \
-		poetry run huggingface-cli download mistralai/Mistral-Small-3.1-24B-Instruct-2503 --local-dir ./models/mistral/mistral-small-3.1-24b-instruct/huggingface --quiet || { \
-			echo "❌ Failed to download Mistral-Small-3.1-24B-Instruct"; \
-			echo "💡 Ensure you have access to mistralai/Mistral-Small-3.1-24B-Instruct-2503"; \
+		echo "Downloading Gemma-3-4B-IT (pre-converted GGUF)..."; \
+		mkdir -p models; \
+		poetry run huggingface-cli download unsloth/gemma-3-4b-it-GGUF --local-dir ./models || { \
+			echo "❌ Failed to download Gemma-3-4B-IT GGUF"; \
+			echo "💡 Ensure you have access to unsloth/gemma-3-4b-it-GGUF"; \
 			exit 1; \
 		}; \
-		echo "Converting Mistral-Small-3.1-24B-Instruct to GGUF..."; \
-		poetry run python convert_hf_to_gguf.py --outfile ./models/mistral-small-3.1-24b-instruct.gguf ./models/mistral/mistral-small-3.1-24b-instruct/huggingface || { \
-			echo "❌ Failed to convert Mistral-Small-3.1-24B-Instruct"; \
+		mv ./models/gemma-3-4b-it.Q4_K_M.gguf ./models/gemma-3-4b-it.gguf 2>/dev/null || true; \
+		echo "✅ Downloaded Gemma-3-4B-IT GGUF successfully"; \
+	fi
+
+download-mistral-7b: check_hf_token
+	@if [ -f "./models/mistral-7b-instruct-v0.3.gguf" ]; then \
+		echo "✅ Mistral-7B-Instruct-v0.3 already downloaded. Skipping."; \
+	else \
+		echo "Downloading Mistral-7B-Instruct-v0.3 (pre-converted GGUF)..."; \
+		mkdir -p models; \
+		poetry run huggingface-cli download MaziyarPanahi/Mistral-7B-Instruct-v0.3-GGUF --local-dir ./models || { \
+			echo "❌ Failed to download Mistral-7B-Instruct-v0.3 GGUF"; \
+			echo "💡 Ensure you have access to MaziyarPanahi/Mistral-7B-Instruct-v0.3-GGUF"; \
 			exit 1; \
 		}; \
+		mv ./models/mistral-7b-instruct-v0.3.Q4_K_M.gguf ./models/mistral-7b-instruct-v0.3.gguf 2>/dev/null || true; \
+		echo "✅ Downloaded Mistral-7B-Instruct-v0.3 GGUF successfully"; \
 	fi
 
 download-qwen3-8b: check_hf_token
 	@if [ -f "./models/qwen3-8b.gguf" ]; then \
 		echo "✅ Qwen3-8B already downloaded. Skipping."; \
 	else \
-		echo "Downloading Qwen3-8B..."; \
-		mkdir -p models/qwen/qwen3-8b/huggingface; \
-		poetry run huggingface-cli download Qwen/Qwen3-8B --local-dir ./models/qwen/qwen3-8b/huggingface --quiet || { \
-			echo "❌ Failed to download Qwen3-8B"; \
-			echo "💡 Ensure you have access to Qwen/Qwen3-8B"; \
+		echo "Downloading Qwen3-8B (pre-converted GGUF)..."; \
+		mkdir -p models; \
+		poetry run huggingface-cli download unsloth/Qwen3-8B-GGUF --local-dir ./models || { \
+			echo "❌ Failed to download Qwen3-8B GGUF"; \
+			echo "💡 Ensure you have access to unsloth/Qwen3-8B-GGUF"; \
 			exit 1; \
 		}; \
-		echo "Converting Qwen3-8B to GGUF..."; \
-		poetry run python convert_hf_to_gguf.py --outfile ./models/qwen3-8b.gguf ./models/qwen/qwen3-8b/huggingface || { \
-			echo "❌ Failed to convert Qwen3-8B"; \
-			exit 1; \
-		}; \
+		mv ./models/qwen3-8b.Q4_K_M.gguf ./models/qwen3-8b.gguf 2>/dev/null || true; \
+		echo "✅ Downloaded Qwen3-8B GGUF successfully"; \
 	fi
 
-
-
 # Main download target that depends on all individual model downloads
-download-models: download-gemma-2-2b download-llama-3-2-1b download-llama-3-1-8b download-gemma-3-12b download-mistral-small # download-qwen3-8b
+download-models: download-gemma-2-2b download-llama-3-2-1b download-llama-3-1-8b download-gemma-3-12b download-gemma-3-4b download-mistral-7b download-qwen3-8b
 	@echo "✅ Model download and conversion complete!"
 	@echo "Available models based on your setup:"
 	@echo "  - models/gemma-2-2b-it.gguf"
 	@echo "  - models/gemma-3-12b-it.gguf"
+	@echo "  - models/gemma-3-4b-it.gguf"
 	@echo "  - models/llama-3.1-8b-instruct.gguf"
 	@echo "  - models/llama-3.2-1b-instruct.gguf"
-	@echo "  - models/qwen3-8b-instruct.gguf"
-	@echo "  - models/mistral-small-3.1-24b-instruct.gguf"
-
+	@echo "  - models/qwen3-8b.gguf"
+	@echo "  - models/mistral-7b-instruct-v0.3.gguf"
 
 start-fpga:
 	@echo "🚀 Starting FPGA stream..."
