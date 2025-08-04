@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python3
 """
 Real-time RNG Visualizer from Log File
@@ -7,18 +8,17 @@ a live, interactive CLI dashboard with statistics and visualizations.
 """
 
 import argparse
-import os
-import time
+import statistics
 import threading
+import time
 from collections import deque
 from pathlib import Path
-from loguru import logger
 
+from loguru import logger
 from rich.console import Console, Group
 from rich.live import Live
 from rich.panel import Panel
 from rich.table import Table
-import statistics
 
 # Setup loguru logging
 logger.remove()
@@ -34,8 +34,15 @@ class RNGVisualizer:
         self.history_size = history_size
 
         # Data storage
-        self.values = deque(maxlen=history_size if history_size else None)
-        self.timestamps = deque(maxlen=history_size if history_size else None)
+        if history_size == 0:
+            # Use regular lists for unlimited history
+            self.values = []
+            self.timestamps = []
+        else:
+            # Use deques with maxlen for limited history
+            self.values = deque(maxlen=history_size)
+            self.timestamps = deque(maxlen=history_size)
+
         self.rates = deque(maxlen=600)  # For consumption rate plot
 
         # State
@@ -43,6 +50,9 @@ class RNGVisualizer:
         self.last_pos = 0
         self.total_values = 0
         self.start_time = time.time()
+
+        # Thread safety
+        self.data_lock = threading.Lock()
 
         self.console = Console()
 
@@ -80,9 +90,10 @@ class RNGVisualizer:
                                     timestamp, value_str = parts
                                     value = float(value_str)
 
-                                    self.values.append(value)
-                                    self.timestamps.append(int(timestamp))
-                                    self.total_values += 1
+                                    with self.data_lock:
+                                        self.values.append(value)
+                                        self.timestamps.append(int(timestamp))
+                                        self.total_values += 1
 
                             except ValueError as e:
                                 logger.warning(f"Skipping malformed line: '{line}' ({e})")
@@ -101,28 +112,34 @@ class RNGVisualizer:
 
     def get_stats(self) -> dict:
         """Calculate statistics for the current window of values."""
-        if not self.values:
-            return {}
+        with self.data_lock:
+            if not self.values:
+                return {}
 
-        values_list = list(self.values)
+            # Make a safe copy of the data for calculation
+            values_copy = list(self.values)
+            timestamps_copy = list(self.timestamps)
 
         # Calculate consumption rate
         rate = 0
-        if len(self.timestamps) > 1:
-            time_span_ms = self.timestamps[-1] - self.timestamps[0]
+        if len(timestamps_copy) > 1:
+            time_span_ms = timestamps_copy[-1] - timestamps_copy[0]
             if time_span_ms > 0:
-                rate = len(self.timestamps) / (time_span_ms / 1000.0)
-        self.rates.append(rate)
+                rate = len(timestamps_copy) / (time_span_ms / 1000.0)
+
+        with self.data_lock:
+            self.rates.append(rate)
+            rates_copy = list(self.rates)
 
         return {
             'count': self.total_values,
-            'mean': statistics.mean(values_list),
-            'stdev': statistics.stdev(values_list) if len(values_list) > 1 else 0.0,
-            'min': min(values_list),
-            'max': max(values_list),
+            'mean': statistics.mean(values_copy),
+            'stdev': statistics.stdev(values_copy) if len(values_copy) > 1 else 0.0,
+            'min': min(values_copy),
+            'max': max(values_copy),
             'rate': rate,
             'uptime': time.time() - self.start_time,
-            'peak_rate': max(self.rates) if self.rates else 0,
+            'peak_rate': max(rates_copy) if rates_copy else 0,
         }
 
     def create_stats_table(self, stats: dict) -> Table:
@@ -151,11 +168,15 @@ class RNGVisualizer:
 
     def create_distribution_plot(self, height: int = 8, width: int = 60) -> str:
         """Create an ASCII histogram of the value distribution."""
-        if not self.values:
-            return "[dim]Gathering data for distribution plot...[/dim]"
+        with self.data_lock:
+            if not self.values:
+                return "[dim]Gathering data for distribution plot...[/dim]"
+
+            # Make a safe copy of the data for calculation
+            values_copy = list(self.values)
 
         bins = [0] * 10
-        for value in self.values:
+        for value in values_copy:
             bin_index = min(int(value * 10), 9)
             bins[bin_index] += 1
 
@@ -165,20 +186,23 @@ class RNGVisualizer:
         for i, count in enumerate(bins):
             bar_width = int((count / max_count) * (width - 20)) if max_count > 0 else 0
             bar = '█' * bar_width
-            percentage = (count / len(self.values)) * 100 if self.values else 0
+            percentage = (count / len(values_copy)) * 100 if values_copy else 0
             plot_lines.append(f"{i/10:.1f}-{(i+1)/10:.1f} | {bar} {count:,} ({percentage:.1f}%)")
 
         return "\n".join(plot_lines)
 
     def create_rate_plot(self, height: int = 6, width: int = 80) -> str:
         """Create an ASCII plot of consumption rate over time."""
-        if len(self.rates) < 2:
-            return "[dim]Gathering data for rate plot...[/dim]"
+        with self.data_lock:
+            if len(self.rates) < 2:
+                return "[dim]Gathering data for rate plot...[/dim]"
+
+            # Make a safe copy of the data for calculation
+            rates_copy = list(self.rates)
 
         full_data = [0.0] * self.rates.maxlen
-        data_list = list(self.rates)
-        start_idx = self.rates.maxlen - len(data_list)
-        for i, val in enumerate(data_list):
+        start_idx = self.rates.maxlen - len(rates_copy)
+        for i, val in enumerate(rates_copy):
             full_data[start_idx + i] = val
 
         sample_rate = max(1, len(full_data) // width)
@@ -251,7 +275,6 @@ def main(
     file: str,
     history: int = 0,
 ):
-
     try:
         visualizer = RNGVisualizer(log_file=file, history_size=history)
         visualizer.run()
