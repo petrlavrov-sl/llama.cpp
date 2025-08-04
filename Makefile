@@ -264,12 +264,12 @@ download-gemma-3-12b: check_hf_token
 			echo "💡 Ensure you have access to unsloth/gemma-3-12b-it-GGUF"; \
 			exit 1; \
 		}; \
-		mv ./models/gemma-3-12b-it.Q4_K_M.gguf ./models/gemma-3-12b-it.gguf 2>/dev/null || true; \
+		mv ./models/gemma-3-12b-it-Q4_K_M.gguf ./models/gemma-3-12b-it.gguf 2>/dev/null || true; \
 		echo "✅ Downloaded Gemma-3-12B-IT GGUF successfully"; \
 	fi
 
 download-gemma-3-4b: check_hf_token
-	@if [ -f "./models/gemma-3-4b-it-Q4_K_M.gguf" ]; then \
+	@if [ -f "./models/gemma-3-4b-it.gguf" ]; then \
 		echo "✅ Gemma-3-4B-IT already downloaded. Skipping."; \
 	else \
 		echo "Downloading Gemma-3-4B-IT (pre-converted GGUF)..."; \
@@ -279,12 +279,12 @@ download-gemma-3-4b: check_hf_token
 			echo "💡 Ensure you have access to unsloth/gemma-3-4b-it-GGUF"; \
 			exit 1; \
 		}; \
-		mv ./models/gemma-3-4b-it.Q4_K_M.gguf ./models/gemma-3-4b-it.gguf 2>/dev/null || true; \
+		mv ./models/gemma-3-4b-it-Q4_K_M.gguf ./models/gemma-3-4b-it.gguf 2>/dev/null || true; \
 		echo "✅ Downloaded Gemma-3-4B-IT GGUF successfully"; \
 	fi
 
 download-mistral-7b: check_hf_token
-	@if [ -f "./models/Mistral-7B-Instruct-v0.3.Q4_K_M.gguf" ]; then \
+	@if [ -f "./models/mistral-7b-instruct-v0.3.gguf" ]; then \
 		echo "✅ Mistral-7B-Instruct-v0.3 already downloaded. Skipping."; \
 	else \
 		echo "Downloading Mistral-7B-Instruct-v0.3 (pre-converted GGUF)..."; \
@@ -294,12 +294,12 @@ download-mistral-7b: check_hf_token
 			echo "💡 Ensure you have access to MaziyarPanahi/Mistral-7B-Instruct-v0.3-GGUF"; \
 			exit 1; \
 		}; \
-		mv ./models/mistral-7b-instruct-v0.3.Q4_K_M.gguf ./models/mistral-7b-instruct-v0.3.gguf 2>/dev/null || true; \
+		mv ./models/Mistral-7B-Instruct-v0.3.Q4_K_M.gguf ./models/mistral-7b-instruct-v0.3.gguf 2>/dev/null || true; \
 		echo "✅ Downloaded Mistral-7B-Instruct-v0.3 GGUF successfully"; \
 	fi
 
 download-qwen3-8b: check_hf_token
-	@if [ -f "./models/Qwen3-8B-Q4_K_M.gguf" ]; then \
+	@if [ -f "./models/qwen3-8b.gguf" ]; then \
 		echo "✅ Qwen3-8B already downloaded. Skipping."; \
 	else \
 		echo "Downloading Qwen3-8B (pre-converted GGUF)..."; \
@@ -309,7 +309,7 @@ download-qwen3-8b: check_hf_token
 			echo "💡 Ensure you have access to unsloth/Qwen3-8B-GGUF"; \
 			exit 1; \
 		}; \
-		mv ./models/qwen3-8b.Q4_K_M.gguf ./models/qwen3-8b.gguf 2>/dev/null || true; \
+		mv ./models/Qwen3-8B-Q4_K_M.gguf ./models/qwen3-8b.gguf 2>/dev/null || true; \
 		echo "✅ Downloaded Qwen3-8B GGUF successfully"; \
 	fi
 
