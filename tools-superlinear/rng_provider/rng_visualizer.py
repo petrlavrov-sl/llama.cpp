@@ -14,16 +14,11 @@ from collections import deque
 from pathlib import Path
 from loguru import logger
 
-try:
-    from rich.console import Console, Group
-    from rich.live import Live
-    from rich.panel import Panel
-    from rich.table import Table
-    import statistics
-    RICH_AVAILABLE = True
-except ImportError:
-    RICH_AVAILABLE = False
-    print("⚠️  Rich not available. Install with: pip install rich loguru")
+from rich.console import Console, Group
+from rich.live import Live
+from rich.panel import Panel
+from rich.table import Table
+import statistics
 
 # Setup loguru logging
 logger.remove()
@@ -37,27 +32,24 @@ class RNGVisualizer:
     def __init__(self, log_file: str, history_size: int = 2000):
         self.log_file = Path(log_file)
         self.history_size = history_size
-        
+
         # Data storage
-        self.values = deque(maxlen=history_size)
-        self.timestamps = deque(maxlen=history_size)
+        self.values = deque(maxlen=history_size if history_size else None)
+        self.timestamps = deque(maxlen=history_size if history_size else None)
         self.rates = deque(maxlen=600)  # For consumption rate plot
-        
+
         # State
         self.running = True
         self.last_pos = 0
         self.total_values = 0
         self.start_time = time.time()
-        
-        if not RICH_AVAILABLE:
-            raise RuntimeError("Rich library is required. Please run: pip install rich loguru")
-        
+
         self.console = Console()
 
     def tail_file(self):
         """Continuously monitor the log file for new values"""
         logger.info(f"Tailing log file: {self.log_file}")
-        
+
         while self.running:
             try:
                 if not self.log_file.exists():
@@ -76,18 +68,18 @@ class RNGVisualizer:
                         f.seek(self.last_pos)
                         lines = f.readlines()
                         self.last_pos = f.tell()
-                        
+
                         for line in lines:
                             line = line.strip()
                             if not line or line.startswith('#'):
                                 continue
-                            
+
                             try:
                                 parts = line.split(',')
                                 if len(parts) == 2:
                                     timestamp, value_str = parts
                                     value = float(value_str)
-                                    
+
                                     self.values.append(value)
                                     self.timestamps.append(int(timestamp))
                                     self.total_values += 1
@@ -113,7 +105,7 @@ class RNGVisualizer:
             return {}
 
         values_list = list(self.values)
-        
+
         # Calculate consumption rate
         rate = 0
         if len(self.timestamps) > 1:
@@ -142,61 +134,61 @@ class RNGVisualizer:
         if not stats:
             table.add_row("Status", "Waiting for data...")
             return table
-            
+
         table.add_row("Consumption Rate", f"{stats['rate']:.1f} values/sec (Peak: {stats['peak_rate']:.1f})")
         table.add_row("Total Values Consumed", f"{stats['count']:,}")
         table.add_row("Mean", f"{stats['mean']:.6f}")
         table.add_row("Std Dev", f"{stats['stdev']:.6f}")
         table.add_row("Range", f"{stats['min']:.6f} – {stats['max']:.6f}")
         table.add_row("Uptime", f"{stats['uptime']:.1f} s")
-        
+
         # Quality check
         mean_diff = abs(stats['mean'] - 0.5)
         if mean_diff > 0.05:
             table.add_row("[yellow]Quality Warning[/yellow]", f"Mean deviates by {mean_diff:.4f} from 0.5")
-        
+
         return table
 
     def create_distribution_plot(self, height: int = 8, width: int = 60) -> str:
         """Create an ASCII histogram of the value distribution."""
         if not self.values:
             return "[dim]Gathering data for distribution plot...[/dim]"
-        
+
         bins = [0] * 10
         for value in self.values:
             bin_index = min(int(value * 10), 9)
             bins[bin_index] += 1
-            
+
         max_count = max(bins) if bins else 1
         plot_lines = []
-        
+
         for i, count in enumerate(bins):
             bar_width = int((count / max_count) * (width - 20)) if max_count > 0 else 0
             bar = '█' * bar_width
             percentage = (count / len(self.values)) * 100 if self.values else 0
             plot_lines.append(f"{i/10:.1f}-{(i+1)/10:.1f} | {bar} {count:,} ({percentage:.1f}%)")
-            
+
         return "\n".join(plot_lines)
 
     def create_rate_plot(self, height: int = 6, width: int = 80) -> str:
         """Create an ASCII plot of consumption rate over time."""
         if len(self.rates) < 2:
             return "[dim]Gathering data for rate plot...[/dim]"
-        
+
         full_data = [0.0] * self.rates.maxlen
         data_list = list(self.rates)
         start_idx = self.rates.maxlen - len(data_list)
         for i, val in enumerate(data_list):
             full_data[start_idx + i] = val
-        
+
         sample_rate = max(1, len(full_data) // width)
         sampled_data = [full_data[i] for i in range(0, len(full_data), sample_rate)][:width]
-        
+
         max_val = max(sampled_data) if sampled_data and max(sampled_data) > 0 else 1
-        
+
         plot_lines = []
         scaled_data = [int((val / max_val) * (height - 1)) for val in sampled_data]
-        
+
         for row in range(height - 1, -1, -1):
             line = ""
             for val in scaled_data:
@@ -204,7 +196,7 @@ class RNGVisualizer:
                     line += "█"
                 else:
                     line += " "
-            
+
             if row == height - 1:
                 line += f" {max_val:.0f} values/s"
             elif row == height // 2:
@@ -212,13 +204,13 @@ class RNGVisualizer:
             elif row == 0:
                 line += " 0"
             plot_lines.append(line)
-        
+
         return "\n".join(plot_lines)
 
     def create_dashboard(self) -> Group:
         """Create the combined dashboard display."""
         stats = self.get_stats()
-        
+
         stats_table = self.create_stats_table(stats)
         dist_plot = self.create_distribution_plot()
         rate_plot = self.create_rate_plot()
@@ -229,7 +221,7 @@ class RNGVisualizer:
             Panel(rate_plot, title="📉 Consumption Rate (last 10m)", border_style="yellow")
         )
         return dashboard_group
-    
+
     def run(self):
         """Start the visualizer main loop."""
         logger.info("Starting real-time RNG visualizer...")
@@ -239,7 +231,7 @@ class RNGVisualizer:
         # Start the file monitoring thread
         monitor_thread = threading.Thread(target=self.tail_file, daemon=True)
         monitor_thread.start()
-        
+
         try:
             with Live(self.create_dashboard(), refresh_per_second=10, console=self.console) as live:
                 while self.running:
@@ -251,11 +243,22 @@ class RNGVisualizer:
         except Exception as e:
             self.running = False
             logger.error(f"A display error occurred: {e}")
-        
+
         monitor_thread.join(timeout=1)
         print("Goodbye!")
 
-def main():
+def main(
+    file: str,
+    history: int = 0,
+):
+
+    try:
+        visualizer = RNGVisualizer(log_file=file, history_size=history)
+        visualizer.run()
+    except Exception as e:
+        logger.error(f"Failed to start visualizer: {e}")
+
+if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Real-time visualizer for RNG log files.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
@@ -268,16 +271,11 @@ def main():
     parser.add_argument(
         "--history",
         type=int,
-        default=2000,
+        default=0,
         help="Number of recent values to use for statistics and plots."
     )
     args = parser.parse_args()
-
-    try:
-        visualizer = RNGVisualizer(log_file=args.file, history_size=args.history)
-        visualizer.run()
-    except Exception as e:
-        logger.error(f"Failed to start visualizer: {e}")
-
-if __name__ == "__main__":
-    main() 
+    main(
+        file=args.file,
+        history=args.history,
+    )
