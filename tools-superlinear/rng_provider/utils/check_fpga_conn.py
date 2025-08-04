@@ -47,7 +47,7 @@ def check_fpga_conn(device_path: str, baudrate: int = 921600, timeout: float = 0
     data = read_data(device_path, baudrate, timeout, check_duration)
     if data:
         logger.warning(f"{device_path} is sending data before we sent the start signal!")
-        raise DataAlreadyStreamingError("{device_path} is sending data before we sent the start signal! "
+        raise DataAlreadyStreamingError(f"{device_path} is sending data before we sent the start signal! "
                                         "Please disable the signal before running your script.")
 
     # step 2: send start signal

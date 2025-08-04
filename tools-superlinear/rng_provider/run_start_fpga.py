@@ -33,8 +33,8 @@ if __name__ == "__main__":
 
     try:
         logger.info(f"Sending START signal to {device_port}...")
-        send_start_signal(port=device_port)
+        send_start_signal(device=device_port)
         logger.success(f"Signal sent to {device_port}.")
     except Exception as e:
         logger.error(f"Failed to send signal to {device_port}: {e}")
-        sys.exit(1) 
+        sys.exit(1)
