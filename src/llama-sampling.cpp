@@ -41,30 +41,29 @@ void check_and_override_rng_env() {
         return;
     }
 
-    if (!provider || std::string(provider) != "external-api") {
-        std::cerr << "[WARN] LLAMA_RNG_PROVIDER env var is '" << (provider ? provider : "<unset>") << "', expected 'external-api' or 'fpga-serial'" << std::endl;
-    }
-    if (!api_url || std::string(api_url) != "http://localhost:8000/random") {
-        std::cerr << "[WARN] LLAMA_RNG_API_URL env var is '" << (api_url ? api_url : "<unset>") << "', expected 'http://localhost:8000/random'" << std::endl;
-    }
-    setenv("LLAMA_RNG_PROVIDER", "external-api", 1);
-    setenv("LLAMA_RNG_API_URL", "http://localhost:8000/random", 1);
-    std::cerr << "[DEBUG] Overrode LLAMA_RNG_PROVIDER and LLAMA_RNG_API_URL with hardcoded values." << std::endl;
-    // Curl the provider
-    std::array<char, 256> buffer;
-    std::string result;
-    FILE* pipe = popen("curl -s -w '\\n[HTTP_STATUS]%{http_code}' http://localhost:8000/random", "r");
-    if (!pipe) {
-        std::cerr << "[WARN] Could not start curl process." << std::endl;
-        return;
-    }
-    while (fgets(buffer.data(), buffer.size(), pipe) != nullptr) {
-        result += buffer.data();
-    }
-    int rc = pclose(pipe);
-    std::cerr << "[DEBUG] Curl result for external RNG provider:\n" << result << std::endl;
-    if (rc != 0) {
-        std::cerr << "[WARN] Curl process exited with code " << rc << std::endl;
+    if (provider && std::string(provider) == "external-api") {
+        std::cerr << "[INFO] Using External API RNG Provider." << std::endl;
+
+        if (!api_url || std::string(api_url) != "http://localhost:8000/random") {
+            std::cerr << "[WARN] LLAMA_RNG_API_URL env var is '" << (api_url ? api_url : "<unset>") << "', expected 'http://localhost:8000/random'" << std::endl;
+        }
+
+        // Curl the provider
+        std::array<char, 256> buffer;
+        std::string result;
+        FILE* pipe = popen("curl -s -w '\\n[HTTP_STATUS]%{http_code}' http://localhost:8000/random", "r");
+        if (!pipe) {
+            std::cerr << "[WARN] Could not start curl process." << std::endl;
+            return;
+        }
+        while (fgets(buffer.data(), buffer.size(), pipe) != nullptr) {
+            result += buffer.data();
+        }
+        int rc = pclose(pipe);
+        std::cerr << "[DEBUG] Curl result for external RNG provider:\n" << result << std::endl;
+        if (rc != 0) {
+            std::cerr << "[WARN] Curl process exited with code " << rc << std::endl;
+        }
     }
 }
 // Run at startup
