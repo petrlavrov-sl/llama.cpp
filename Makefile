@@ -313,18 +313,34 @@ download-qwen3-8b: check_hf_token
 		echo "✅ Downloaded Qwen3-8B GGUF successfully"; \
 	fi
 
+download-gpt-oss-20b: check_hf_token
+	@if [ -f "./models/gpt-oss-20b.gguf" ]; then \
+		echo "✅ GPT-OSS-20B already downloaded. Skipping."; \
+	else \
+		echo "Downloading GPT-OSS-20B (pre-converted GGUF)..."; \
+		mkdir -p models; \
+		poetry run huggingface-cli download unsloth/gpt-oss-20b-GGUF gpt-oss-20b-Q4_K_M.gguf --local-dir ./models || { \
+			echo "❌ Failed to download GPT-OSS-20B GGUF"; \
+			echo "💡 Ensure you have access to unsloth/gpt-oss-20b-GGUF"; \
+			exit 1; \
+		}; \
+		mv ./models/gpt-oss-20b-Q4_K_M.gguf ./models/gpt-oss-20b.gguf 2>/dev/null || true; \
+		echo "✅ Downloaded GPT-OSS-20B GGUF successfully"; \
+	fi
+
 
 # Main download target that depends on all individual model downloads
-download-models: download-gemma-2-2b download-llama-3-2-1b download-llama-3-1-8b download-gemma-3-12b download-gemma-3-4b download-mistral-7b download-qwen3-8b
+download-models: download-gemma-2-2b download-llama-3-2-1b download-llama-3-1-8b download-gemma-3-12b download-gemma-3-4b download-mistral-7b download-qwen3-8b download-gpt-oss-20b
 	@echo "✅ Model download and conversion complete!"
 	@echo "Available models based on your setup:"
 	@echo "  - models/gemma-2-2b-it.gguf"
-	@echo "  - models/gemma-3-12b-it-Q4_K_M.gguf"
-	@echo "  - models/gemma-3-4b-it-Q4_K_M.gguf"
+	@echo "  - models/gemma-3-12b-it.gguf"
+	@echo "  - models/gemma-3-4b-it.gguf"
 	@echo "  - models/llama-3.1-8b-instruct.gguf"
 	@echo "  - models/llama-3.2-1b-instruct.gguf"
-	@echo "  - models/Qwen3-8B-Q4_K_M.gguf"
+	@echo "  - models/qwen3-8b.gguf"
 	@echo "  - models/mistral-7b-instruct-v0.3.gguf"
+	@echo "  - models/gpt-oss-20b.gguf"
 
 start-fpga:
 	@echo "🚀 Starting FPGA stream..."
